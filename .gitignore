@@ -1,0 +1,49 @@
+HELP.md
+target/
+src/test/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+virtualvision-webapi/src/test/**
+.xcodemap/**
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+!.idea/icon.png
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+# Maven ignore
+.flattened-pom.xml
+
+### Temp ###
+*.log
+*.log.gz
+*.logs
+*.cache
+*.diff
+*.patch
+*.tmp
