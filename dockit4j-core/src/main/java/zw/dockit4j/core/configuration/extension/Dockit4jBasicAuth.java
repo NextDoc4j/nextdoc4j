@@ -1,12 +1,18 @@
-package zw.dockit4j.core.configuration;
+package zw.dockit4j.core.configuration.extension;
+
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
- * dockit4j基础认证
+ * 基础认证
  *
  * @author echo
  * @since 1.0.0
  **/
-public class Dockit4jBasicAuth {
+public class Dockit4jBasicAuth implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /**
      * 是否启用

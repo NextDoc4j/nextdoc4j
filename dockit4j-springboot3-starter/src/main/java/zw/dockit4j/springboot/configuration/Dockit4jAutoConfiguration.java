@@ -1,8 +1,6 @@
 package zw.dockit4j.springboot.configuration;
 
 import io.swagger.v3.oas.models.OpenAPI;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springdoc.core.customizers.OpenApiBuilderCustomizer;
 import org.springdoc.core.customizers.ServerBaseUrlCustomizer;
 import org.springdoc.core.properties.SpringDocConfigProperties;
@@ -12,9 +10,11 @@ import org.springdoc.core.service.SecurityService;
 import org.springdoc.core.utils.PropertyResolverUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import zw.dockit4j.core.configuration.Dockit4jBasicAuth;
-import zw.dockit4j.core.configuration.Dockit4jExpand;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 import zw.dockit4j.core.configuration.Dockit4jProperties;
 import zw.dockit4j.core.constant.Dockit4jBaseConstant;
 import zw.dockit4j.core.handler.OpenApiHandler;
@@ -28,9 +28,8 @@ import java.util.Optional;
  * @author echo
  * @since 1.0.0
  **/
+@ConditionalOnProperty(prefix = Dockit4jBaseConstant.DOCKIT4J, name = Dockit4jBaseConstant.ENABLED, havingValue = "true")
 public class Dockit4jAutoConfiguration {
-
-    private static final Logger log = LoggerFactory.getLogger(Dockit4jAutoConfiguration.class);
 
     /**
      * 获取基础配置bean
@@ -38,34 +37,34 @@ public class Dockit4jAutoConfiguration {
      * @return {@link Dockit4jProperties }
      */
     @Bean
-    @ConditionalOnMissingBean
-    @ConditionalOnProperty(prefix = Dockit4jBaseConstant.DOCKIT4J, name = Dockit4jBaseConstant.ENABLED, havingValue = "true")
+    @ConfigurationProperties(prefix = Dockit4jBaseConstant.DOCKIT4J)
     public Dockit4jProperties getDockit4jProperties() {
         return new Dockit4jProperties();
     }
 
     /**
-     * 获取基础认证 bean
+     * dockit4j 跨域配置
      *
-     * @return {@link Dockit4jBasicAuth }
+     * @return {@link CorsFilter }
      */
     @Bean
-    @ConditionalOnMissingBean
-    @ConditionalOnProperty(prefix = Dockit4jBaseConstant.BASIC_AUTH, name = Dockit4jBaseConstant.ENABLED, havingValue = "true")
-    public Dockit4jBasicAuth getBasicAuth() {
-        return new Dockit4jBasicAuth();
-    }
-
-    /**
-     * 获取扩展属性 bean
-     *
-     * @return {@link Dockit4jExpand }
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    @ConditionalOnProperty(prefix = Dockit4jBaseConstant.EXPAND, name = Dockit4jBaseConstant.ENABLED, havingValue = "true")
-    public Dockit4jExpand getExpand() {
-        return new Dockit4jExpand();
+    @ConditionalOnMissingBean(CorsFilter.class)
+    @ConditionalOnProperty(prefix = Dockit4jBaseConstant.DOCKIT4J, name = "cors", havingValue = "true")
+    public CorsFilter dockit4jCorsFilter() {
+        CorsConfiguration config = new CorsConfiguration();
+        // 允许所有来源
+        config.addAllowedOriginPattern("*");
+        // 允许所有请求头
+        config.addAllowedHeader("*");
+        // 允许所有方法
+        config.addAllowedMethod("*");
+        // 允许携带 Cookie
+        config.setAllowCredentials(true);
+        // 设置跨域允许时间
+        config.setMaxAge(1800L);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return new CorsFilter(source);
     }
 
     /**

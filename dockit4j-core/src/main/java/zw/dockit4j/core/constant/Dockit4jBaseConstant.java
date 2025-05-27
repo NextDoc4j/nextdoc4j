@@ -19,12 +19,12 @@ public class Dockit4jBaseConstant {
     public static final String DOCKIT4J = "dockit4j";
 
     /**
-     * 基础认证
+     * 生产
      */
-    public static final String BASIC_AUTH = DOCKIT4J + ".basicAuth";
+    public static final String PRODUCTION = "production";
 
     /**
-     * 扩展
+     * springdoc 扩展属性 key 值
      */
-    public static final String EXPAND = DOCKIT4J + ".expand";
+    public static final String X_EXPAND = "x-dockit4j";
 }

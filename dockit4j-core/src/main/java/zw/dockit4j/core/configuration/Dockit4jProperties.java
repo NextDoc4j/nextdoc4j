@@ -1,17 +1,25 @@
 package zw.dockit4j.core.configuration;
 
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
+
+import java.io.Serial;
+import java.io.Serializable;
+
 /**
- * dockit4j 配置属性
+ * 配置属性
  *
  * @author echo
  * @since 1.0.0
  **/
-public class Dockit4jProperties {
+public class Dockit4jProperties implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /**
      * 是否启用
      */
-    private boolean enable = false;
+    private boolean enabled = false;
 
     /**
      * 是否开启跨域
@@ -21,14 +29,20 @@ public class Dockit4jProperties {
     /**
      * 是否生产环境
      */
-    private boolean prod = false;
+    private boolean production = false;
 
-    public boolean isEnable() {
-        return enable;
+    /**
+     * 扩展属性
+     */
+    @NestedConfigurationProperty
+    private Dockit4jExtension extension;
+
+    public boolean isEnabled() {
+        return enabled;
     }
 
-    public void setEnable(boolean enable) {
-        this.enable = enable;
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
     public boolean isCors() {
@@ -39,11 +53,19 @@ public class Dockit4jProperties {
         this.cors = cors;
     }
 
-    public boolean isProd() {
-        return prod;
+    public boolean isProduction() {
+        return production;
     }
 
-    public void setProd(boolean prod) {
-        this.prod = prod;
+    public void setProduction(boolean production) {
+        this.production = production;
+    }
+
+    public Dockit4jExtension getExtension() {
+        return extension;
+    }
+
+    public void setExtension(Dockit4jExtension extension) {
+        this.extension = extension;
     }
 }
