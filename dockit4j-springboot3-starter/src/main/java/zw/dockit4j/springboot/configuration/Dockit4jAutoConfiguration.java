@@ -12,11 +12,14 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 import zw.dockit4j.core.configuration.Dockit4jProperties;
 import zw.dockit4j.core.constant.Dockit4jBaseConstant;
+import zw.dockit4j.core.extension.Dockit4jExtensionOpenApiCustomizer;
+import zw.dockit4j.core.extension.Dockit4jExtensionResolver;
 import zw.dockit4j.core.handler.OpenApiHandler;
 
 import java.util.List;
@@ -28,7 +31,7 @@ import java.util.Optional;
  * @author echo
  * @since 1.0.0
  **/
-@ConditionalOnProperty(prefix = Dockit4jBaseConstant.DOCKIT4J, name = Dockit4jBaseConstant.ENABLED, havingValue = "true")
+@ConditionalOnProperty(prefix = Dockit4jBaseConstant.DOCKIT4J, name = Dockit4jBaseConstant.ENABLED, havingValue = "true", matchIfMissing = true)
 public class Dockit4jAutoConfiguration {
 
     /**
@@ -65,6 +68,33 @@ public class Dockit4jAutoConfiguration {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
+    }
+
+    /**
+     * 扩展解析器
+     *
+     * @param resourceLoader 资源加载器
+     * @return {@link Dockit4jExtensionResolver }
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(prefix = Dockit4jBaseConstant.EXTENSION, name = Dockit4jBaseConstant.ENABLED, havingValue = "true", matchIfMissing = true)
+    public Dockit4jExtensionResolver dockit4jExtensionResolver(ResourceLoader resourceLoader) {
+        return new Dockit4jExtensionResolver(resourceLoader);
+    }
+
+    /**
+     * 扩展open api定制器
+     *
+     * @param resolver 旋转变压器
+     * @return {@link Dockit4jExtensionOpenApiCustomizer }
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(prefix = Dockit4jBaseConstant.EXTENSION, name = Dockit4jBaseConstant.ENABLED, havingValue = "true", matchIfMissing = true)
+    public Dockit4jExtensionOpenApiCustomizer dockit4jExtensionOpenApiCustomizer(Dockit4jProperties properties,
+                                                                                 Dockit4jExtensionResolver resolver) {
+        return new Dockit4jExtensionOpenApiCustomizer(properties, resolver);
     }
 
     /**

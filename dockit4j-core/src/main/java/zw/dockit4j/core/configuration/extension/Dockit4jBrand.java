@@ -15,7 +15,7 @@ public class Dockit4jBrand implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * logo 信息 格式 classpath:logo/xxx.svg
+     * logo 信息 格式 classpath:logo/xxx.svg 转 base64
      */
     private String logo;
 
@@ -36,6 +36,14 @@ public class Dockit4jBrand implements Serializable {
 
     public void setLogo(String logo) {
         this.logo = logo;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getFooterText() {
