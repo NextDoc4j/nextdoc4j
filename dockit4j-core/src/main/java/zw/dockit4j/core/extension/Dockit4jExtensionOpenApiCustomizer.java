@@ -37,11 +37,6 @@ public class Dockit4jExtensionOpenApiCustomizer implements GlobalOpenApiCustomiz
             if (!extensionData.isEmpty()) {
                 // 添加到 OpenAPI 的扩展属性中
                 openApi.addExtension(Dockit4jBaseConstant.X_EXPAND, extensionData);
-                log.info("Successfully added dockit4j extension data to OpenAPI with {} properties", extensionData
-                    .size());
-
-            } else {
-                log.debug("No extension data to add to OpenAPI");
             }
         } catch (Exception e) {
             log.error("Failed to customize OpenAPI with dockit4j extensions", e);

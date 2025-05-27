@@ -1,7 +1,9 @@
 package zw.dockit4j.core.extension;
 
+import io.swagger.v3.oas.models.OpenAPI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -30,10 +32,12 @@ public class Dockit4jExtensionResolver {
 
     private final ResourceLoader resourceLoader;
     private final ResourcePatternResolver resourcePatternResolver;
+    private final ApplicationContext applicationContext;
 
-    public Dockit4jExtensionResolver(ResourceLoader resourceLoader) {
+    public Dockit4jExtensionResolver(ResourceLoader resourceLoader, ApplicationContext applicationContext) {
         this.resourceLoader = resourceLoader;
         this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
+        this.applicationContext = applicationContext;
     }
 
     /**
@@ -79,6 +83,12 @@ public class Dockit4jExtensionResolver {
         // 设置标题
         if (StringUtils.hasText(brand.getTitle())) {
             brandData.put("title", brand.getTitle());
+        } else {
+            OpenAPI bean = applicationContext.getBean(OpenAPI.class);
+            String title = bean.getInfo().getTitle();
+            if (StringUtils.hasText(title)) {
+                brandData.put("title", title);
+            }
         }
 
         // 设置页脚文本
@@ -138,22 +148,17 @@ public class Dockit4jExtensionResolver {
             for (Resource resource : resources) {
                 if (resource.exists() && resource.isReadable()) {
                     String content = readResourceContent(resource);
-                    if (content != null) {
-                        Map<String, Object> markdownData = new HashMap<>();
-
-                        // 使用模板的 group 信息
-                        if (StringUtils.hasText(template.getGroup())) {
-                            markdownData.put("group", template.getGroup());
-                        }
-
-                        // 生成文档名称：优先使用模板名称，否则使用文件名
-                        String name = generateMarkdownName(template.getName(), resource);
-                        markdownData.put("name", name);
-                        markdownData.put("content", content);
-                        markdownData.put("filename", resource.getFilename());
-
-                        results.add(markdownData);
+                    Map<String, Object> markdownData = new HashMap<>();
+                    // 使用模板的 group 信息
+                    if (StringUtils.hasText(template.getGroup())) {
+                        markdownData.put("group", template.getGroup());
                     }
+                    // 生成文档名称：优先使用模板名称，否则使用文件名
+                    String name = generateMarkdownName(template.getName(), resource);
+                    markdownData.put("name", name);
+                    markdownData.put("content", content);
+                    markdownData.put("filename", resource.getFilename());
+                    results.add(markdownData);
                 }
             }
 

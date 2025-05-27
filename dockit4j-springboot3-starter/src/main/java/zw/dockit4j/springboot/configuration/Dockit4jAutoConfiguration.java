@@ -11,6 +11,7 @@ import org.springdoc.core.utils.PropertyResolverUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.web.cors.CorsConfiguration;
@@ -79,8 +80,9 @@ public class Dockit4jAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnProperty(prefix = Dockit4jBaseConstant.EXTENSION, name = Dockit4jBaseConstant.ENABLED, havingValue = "true", matchIfMissing = true)
-    public Dockit4jExtensionResolver dockit4jExtensionResolver(ResourceLoader resourceLoader) {
-        return new Dockit4jExtensionResolver(resourceLoader);
+    public Dockit4jExtensionResolver dockit4jExtensionResolver(ResourceLoader resourceLoader,
+                                                               ApplicationContext applicationContext) {
+        return new Dockit4jExtensionResolver(resourceLoader, applicationContext);
     }
 
     /**
