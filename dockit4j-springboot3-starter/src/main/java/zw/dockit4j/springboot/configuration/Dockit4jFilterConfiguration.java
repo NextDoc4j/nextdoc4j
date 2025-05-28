@@ -4,8 +4,11 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
+import zw.dockit4j.core.configuration.Dockit4jProperties;
+import zw.dockit4j.core.configuration.extension.Dockit4jBasicAuth;
 import zw.dockit4j.core.constant.Dockit4jBaseConstant;
 import zw.dockit4j.core.constant.Dockit4jFilterConstant;
+import zw.dockit4j.springboot.filter.Dockit4jBasicAuthFilter;
 import zw.dockit4j.springboot.filter.Dockit4jProductionFilter;
 import zw.dockit4j.springboot.filter.Dockit4jResourceFilter;
 
@@ -48,6 +51,18 @@ public class Dockit4jFilterConfiguration {
         // 使用统一配置的URL路径
         bean.addUrlPatterns(Dockit4jFilterConstant.BlockedPaths.URL_PATTERNS);
         return bean;
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = Dockit4jBaseConstant.AUTH, name = Dockit4jBaseConstant.ENABLED, havingValue = "true")
+    public FilterRegistrationBean<Dockit4jBasicAuthFilter> dockit4jBasicAuthFilter(Dockit4jProperties properties) {
+        Dockit4jBasicAuth auth = properties.getExtension().getAuth();
+        FilterRegistrationBean<Dockit4jBasicAuthFilter> registration = new FilterRegistrationBean<>();
+        registration.setFilter(new Dockit4jBasicAuthFilter(auth));
+        registration.addUrlPatterns(Dockit4jFilterConstant.BlockedPaths.URL_PATTERNS);
+        registration.setOrder(Ordered.HIGHEST_PRECEDENCE + 2);
+        registration.setEnabled(properties.isEnabled() && auth.isEnabled());
+        return registration;
     }
 
 }

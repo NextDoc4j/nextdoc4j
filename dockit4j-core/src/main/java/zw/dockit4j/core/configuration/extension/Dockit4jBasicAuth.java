@@ -17,7 +17,7 @@ public class Dockit4jBasicAuth implements Serializable {
     /**
      * 是否启用
      */
-    private boolean enable = false;
+    private boolean enabled = false;
 
     /**
      * 用户名
@@ -29,12 +29,12 @@ public class Dockit4jBasicAuth implements Serializable {
      */
     private String password;
 
-    public boolean isEnable() {
-        return enable;
+    public boolean isEnabled() {
+        return enabled;
     }
 
-    public void setEnable(boolean enable) {
-        this.enable = enable;
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
     public String getUsername() {

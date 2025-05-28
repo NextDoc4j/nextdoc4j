@@ -29,6 +29,11 @@ public class Dockit4jBaseConstant {
     public static final String EXTENSION = DOCKIT4J + ".extension";
 
     /**
+     * 认证
+     */
+    public static final String AUTH = EXTENSION + ".auth";
+
+    /**
      * springdoc 扩展属性 key 值
      */
     public static final String X_EXPAND = "x-dockit4j";
