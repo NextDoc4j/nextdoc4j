@@ -86,7 +86,7 @@ public class Dockit4jAutoConfiguration {
     }
 
     /**
-     * 扩展open api定制器
+     * 全局 openapi 定制器
      *
      * @param resolver 旋转变压器
      * @return {@link Dockit4jExtensionOpenApiCustomizer }

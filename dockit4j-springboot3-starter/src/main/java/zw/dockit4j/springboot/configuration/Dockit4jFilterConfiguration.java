@@ -13,7 +13,7 @@ import zw.dockit4j.springboot.filter.Dockit4jProductionFilter;
 import zw.dockit4j.springboot.filter.Dockit4jResourceFilter;
 
 /**
- * 资源过滤器配置
+ * 过滤器自动配置
  *
  * @author echo
  * @since 1.0.0
