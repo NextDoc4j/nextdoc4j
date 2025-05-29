@@ -68,23 +68,25 @@ public class Dockit4jBasicAuthFilter extends OncePerRequestFilter {
                 // 设置Session超时时间（30分钟）
                 newSession.setMaxInactiveInterval(30 * 60);
 
-                // 如果是AJAX请求，返回JSON响应
-                if (isAjaxRequest(request)) {
+                // 修复：更严格的AJAX判断，只有明确的AJAX请求才返回JSON
+                if (isStrictAjaxRequest(request)) {
                     response.setContentType("application/json; charset=UTF-8");
                     response.getWriter().write("{\"success\": true, \"message\": \"认证成功\"}");
-                    return;
+                } else {
+                    // 浏览器请求认证成功后，重定向到原始请求，避免显示JSON
+                    response.sendRedirect(request.getRequestURI());
                 }
-
-                filterChain.doFilter(request, response);
                 return;
             } else {
                 // 认证失败
-                if (isAjaxRequest(request)) {
+                if (isStrictAjaxRequest(request)) {
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     response.setContentType("application/json; charset=UTF-8");
                     response.getWriter().write("{\"success\": false, \"message\": \"用户名或密码错误\"}");
                     return;
                 }
+                // 浏览器认证失败，清除可能的缓存认证信息
+                clearAuthCache(response);
             }
         }
 
@@ -98,19 +100,54 @@ public class Dockit4jBasicAuthFilter extends OncePerRequestFilter {
     private void handleLogout(HttpServletRequest request, HttpServletResponse response) throws IOException {
         HttpSession session = request.getSession(false);
         if (session != null) {
-            session.removeAttribute(AUTH_SESSION_KEY);
+            session.invalidate(); // 完全销毁session
         }
+
+        // 清除浏览器缓存的认证信息
+        clearAuthCache(response);
 
         // 重定向到登录页面
         response.sendRedirect(request.getRequestURI());
     }
 
     /**
-     * 判断是否为AJAX请求
+     * 清除浏览器缓存的认证信息
      */
-    private boolean isAjaxRequest(HttpServletRequest request) {
-        return "XMLHttpRequest".equals(request.getHeader("X-Requested-With")) || "application/json".equals(request
-            .getHeader("Accept")) || request.getHeader("Authorization") != null;
+    private void clearAuthCache(HttpServletResponse response) {
+        // 设置响应头来清除浏览器缓存的认证信息
+        response.setHeader("WWW-Authenticate", "Basic realm=\"Dockit4j API Documentation\"");
+        response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+        response.setHeader("Pragma", "no-cache");
+        response.setHeader("Expires", "0");
+    }
+
+    /**
+     * 更严格的AJAX请求判断
+     */
+    private boolean isStrictAjaxRequest(HttpServletRequest request) {
+        // 只有明确标识为AJAX的请求才返回JSON
+        String xRequestedWith = request.getHeader("X-Requested-With");
+        String accept = request.getHeader("Accept");
+
+        // 1. 标准的AJAX请求头
+        if ("XMLHttpRequest".equals(xRequestedWith)) {
+            return true;
+        }
+
+        // 2. 明确请求JSON格式
+        if (accept != null && accept.contains("application/json") && !accept.contains("text/html")) {
+            return true;
+        }
+
+        // 3. Fetch API请求（通常不包含X-Requested-With）
+        String userAgent = request.getHeader("User-Agent");
+        if (accept != null && accept.contains("*/*") && userAgent != null && userAgent.contains("Chrome")) {
+            // 进一步检查是否是fetch请求
+            String referer = request.getHeader("Referer");
+            return referer != null && referer.contains(request.getServerName());
+        }
+
+        return false;
     }
 
     /**
@@ -138,6 +175,7 @@ public class Dockit4jBasicAuthFilter extends OncePerRequestFilter {
             }
         }
 
+        System.out.println("路径不需要认证: " + uri);
         return false;
     }
 
@@ -170,9 +208,14 @@ public class Dockit4jBasicAuthFilter extends OncePerRequestFilter {
      * 要求客户端提供认证信息
      */
     private void requireAuthentication(HttpServletResponse response) throws IOException {
-        response.setHeader("WWW-Authenticate", "Basic realm=\"Dockit4j API Documentation\"");
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        // 不设置WWW-Authenticate头部，避免浏览器弹出原生登录框
+        response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType("text/html; charset=UTF-8");
+
+        // 设置缓存控制头，确保每次都重新验证
+        response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+        response.setHeader("Pragma", "no-cache");
+        response.setHeader("Expires", "0");
 
         // 返回登录页面
         String loginPage = generateLoginPage();
@@ -190,6 +233,9 @@ public class Dockit4jBasicAuthFilter extends OncePerRequestFilter {
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <title>Dockit4j - 登录验证</title>
+                <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+                <meta http-equiv="Pragma" content="no-cache">
+                <meta http-equiv="Expires" content="0">
                 <style>
                     * {
                         margin: 0;
@@ -398,24 +444,31 @@ public class Dockit4jBasicAuthFilter extends OncePerRequestFilter {
                         // 创建Basic Auth头部
                         const credentials = btoa(unescape(encodeURIComponent(username + ':' + password)));
 
-                        // 发起认证请求
+                        // 发起认证请求 - 明确标识为AJAX请求
                         fetch(window.location.href, {
                             method: 'GET',
                             headers: {
                                 'Authorization': 'Basic ' + credentials,
-                                'X-Requested-With': 'XMLHttpRequest'
-                            }
+                                'X-Requested-With': 'XMLHttpRequest',  // 明确标识AJAX请求
+                                'Accept': 'application/json'           // 明确请求JSON响应
+                            },
+                            cache: 'no-cache'  // 禁用缓存
                         }).then(response => {
                             if (response.ok) {
-                                // 认证成功
-                                showMessage('登录成功，正在跳转...', 'success');
-                                setTimeout(() => {
-                                    window.location.reload();
-                                }, 1000);
+                                return response.json().then(data => {
+                                    // 认证成功
+                                    showMessage('登录成功，正在跳转...', 'success');
+                                    setTimeout(() => {
+                                        // 跳转到原始页面，不使用reload避免缓存问题
+                                        window.location.href = window.location.pathname + '?t=' + Date.now();
+                                    }, 1000);
+                                });
                             } else {
                                 // 认证失败
-                                showMessage('用户名或密码错误，请重试', 'error');
-                                resetButton();
+                                return response.json().then(data => {
+                                    showMessage(data.message || '用户名或密码错误，请重试', 'error');
+                                    resetButton();
+                                });
                             }
                         }).catch(error => {
                             console.error('Login error:', error);
@@ -441,6 +494,14 @@ public class Dockit4jBasicAuthFilter extends OncePerRequestFilter {
 
                     // 自动聚焦到用户名输入框
                     document.getElementById('username').focus();
+
+                    // 清理可能的浏览器缓存认证信息
+                    window.addEventListener('load', function() {
+                        // 尝试清理浏览器缓存的Basic Auth信息
+                        if (navigator.credentials && navigator.credentials.preventSilentAccess) {
+                            navigator.credentials.preventSilentAccess();
+                        }
+                    });
                 </script>
             </body>
             </html>
