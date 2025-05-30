@@ -82,7 +82,7 @@ public class Dockit4jBasicAuthFilter extends OncePerRequestFilter {
                 if (isStrictAjaxRequest(request)) {
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     response.setContentType("application/json; charset=UTF-8");
-                    response.getWriter().write("{\"success\": false, \"message\": \"用户名或密码错误\"}");
+                    response.getWriter().write("{\"success\": false, \"message\": \"密码错误\"}");
                     return;
                 }
                 // 浏览器认证失败，清除可能的缓存认证信息
@@ -106,7 +106,7 @@ public class Dockit4jBasicAuthFilter extends OncePerRequestFilter {
         // 清除浏览器缓存的认证信息
         clearAuthCache(response);
 
-        // 重定向到登录页面
+        // 重定向到认证页面
         response.sendRedirect(request.getRequestURI());
     }
 
@@ -188,17 +188,12 @@ public class Dockit4jBasicAuthFilter extends OncePerRequestFilter {
             String base64Credentials = authHeader.substring("Basic ".length());
             String credentials = new String(Base64.getDecoder().decode(base64Credentials), StandardCharsets.UTF_8);
 
-            // 分割用户名和密码
-            String[] parts = credentials.split(":", 2);
-            if (parts.length != 2) {
-                return false;
-            }
+            // 只取冒号后的部分
+            int index = credentials.indexOf(':');
+            String password = (index != -1) ? credentials.substring(index + 1) : credentials;
 
-            String username = parts[0];
-            String password = parts[1];
-
-            // 验证用户名和密码
-            return basicAuth.getUsername().equals(username) && basicAuth.getPassword().equals(password);
+            // 校验密码
+            return basicAuth.getPassword().equals(password);
         } catch (Exception e) {
             return false;
         }
@@ -208,7 +203,7 @@ public class Dockit4jBasicAuthFilter extends OncePerRequestFilter {
      * 要求客户端提供认证信息
      */
     private void requireAuthentication(HttpServletResponse response) throws IOException {
-        // 不设置WWW-Authenticate头部，避免浏览器弹出原生登录框
+        // 不设置WWW-Authenticate头部，避免浏览器弹出原生认证框
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType("text/html; charset=UTF-8");
 
@@ -217,13 +212,13 @@ public class Dockit4jBasicAuthFilter extends OncePerRequestFilter {
         response.setHeader("Pragma", "no-cache");
         response.setHeader("Expires", "0");
 
-        // 返回登录页面
+        // 返回认证页面
         String loginPage = generateLoginPage();
         response.getWriter().write(loginPage);
     }
 
     /**
-     * 生成登录页面HTML
+     * 生成认证页面HTML
      */
     private String generateLoginPage() {
         return """
@@ -231,254 +226,93 @@ public class Dockit4jBasicAuthFilter extends OncePerRequestFilter {
             <html lang="zh-CN">
             <head>
                 <meta charset="UTF-8">
+                <title>Dockit4j - 认证验证</title>
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Dockit4j - 登录验证</title>
-                <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-                <meta http-equiv="Pragma" content="no-cache">
-                <meta http-equiv="Expires" content="0">
                 <style>
-                    * {
-                        margin: 0;
-                        padding: 0;
-                        box-sizing: border-box;
-                    }
-
-                    body {
-                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                        height: 100vh;
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                    }
-
-                    .login-container {
-                        background: rgba(255, 255, 255, 0.95);
-                        backdrop-filter: blur(10px);
-                        padding: 2.5rem;
-                        border-radius: 16px;
-                        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-                        width: 100%;
-                        max-width: 420px;
-                        border: 1px solid rgba(255, 255, 255, 0.2);
-                    }
-
-                    .login-header {
-                        text-align: center;
-                        margin-bottom: 2rem;
-                    }
-
-                    .login-header h1 {
-                        color: #333;
-                        font-size: 2rem;
-                        font-weight: 700;
-                        margin-bottom: 0.5rem;
-                        background: linear-gradient(135deg, #667eea, #764ba2);
-                        -webkit-background-clip: text;
-                        -webkit-text-fill-color: transparent;
-                        background-clip: text;
-                    }
-
-                    .login-header p {
-                        color: #666;
-                        font-size: 0.95rem;
-                    }
-
-                    .form-group {
-                        margin-bottom: 1.5rem;
-                    }
-
-                    .form-group label {
-                        display: block;
-                        margin-bottom: 0.5rem;
-                        color: #555;
-                        font-weight: 500;
-                        font-size: 0.9rem;
-                    }
-
-                    .form-group input {
-                        width: 100%;
-                        padding: 0.875rem 1rem;
-                        border: 2px solid #e1e5e9;
-                        border-radius: 8px;
-                        font-size: 1rem;
-                        transition: all 0.2s ease;
-                        background: rgba(255, 255, 255, 0.8);
-                    }
-
-                    .form-group input:focus {
-                        outline: none;
-                        border-color: #667eea;
-                        background: rgba(255, 255, 255, 1);
-                        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-                    }
-
-                    .login-btn {
-                        width: 100%;
-                        padding: 0.875rem;
-                        background: linear-gradient(135deg, #667eea, #764ba2);
-                        color: white;
-                        border: none;
-                        border-radius: 8px;
-                        font-size: 1rem;
-                        font-weight: 600;
-                        cursor: pointer;
-                        transition: all 0.2s ease;
-                        position: relative;
-                        overflow: hidden;
-                    }
-
-                    .login-btn:hover {
-                        transform: translateY(-1px);
-                        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-                    }
-
-                    .login-btn:active {
-                        transform: translateY(0);
-                    }
-
-                    .login-btn:disabled {
-                        opacity: 0.7;
-                        cursor: not-allowed;
-                        transform: none;
-                    }
-
-                    .message {
-                        text-align: center;
-                        margin-top: 1rem;
-                        padding: 0.75rem;
-                        border-radius: 6px;
-                        font-size: 0.9rem;
-                        display: none;
-                    }
-
-                    .message.error {
-                        background: rgba(231, 76, 60, 0.1);
-                        color: #e74c3c;
-                        border: 1px solid rgba(231, 76, 60, 0.2);
-                    }
-
-                    .message.success {
-                        background: rgba(46, 204, 113, 0.1);
-                        color: #27ae60;
-                        border: 1px solid rgba(46, 204, 113, 0.2);
-                    }
-
-                    .loading {
-                        display: inline-block;
-                        width: 16px;
-                        height: 16px;
-                        border: 2px solid rgba(255, 255, 255, 0.3);
-                        border-radius: 50%;
-                        border-top-color: #fff;
-                        animation: spin 0.8s ease-in-out infinite;
-                        margin-right: 8px;
-                    }
-
-                    @keyframes spin {
-                        to { transform: rotate(360deg); }
-                    }
-
-                    .logout-info {
-                        background: rgba(52, 152, 219, 0.1);
-                        color: #3498db;
-                        border: 1px solid rgba(52, 152, 219, 0.2);
-                        margin-bottom: 1rem;
-                    }
+                    body { font-family: Arial, sans-serif; background: #f5f5f5; display: flex; justify-content: center; align-items: center; height: 100vh; }
+                    .login-container { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); width: 300px; }
+                    h1 { margin-bottom: 1rem; font-size: 1.5rem; color: #333; }
+                    .form-group { margin-bottom: 1rem; }
+                    .form-group label { display: block; margin-bottom: 0.5rem; color: #555; }
+                    .form-group input { width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; }
+                    .login-btn { width: 100%; padding: 0.5rem; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; }
+                    .login-btn:hover { background: #45a049; }
+                    .message { margin-top: 1rem; font-size: 0.9rem; display: none; }
+                    .message.error { color: #e74c3c; }
+                    .message.success { color: #27ae60; }
+                    .logout-info { background: #3498db22; color: #3498db; margin-bottom: 1rem; padding: 0.5rem; border-radius: 4px; }
                 </style>
             </head>
             <body>
                 <div class="login-container">
-                    <div class="login-header">
-                        <h1>Dockit4j</h1>
-                        <p>请输入用户名和密码访问API文档</p>
-                    </div>
+                    <h1>Dockit4j</h1>
+                    <p>需要输入密码访问API文档</p>
 
-                    <div id="logoutInfo" class="message logout-info" style="display: none;">
-                        您已安全退出，请重新登录
-                    </div>
+                    <div id="logoutInfo" class="logout-info" style="display: none;">您已安全退出，请重新认证</div>
 
                     <form id="loginForm">
                         <div class="form-group">
-                            <label for="username">用户名</label>
-                            <input type="text" id="username" name="username" required autocomplete="username">
-                        </div>
-                        <div class="form-group">
                             <label for="password">密码</label>
-                            <input type="password" id="password" name="password" required autocomplete="current-password">
+                            <input type="password" id="password" required>
                         </div>
-                        <button type="submit" class="login-btn" id="loginBtn">
-                            <span id="btnText">登录</span>
-                        </button>
+                        <button type="submit" class="login-btn" id="loginBtn"><span id="btnText">访问文档</span></button>
                         <div id="message" class="message"></div>
                     </form>
                 </div>
 
                 <script>
-                    // 检查是否是注销操作
                     if (window.location.search.includes('action=logout')) {
                         document.getElementById('logoutInfo').style.display = 'block';
-                        // 清理URL中的logout参数
                         history.replaceState({}, '', window.location.pathname);
                     }
 
                     document.getElementById('loginForm').addEventListener('submit', function(e) {
                         e.preventDefault();
 
-                        const username = document.getElementById('username').value.trim();
                         const password = document.getElementById('password').value;
                         const loginBtn = document.getElementById('loginBtn');
                         const btnText = document.getElementById('btnText');
                         const messageEl = document.getElementById('message');
 
-                        if (!username || !password) {
-                            showMessage('请输入用户名和密码', 'error');
+                        if (!password) {
+                            showMessage('请输入密码', 'error');
                             return;
                         }
 
-                        // 显示加载状态
                         loginBtn.disabled = true;
-                        btnText.innerHTML = '<span class="loading"></span>登录中...';
+                        btnText.textContent = '认证中...';
                         hideMessage();
 
-                        // 创建Basic Auth头部
-                        const credentials = btoa(unescape(encodeURIComponent(username + ':' + password)));
-
-                        // 发起认证请求 - 明确标识为AJAX请求
+                        const credentials = btoa(':' + password);  // 只用密码，用户名为空
                         fetch(window.location.href, {
                             method: 'GET',
                             headers: {
                                 'Authorization': 'Basic ' + credentials,
-                                'X-Requested-With': 'XMLHttpRequest',  // 明确标识AJAX请求
-                                'Accept': 'application/json'           // 明确请求JSON响应
-                            },
-                            cache: 'no-cache'  // 禁用缓存
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'application/json'
+                            }
                         }).then(response => {
                             if (response.ok) {
                                 return response.json().then(data => {
-                                    // 认证成功
-                                    showMessage('登录成功，正在跳转...', 'success');
+                                    showMessage('验证成功，正在跳转...', 'success');
                                     setTimeout(() => {
-                                        // 跳转到原始页面，不使用reload避免缓存问题
                                         window.location.href = window.location.pathname + '?t=' + Date.now();
                                     }, 1000);
                                 });
                             } else {
-                                // 认证失败
                                 return response.json().then(data => {
-                                    showMessage(data.message || '用户名或密码错误，请重试', 'error');
+                                    showMessage(data.message || '密码错误', 'error');
                                     resetButton();
                                 });
                             }
-                        }).catch(error => {
-                            console.error('Login error:', error);
-                            showMessage('登录失败，请稍后重试', 'error');
+                        }).catch(() => {
+                            showMessage('验证失败，请稍后重试', 'error');
                             resetButton();
                         });
 
                         function resetButton() {
                             loginBtn.disabled = false;
-                            btnText.textContent = '登录';
+                            btnText.textContent = '访问文档';
                         }
 
                         function showMessage(text, type) {
@@ -489,17 +323,6 @@ public class Dockit4jBasicAuthFilter extends OncePerRequestFilter {
 
                         function hideMessage() {
                             messageEl.style.display = 'none';
-                        }
-                    });
-
-                    // 自动聚焦到用户名输入框
-                    document.getElementById('username').focus();
-
-                    // 清理可能的浏览器缓存认证信息
-                    window.addEventListener('load', function() {
-                        // 尝试清理浏览器缓存的Basic Auth信息
-                        if (navigator.credentials && navigator.credentials.preventSilentAccess) {
-                            navigator.credentials.preventSilentAccess();
                         }
                     });
                 </script>
