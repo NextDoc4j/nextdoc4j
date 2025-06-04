@@ -53,6 +53,12 @@ public class Dockit4jFilterConfiguration {
         return bean;
     }
 
+    /**
+     * dockit4j 基础认证 过滤
+     *
+     * @param properties 属性
+     * @return {@link FilterRegistrationBean }<{@link Dockit4jBasicAuthFilter }>
+     */
     @Bean
     @ConditionalOnProperty(prefix = Dockit4jBaseConstant.AUTH, name = Dockit4jBaseConstant.ENABLED, havingValue = "true")
     public FilterRegistrationBean<Dockit4jBasicAuthFilter> dockit4jBasicAuthFilter(Dockit4jProperties properties) {

@@ -5,6 +5,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.filter.OncePerRequestFilter;
 import zw.dockit4j.core.configuration.extension.Dockit4jBasicAuth;
 import zw.dockit4j.core.constant.Dockit4jFilterConstant;
@@ -12,6 +14,7 @@ import zw.dockit4j.core.constant.Dockit4jFilterConstant;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.UUID;
 
 /**
  * 基础认证过滤器
@@ -20,6 +23,8 @@ import java.util.Base64;
  * @since 1.0.0
  */
 public class Dockit4jBasicAuthFilter extends OncePerRequestFilter {
+
+    private static final Logger log = LoggerFactory.getLogger(Dockit4jBasicAuthFilter.class);
 
     private final Dockit4jBasicAuth basicAuth;
 
@@ -30,6 +35,13 @@ public class Dockit4jBasicAuthFilter extends OncePerRequestFilter {
 
     public Dockit4jBasicAuthFilter(Dockit4jBasicAuth basicAuth) {
         this.basicAuth = basicAuth;
+
+        // 如果启用了认证但未配置密码，则生成一个默认密码
+        if (basicAuth.isEnabled() && (basicAuth.getPassword() == null || basicAuth.getPassword().isBlank())) {
+            String generatedPassword = UUID.randomUUID().toString().replace("-", "");
+            basicAuth.setPassword(generatedPassword);
+            log.info("Dockit4j Basic Auth 已启用，未配置密码，已自动生成默认密码： {}", generatedPassword);
+        }
     }
 
     @Override
@@ -82,7 +94,7 @@ public class Dockit4jBasicAuthFilter extends OncePerRequestFilter {
                 if (isStrictAjaxRequest(request)) {
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     response.setContentType("application/json; charset=UTF-8");
-                    response.getWriter().write("{\"success\": false, \"message\": \"密码错误\"}");
+                    response.getWriter().write("{\"success\": false, \"message\": \"认证失败\"}");
                     return;
                 }
                 // 浏览器认证失败，清除可能的缓存认证信息
@@ -222,112 +234,112 @@ public class Dockit4jBasicAuthFilter extends OncePerRequestFilter {
      */
     private String generateLoginPage() {
         return """
-            <!DOCTYPE html>
-            <html lang="zh-CN">
-            <head>
-                <meta charset="UTF-8">
-                <title>Dockit4j - 认证验证</title>
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <style>
-                    body { font-family: Arial, sans-serif; background: #f5f5f5; display: flex; justify-content: center; align-items: center; height: 100vh; }
-                    .login-container { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); width: 300px; }
-                    h1 { margin-bottom: 1rem; font-size: 1.5rem; color: #333; }
-                    .form-group { margin-bottom: 1rem; }
-                    .form-group label { display: block; margin-bottom: 0.5rem; color: #555; }
-                    .form-group input { width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; }
-                    .login-btn { width: 100%; padding: 0.5rem; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; }
-                    .login-btn:hover { background: #45a049; }
-                    .message { margin-top: 1rem; font-size: 0.9rem; display: none; }
-                    .message.error { color: #e74c3c; }
-                    .message.success { color: #27ae60; }
-                    .logout-info { background: #3498db22; color: #3498db; margin-bottom: 1rem; padding: 0.5rem; border-radius: 4px; }
-                </style>
-            </head>
-            <body>
-                <div class="login-container">
-                    <h1>Dockit4j</h1>
-                    <p>需要输入密码访问API文档</p>
-
-                    <div id="logoutInfo" class="logout-info" style="display: none;">您已安全退出，请重新认证</div>
-
-                    <form id="loginForm">
-                        <div class="form-group">
-                            <label for="password">密码</label>
-                            <input type="password" id="password" required>
-                        </div>
-                        <button type="submit" class="login-btn" id="loginBtn"><span id="btnText">访问文档</span></button>
-                        <div id="message" class="message"></div>
-                    </form>
-                </div>
-
-                <script>
-                    if (window.location.search.includes('action=logout')) {
-                        document.getElementById('logoutInfo').style.display = 'block';
-                        history.replaceState({}, '', window.location.pathname);
-                    }
-
-                    document.getElementById('loginForm').addEventListener('submit', function(e) {
-                        e.preventDefault();
-
-                        const password = document.getElementById('password').value;
-                        const loginBtn = document.getElementById('loginBtn');
-                        const btnText = document.getElementById('btnText');
-                        const messageEl = document.getElementById('message');
-
-                        if (!password) {
-                            showMessage('请输入密码', 'error');
-                            return;
+                <!DOCTYPE html>
+                <html lang="zh-CN">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Dockit4j - 认证验证</title>
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <style>
+                        body { font-family: Arial, sans-serif; background: #f5f5f5; display: flex; justify-content: center; align-items: center; height: 100vh; }
+                        .login-container { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); width: 300px; }
+                        h1 { margin-bottom: 1rem; font-size: 1.5rem; color: #333; }
+                        .form-group { margin-bottom: 1rem; }
+                        .form-group label { display: block; margin-bottom: 0.5rem; color: #555; }
+                        .form-group input { width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; }
+                        .login-btn { width: 100%; padding: 0.5rem; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; }
+                        .login-btn:hover { background: #45a049; }
+                        .message { margin-top: 1rem; font-size: 0.9rem; display: none; }
+                        .message.error { color: #e74c3c; }
+                        .message.success { color: #27ae60; }
+                        .logout-info { background: #3498db22; color: #3498db; margin-bottom: 1rem; padding: 0.5rem; border-radius: 4px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="login-container">
+                        <h1>Dockit4j</h1>
+                        <p>需要输入密码访问API文档</p>
+                
+                        <div id="logoutInfo" class="logout-info" style="display: none;">您已安全退出，请重新认证</div>
+                
+                        <form id="loginForm">
+                            <div class="form-group">
+                                <label for="password">密码</label>
+                                <input type="password" id="password" required>
+                            </div>
+                            <button type="submit" class="login-btn" id="loginBtn"><span id="btnText">访问文档</span></button>
+                            <div id="message" class="message"></div>
+                        </form>
+                    </div>
+                
+                    <script>
+                        if (window.location.search.includes('action=logout')) {
+                            document.getElementById('logoutInfo').style.display = 'block';
+                            history.replaceState({}, '', window.location.pathname);
                         }
-
-                        loginBtn.disabled = true;
-                        btnText.textContent = '认证中...';
-                        hideMessage();
-
-                        const credentials = btoa(':' + password);  // 只用密码，用户名为空
-                        fetch(window.location.href, {
-                            method: 'GET',
-                            headers: {
-                                'Authorization': 'Basic ' + credentials,
-                                'X-Requested-With': 'XMLHttpRequest',
-                                'Accept': 'application/json'
+                
+                        document.getElementById('loginForm').addEventListener('submit', function(e) {
+                            e.preventDefault();
+                
+                            const password = document.getElementById('password').value;
+                            const loginBtn = document.getElementById('loginBtn');
+                            const btnText = document.getElementById('btnText');
+                            const messageEl = document.getElementById('message');
+                
+                            if (!password) {
+                                showMessage('请输入密码', 'error');
+                                return;
                             }
-                        }).then(response => {
-                            if (response.ok) {
-                                return response.json().then(data => {
-                                    showMessage('验证成功，正在跳转...', 'success');
-                                    setTimeout(() => {
-                                        window.location.href = window.location.pathname + '?t=' + Date.now();
-                                    }, 1000);
-                                });
-                            } else {
-                                return response.json().then(data => {
-                                    showMessage(data.message || '密码错误', 'error');
-                                    resetButton();
-                                });
+                
+                            loginBtn.disabled = true;
+                            btnText.textContent = '认证中...';
+                            hideMessage();
+                
+                            const credentials = btoa(':' + password);  // 只用密码，用户名为空
+                            fetch(window.location.href, {
+                                method: 'GET',
+                                headers: {
+                                    'Authorization': 'Basic ' + credentials,
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'Accept': 'application/json'
+                                }
+                            }).then(response => {
+                                if (response.ok) {
+                                    return response.json().then(data => {
+                                        showMessage('验证成功，正在跳转...', 'success');
+                                        setTimeout(() => {
+                                            window.location.href = window.location.pathname + '?t=' + Date.now();
+                                        }, 1000);
+                                    });
+                                } else {
+                                    return response.json().then(data => {
+                                        showMessage(data.message || '密码错误', 'error');
+                                        resetButton();
+                                    });
+                                }
+                            }).catch(() => {
+                                showMessage('验证失败，请稍后重试', 'error');
+                                resetButton();
+                            });
+                
+                            function resetButton() {
+                                loginBtn.disabled = false;
+                                btnText.textContent = '访问文档';
                             }
-                        }).catch(() => {
-                            showMessage('验证失败，请稍后重试', 'error');
-                            resetButton();
+                
+                            function showMessage(text, type) {
+                                messageEl.textContent = text;
+                                messageEl.className = 'message ' + type;
+                                messageEl.style.display = 'block';
+                            }
+                
+                            function hideMessage() {
+                                messageEl.style.display = 'none';
+                            }
                         });
-
-                        function resetButton() {
-                            loginBtn.disabled = false;
-                            btnText.textContent = '访问文档';
-                        }
-
-                        function showMessage(text, type) {
-                            messageEl.textContent = text;
-                            messageEl.className = 'message ' + type;
-                            messageEl.style.display = 'block';
-                        }
-
-                        function hideMessage() {
-                            messageEl.style.display = 'none';
-                        }
-                    });
-                </script>
-            </body>
-            </html>
-            """;
+                    </script>
+                </body>
+                </html>
+                """;
     }
 }
