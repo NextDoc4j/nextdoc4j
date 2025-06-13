@@ -16,7 +16,6 @@
 
 package zw.dcokit4j.enums.util;
 
-import org.springframework.web.bind.annotation.RestController;
 import zw.dcokit4j.enums.core.BaseEnum;
 
 import java.lang.reflect.ParameterizedType;
