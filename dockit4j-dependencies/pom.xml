@@ -15,7 +15,7 @@
         <!-- 项目版本号 -->
         <revision>1.0.0</revision>
 
-        <!--dockit 项目所需外部依赖版本-->
+        <!--dockit4j 项目所需外部依赖版本-->
         <jakarta-servlet.version>6.1.0</jakarta-servlet.version>
         <jackson.version>2.18.2</jackson.version>
         <spring-boot3.version>3.4.6</spring-boot3.version>

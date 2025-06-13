@@ -29,6 +29,7 @@
         <module>dockit4j-core</module>
         <module>dockit4j-ui</module>
         <module>dockit4j-springboot3-starter</module>
+        <module>dockit4j-plugin</module>
     </modules>
 
 

@@ -40,6 +40,13 @@
                 <version>${revision}</version>
             </dependency>
 
+            <!--插件 - 枚举信息展示模块-->
+            <dependency>
+                <groupId>zw.dockit4j</groupId>
+                <artifactId>dockit4j-plugin-enums</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
