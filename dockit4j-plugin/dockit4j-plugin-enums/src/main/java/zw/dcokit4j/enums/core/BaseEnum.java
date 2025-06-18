@@ -26,6 +26,7 @@ import java.util.Objects;
  * @author Charles7c
  * @since 1.0.0
  */
+@SuppressWarnings("unchecked")
 public interface BaseEnum<T extends Serializable> {
 
     /**

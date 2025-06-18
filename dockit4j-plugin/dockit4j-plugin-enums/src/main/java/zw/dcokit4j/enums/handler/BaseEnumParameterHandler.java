@@ -40,7 +40,7 @@ import java.util.List;
  * </p>
  *
  * @author echo
- * @since 2.5.2
+ * @since 1.0.0
  */
 public class BaseEnumParameterHandler implements ParameterCustomizer, PropertyCustomizer {
 
