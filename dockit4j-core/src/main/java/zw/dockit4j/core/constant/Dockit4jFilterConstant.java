@@ -13,8 +13,8 @@ public class Dockit4jFilterConstant {
      */
     public static final class BlockedPaths {
         // Dockit4j 相关路径
-        public static final String DOCKIT_HTML = "/dockit.html";
-        public static final String DOCKIT4J_PREFIX = "/dockit4j/";
+        public static final String DOCKIT_HTML = "/doc.html";
+        public static final String DOCKIT4J_PREFIX = "/assets/";
 
         // SpringDoc 相关路径
         public static final String API_DOCS = "/v3/api-docs";
