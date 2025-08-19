@@ -9,17 +9,14 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 import zw.dockit4j.core.configuration.Dockit4jExtension;
 import zw.dockit4j.core.configuration.extension.Dockit4jBrand;
 import zw.dockit4j.core.configuration.extension.Dockit4jMarkdown;
+import zw.dockit4j.core.util.Dockit4jResourceUtils;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Dockit4j扩展解析器
@@ -64,17 +61,6 @@ public class Dockit4jExtensionResolver {
      */
     private static final Set<String> WILDCARD_CHARS = Set.of("*", "?");
 
-    /**
-     * MIME类型映射表，用于根据文件扩展名确定内容类型
-     */
-    private static final Map<String, String> MIME_TYPE_MAPPING = Map
-        .of("svg", "image/svg+xml", "png", "image/png", "jpg", "image/jpeg", "jpeg", "image/jpeg", "gif", "image/gif", "webp", "image/webp", "ico", "image/x-icon");
-
-    /**
-     * 默认MIME类型，用于未知文件类型
-     */
-    private static final String DEFAULT_MIME_TYPE = "application/octet-stream";
-
     // ==================== 核心依赖服务 ====================
 
     /**
@@ -94,20 +80,6 @@ public class Dockit4jExtensionResolver {
      * 用于获取Bean实例和应用配置信息
      */
     private final ApplicationContext applicationContext;
-
-    // ==================== 缓存机制 ====================
-
-    /**
-     * 资源内容缓存
-     * 缓存已读取的资源内容，避免重复IO操作
-     */
-    private final Map<String, String> contentCache = new ConcurrentHashMap<>();
-
-    /**
-     * Logo Base64编码缓存
-     * 缓存已转换的Logo Base64数据
-     */
-    private final Map<String, String> logoCache = new ConcurrentHashMap<>();
 
     /**
      * 构造函数 - 初始化扩展解析器
@@ -179,8 +151,8 @@ public class Dockit4jExtensionResolver {
         }
 
         try {
-            // 解析 Logo
-            String logoBase64 = resolveLogo(brand.getLogo());
+            // 使用工具类解析 Logo
+            String logoBase64 = Dockit4jResourceUtils.resolveLogo(brand.getLogo(), resourceLoader);
             if (logoBase64 != null) {
                 brandData.put("logo", logoBase64);
             }
@@ -266,7 +238,6 @@ public class Dockit4jExtensionResolver {
                     Map<String, Object> singleResult = resolveSingleMarkdown(markdown);
                     if (singleResult != null) {
                         result.add(singleResult);
-
                     }
                 }
             } catch (Exception e) {
@@ -300,14 +271,7 @@ public class Dockit4jExtensionResolver {
     /**
      * 解析通配符模式的 Markdown 路径
      * <p>
-     * 使用Spring的ResourcePatternResolver来解析Ant风格的路径模式，
-     * 支持以下模式：
-     * <ul>
-     * <li> classpath*:docs/** /*.md -匹配所有classpath中docs目录下的md文件</li>
-     * <li>file:docs/*.md - 匹配指定目录下的md文件</li>
-     * 
-     * <li>**&#47;*.md - 递归匹配所有md文件</li>
-     * </ul>
+     * 使用Spring的ResourcePatternResolver来解析Ant风格的路径模式
      * </p>
      *
      * @param template 模版配置，包含通配符路径和默认属性
@@ -325,9 +289,9 @@ public class Dockit4jExtensionResolver {
             }
 
             for (Resource resource : resources) {
-                if (resource.exists() && resource.isReadable()) {
+                if (Dockit4jResourceUtils.isResourceValid(resource)) {
                     try {
-                        String content = readResourceContent(resource);
+                        String content = Dockit4jResourceUtils.readResourceContent(resource);
                         Map<String, Object> markdownData = createMarkdownDataMap(template, resource, content);
                         results.add(markdownData);
                     } catch (Exception e) {
@@ -392,7 +356,8 @@ public class Dockit4jExtensionResolver {
         String location = markdown.getLocation();
 
         try {
-            String content = resolveMarkdownContent(location);
+            // 使用工具类读取内容
+            String content = Dockit4jResourceUtils.readResourceContent(location, resourceLoader);
             if (content == null) {
                 return null;
             }
@@ -404,10 +369,16 @@ public class Dockit4jExtensionResolver {
                 result.put("group", markdown.getGroup());
             }
 
-            // 设置名称
+            // 设置名称，使用工具类提取文件名
             String name = StringUtils.hasText(markdown.getName())
                 ? markdown.getName()
-                : extractFileNameWithoutExtension(location);
+                : Dockit4jResourceUtils.extractFileNameWithoutExtension(location);
+
+            // 如果工具类返回null，使用默认名称
+            if (name == null) {
+                name = DEFAULT_DOCUMENT_NAME;
+            }
+
             result.put("name", name);
             result.put("content", content);
             result.put("location", location);
@@ -417,26 +388,6 @@ public class Dockit4jExtensionResolver {
         } catch (Exception e) {
             return null;
         }
-    }
-
-    /**
-     * 从文件路径中提取不带扩展名的文件名
-     *
-     * @param location 文件路径
-     * @return 不带扩展名的文件名
-     */
-    private String extractFileNameWithoutExtension(String location) {
-        if (!StringUtils.hasText(location)) {
-            return DEFAULT_DOCUMENT_NAME;
-        }
-
-        // 提取文件名部分
-        int lastSlash = Math.max(location.lastIndexOf('/'), location.lastIndexOf('\\'));
-        String fileName = (lastSlash >= 0) ? location.substring(lastSlash + 1) : location;
-
-        // 去掉扩展名
-        int dotIndex = fileName.lastIndexOf('.');
-        return (dotIndex > 0) ? fileName.substring(0, dotIndex) : fileName;
     }
 
     /**
@@ -461,8 +412,7 @@ public class Dockit4jExtensionResolver {
         // 从资源文件名中提取
         String filename = resource.getFilename();
         if (filename != null) {
-            int dotIndex = filename.lastIndexOf('.');
-            String nameWithoutExt = (dotIndex > 0) ? filename.substring(0, dotIndex) : filename;
+            String nameWithoutExt = Dockit4jResourceUtils.extractFileNameWithoutExtension(filename);
             return StringUtils.hasText(nameWithoutExt) ? nameWithoutExt : DEFAULT_DOCUMENT_NAME;
         }
 
@@ -470,160 +420,13 @@ public class Dockit4jExtensionResolver {
     }
 
     /**
-     * 解析 Logo 文件并转换为 Base64 编码
-     * <p>
-     * 支持的图像格式：PNG、JPG、JPEG、GIF、SVG、WebP、ICO
-     * 转换后的格式：data:[mimeType];base64,[base64Data]
-     * </p>
-     *
-     * @param logoPath Logo文件路径，支持classpath:、file:等Spring资源路径格式
-     * @return Base64编码的Data URL，如果处理失败返回null
-     */
-    private String resolveLogo(String logoPath) {
-        if (!StringUtils.hasText(logoPath)) {
-            return null;
-        }
-
-        // 检查缓存
-        String cachedLogo = logoCache.get(logoPath);
-        if (cachedLogo != null) {
-            return cachedLogo;
-        }
-
-        try {
-            Resource resource = resourceLoader.getResource(logoPath);
-            if (!resource.exists()) {
-                return null;
-            }
-
-            // 检查文件可读性
-            if (!resource.isReadable()) {
-                return null;
-            }
-
-            byte[] logoBytes = readResourceBytes(resource);
-            if (logoBytes.length == 0) {
-                return null;
-            }
-
-            String mimeType = determineMimeType(logoPath);
-            String base64Data = Base64.getEncoder().encodeToString(logoBytes);
-            String dataUrl = "data:" + mimeType + ";base64," + base64Data;
-
-            // 缓存结果
-            logoCache.put(logoPath, dataUrl);
-            return dataUrl;
-
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    /**
-     * 解析 Markdown 文件内容
-     * <p>
-     * 支持缓存机制，避免重复读取相同文件
-     * </p>
-     *
-     * @param location Markdown文件路径
-     * @return 文件内容字符串，如果读取失败返回null
-     */
-    private String resolveMarkdownContent(String location) {
-        if (!StringUtils.hasText(location)) {
-            return null;
-        }
-
-        // 检查缓存
-        String cachedContent = contentCache.get(location);
-        if (cachedContent != null) {
-            return cachedContent;
-        }
-
-        try {
-            Resource resource = resourceLoader.getResource(location);
-            if (!resource.exists()) {
-                return null;
-            }
-
-            if (!resource.isReadable()) {
-                return null;
-            }
-
-            String content = readResourceContent(resource);
-
-            // 缓存内容
-            contentCache.put(location, content);
-            return content;
-
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    /**
-     * 读取资源文件内容（文本格式）
-     * <p>
-     * 使用UTF-8编码读取文本文件内容，自动关闭输入流
-     * </p>
-     *
-     * @param resource Spring资源对象
-     * @return 文件内容字符串
-     * @throws IOException 当文件读取失败时抛出
-     */
-    private String readResourceContent(Resource resource) throws IOException {
-        try (InputStream inputStream = resource.getInputStream()) {
-            return StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8);
-        }
-    }
-
-    /**
-     * 读取资源文件内容（字节格式）
-     * <p>
-     * 用于读取二进制文件（如图片），自动关闭输入流
-     * </p>
-     *
-     * @param resource Spring资源对象
-     * @return 文件内容字节数组
-     * @throws IOException 当文件读取失败时抛出
-     */
-    private byte[] readResourceBytes(Resource resource) throws IOException {
-        try (InputStream inputStream = resource.getInputStream()) {
-            return StreamUtils.copyToByteArray(inputStream);
-        }
-    }
-
-    /**
-     * 根据文件扩展名确定 MIME 类型
-     * <p>
-     * 支持常见的图像格式MIME类型识别，对于未知类型返回通用二进制类型
-     * </p>
-     *
-     * @param filePath 文件路径
-     * @return 对应的MIME类型字符串
-     */
-    private String determineMimeType(String filePath) {
-        if (!StringUtils.hasText(filePath)) {
-            return DEFAULT_MIME_TYPE;
-        }
-
-        int lastDotIndex = filePath.lastIndexOf('.');
-        if (lastDotIndex < 0 || lastDotIndex == filePath.length() - 1) {
-            return DEFAULT_MIME_TYPE;
-        }
-
-        String extension = filePath.substring(lastDotIndex + 1).toLowerCase();
-        return MIME_TYPE_MAPPING.getOrDefault(extension, DEFAULT_MIME_TYPE);
-    }
-
-    /**
      * 清除所有缓存
      * <p>
-     * 用于释放内存或在配置更新时清除旧的缓存数据
+     * 委托给工具类处理
      * </p>
      */
     public void clearCache() {
-        contentCache.clear();
-        logoCache.clear();
+        Dockit4jResourceUtils.clearAllCaches();
     }
 
     /**
@@ -632,10 +435,7 @@ public class Dockit4jExtensionResolver {
      * @return 包含缓存大小信息的Map
      */
     public Map<String, Integer> getCacheStats() {
-        Map<String, Integer> stats = new HashMap<>();
-        stats.put("contentCacheSize", contentCache.size());
-        stats.put("logoCacheSize", logoCache.size());
-        return stats;
+        return Dockit4jResourceUtils.getCacheStats();
     }
 
 }

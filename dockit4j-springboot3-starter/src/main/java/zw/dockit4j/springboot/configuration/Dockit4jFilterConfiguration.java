@@ -1,11 +1,13 @@
 package zw.dockit4j.springboot.configuration;
 
+import io.swagger.v3.oas.models.OpenAPI;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
+import org.springframework.core.io.ResourceLoader;
+import zw.dockit4j.core.configuration.Dockit4jExtension;
 import zw.dockit4j.core.configuration.Dockit4jProperties;
-import zw.dockit4j.core.configuration.extension.Dockit4jBasicAuth;
 import zw.dockit4j.core.constant.Dockit4jBaseConstant;
 import zw.dockit4j.core.constant.Dockit4jFilterConstant;
 import zw.dockit4j.springboot.filter.Dockit4jBasicAuthFilter;
@@ -61,13 +63,15 @@ public class Dockit4jFilterConfiguration {
      */
     @Bean
     @ConditionalOnProperty(prefix = Dockit4jBaseConstant.AUTH, name = Dockit4jBaseConstant.ENABLED, havingValue = "true")
-    public FilterRegistrationBean<Dockit4jBasicAuthFilter> dockit4jBasicAuthFilter(Dockit4jProperties properties) {
-        Dockit4jBasicAuth auth = properties.getExtension().getAuth();
+    public FilterRegistrationBean<Dockit4jBasicAuthFilter> dockit4jBasicAuthFilter(Dockit4jProperties properties,
+                                                                                   ResourceLoader resourceLoader,
+                                                                                   OpenAPI openAPI) {
+        Dockit4jExtension extension = properties.getExtension();
         FilterRegistrationBean<Dockit4jBasicAuthFilter> registration = new FilterRegistrationBean<>();
-        registration.setFilter(new Dockit4jBasicAuthFilter(auth));
+        registration.setFilter(new Dockit4jBasicAuthFilter(extension, resourceLoader, openAPI));
         registration.addUrlPatterns(Dockit4jFilterConstant.BlockedPaths.URL_PATTERNS);
         registration.setOrder(Ordered.HIGHEST_PRECEDENCE + 2);
-        registration.setEnabled(properties.isEnabled() && auth.isEnabled());
+        registration.setEnabled(properties.isEnabled() && extension.getAuth().isEnabled());
         return registration;
     }
 

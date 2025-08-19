@@ -1,6 +1,8 @@
 package zw.dockit4j.springboot.filter;
 
 import ch.qos.logback.core.joran.spi.HttpUtil;
+import cn.hutool.core.util.StrUtil;
+import io.swagger.v3.oas.models.OpenAPI;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -8,15 +10,20 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.filter.OncePerRequestFilter;
+import zw.dockit4j.core.configuration.Dockit4jExtension;
 import zw.dockit4j.core.configuration.extension.Dockit4jBasicAuth;
+import zw.dockit4j.core.configuration.extension.Dockit4jBrand;
 import zw.dockit4j.core.constant.Dockit4jFilterConstant;
+import zw.dockit4j.core.util.Dockit4jResourceUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -72,6 +79,11 @@ public class Dockit4jBasicAuthFilter extends OncePerRequestFilter {
      */
     private static final String AJAX_HEADER_VALUE = "XMLHttpRequest";
 
+    /**
+     * 登录页面 HTML 文件路径
+     */
+    private static final String DOC_LOGIN = "classpath:/META-INF/resources/doclogin.html";
+
     // ==================== 成员变量 ====================
 
     /**
@@ -79,20 +91,42 @@ public class Dockit4jBasicAuthFilter extends OncePerRequestFilter {
      */
     private final Dockit4jBasicAuth basicAuth;
 
+    /**
+     * dockit4j扩展
+     */
+    public final Dockit4jExtension dockit4jExtension;
+
+    /**
+     * 资源加载器
+     */
+    private final ResourceLoader resourceLoader;
+
+    /**
+     * 开放api
+     */
+    private final OpenAPI openAPI;
+
     // ==================== 构造方法 ====================
 
     /**
      * 构造函数
      *
-     * @param basicAuth 基本认证配置对象，不能为null
-     * @throws IllegalArgumentException 如果basicAuth为null
+     * @param resourceLoader    资源加载器
+     * @param dockit4jExtension dockit4j扩展
+     * @param openAPI           OpenAPI对象
      */
-    public Dockit4jBasicAuthFilter(Dockit4jBasicAuth basicAuth) {
-        if (basicAuth == null) {
+    public Dockit4jBasicAuthFilter(Dockit4jExtension dockit4jExtension,
+                                   ResourceLoader resourceLoader,
+                                   OpenAPI openAPI) {
+
+        this.resourceLoader = Objects.requireNonNull(resourceLoader, "ResourceLoader cannot be null");
+        this.dockit4jExtension = dockit4jExtension;
+        this.openAPI = openAPI;
+        Dockit4jBasicAuth auth = this.dockit4jExtension.getAuth();
+        if (auth == null) {
             throw new IllegalArgumentException("basicAuth配置不能为null");
         }
-
-        this.basicAuth = basicAuth;
+        this.basicAuth = dockit4jExtension.getAuth();
 
         // 初始化默认密码（如果需要）
         initializeDefaultPassword();
@@ -265,6 +299,7 @@ public class Dockit4jBasicAuthFilter extends OncePerRequestFilter {
             return basicAuth.getPassword().equals(password);
 
         } catch (Exception e) {
+            log.debug("Failed to validate basic authentication", e);
             return false;
         }
     }
@@ -348,12 +383,11 @@ public class Dockit4jBasicAuthFilter extends OncePerRequestFilter {
     private void showLoginPage(HttpServletResponse response) throws IOException {
         // 设置响应头
         response.setStatus(HttpServletResponse.SC_OK);
-
         response.setContentType("text/html;charset=UTF-8");
         setNoCacheHeaders(response);
 
         // 输出登录页面HTML
-        final String loginPageHtml = generateLoginPageHtml();
+        final String loginPageHtml = loadLoginPageFromResources();
         response.getWriter().write(loginPageHtml);
     }
 
@@ -407,6 +441,7 @@ public class Dockit4jBasicAuthFilter extends OncePerRequestFilter {
 
     /**
      * 发送JSON格式响应
+     * 使用工具类进行JSON字符串转义
      *
      * @param response   HTTP响应对象
      * @param statusCode HTTP状态码
@@ -419,34 +454,17 @@ public class Dockit4jBasicAuthFilter extends OncePerRequestFilter {
                                   boolean success,
                                   String message) throws IOException {
         response.setStatus(statusCode);
-
         response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
 
+        // 使用工具类进行JSON转义
         final String jsonResponse = """
             {
               "success": %s,
               "message": "%s"
             }
-            """.formatted(success, escapeJsonString(message));
+            """.formatted(success, Dockit4jResourceUtils.escapeJsonString(message));
 
         response.getWriter().write(jsonResponse);
-    }
-
-    /**
-     * 转义JSON字符串中的特殊字符
-     *
-     * @param str 原始字符串
-     * @return 转义后的字符串
-     */
-    private String escapeJsonString(String str) {
-        if (str == null) {
-            return "";
-        }
-        return str.replace("\\", "\\\\")
-            .replace("\"", "\\\"")
-            .replace("\n", "\\n")
-            .replace("\r", "\\r")
-            .replace("\t", "\\t");
     }
 
     /**
@@ -505,413 +523,130 @@ public class Dockit4jBasicAuthFilter extends OncePerRequestFilter {
         return clientIp != null ? clientIp : "unknown";
     }
 
-    // ==================== HTML页面生成 ====================
-
     /**
-     * 生成登录页面HTML
-     *
+     * 从resources目录加载登录页面HTML
      * <p>页面功能特性：</p>
      * <ul>
-     * <li>响应式设计，支持移动端</li>
-     * <li>现代化UI风格</li>
      * <li>AJAX提交表单</li>
      * <li>加载状态提示</li>
      * <li>错误消息显示</li>
-     * <li>注销状态提示</li>
      * </ul>
      *
-     * @return 登录页面HTML字符串
+     * @return 登录页面HTML内容
      */
-    private String generateLoginPageHtml() {
-        return """
-            <!DOCTYPE html>
-            <html lang="zh-CN">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Dockit4j - API文档认证</title>
-                <style>
-                    /* 基础样式重置 */
-                    * {
-                        margin: 0;
-                        padding: 0;
-                        box-sizing: border-box;
-                    }
+    private String loadLoginPageFromResources() {
+        try {
+            // 使用工具类加载HTML模板
+            String htmlTemplate = Dockit4jResourceUtils.readResourceContent(DOC_LOGIN, resourceLoader);
+            if (htmlTemplate == null) {
+                throw new RuntimeException("无法加载登录页面模板");
+            }
 
-                    /* 页面主体样式 */
-                    body {
-                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-                                     'Helvetica Neue', Arial, sans-serif;
-                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        min-height: 100vh;
-                        color: #333;
-                    }
+            // 检查模板是否包含替换标记
+            if (!isTemplateWithPlaceholders(htmlTemplate)) {
+                return htmlTemplate;
+            }
 
-                    /* 登录容器样式 */
-                    .login-container {
-                        background: rgba(255, 255, 255, 0.95);
-                        backdrop-filter: blur(10px);
-                        padding: 2.5rem;
-                        border-radius: 16px;
-                        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-                        width: 100%;
-                        max-width: 400px;
-                        margin: 1rem;
-                        transition: transform 0.3s ease;
-                    }
+            // 模板包含替换标记，执行替换逻辑
+            return processTemplateWithPlaceholders(htmlTemplate);
 
-                    .login-container:hover {
-                        transform: translateY(-2px);
-                    }
-
-                    /* 标题样式 */
-                    .title {
-                        text-align: center;
-                        margin-bottom: 0.5rem;
-                        font-size: 2rem;
-                        font-weight: 700;
-                        background: linear-gradient(135deg, #667eea, #764ba2);
-                        -webkit-background-clip: text;
-                        -webkit-text-fill-color: transparent;
-                        background-clip: text;
-                    }
-
-                    .subtitle {
-                        text-align: center;
-                        margin-bottom: 2rem;
-                        color: #666;
-                        font-size: 0.95rem;
-                    }
-
-                    /* 注销提示样式 */
-                    .logout-info {
-                        background: linear-gradient(135deg, #3498db22, #2980b922);
-                        color: #2980b9;
-                        margin-bottom: 1.5rem;
-                        padding: 1rem;
-                        border-radius: 8px;
-                        border-left: 4px solid #3498db;
-                        font-size: 0.9rem;
-                        display: none;
-                    }
-
-                    /* 表单样式 */
-                    .form-group {
-                        margin-bottom: 1.5rem;
-                    }
-
-                    .form-group label {
-                        display: block;
-                        margin-bottom: 0.5rem;
-                        font-weight: 600;
-                        color: #555;
-                    }
-
-                    .form-group input {
-                        width: 100%;
-                        padding: 0.875rem;
-                        border: 2px solid #e1e8ed;
-                        border-radius: 8px;
-                        font-size: 1rem;
-                        transition: all 0.3s ease;
-                        background: #fff;
-                    }
-
-                    .form-group input:focus {
-                        outline: none;
-                        border-color: #667eea;
-                        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-                    }
-
-                    /* 按钮样式 */
-                    .login-btn {
-                        width: 100%;
-                        padding: 0.875rem;
-                        background: linear-gradient(135deg, #667eea, #764ba2);
-                        color: white;
-                        border: none;
-                        border-radius: 8px;
-                        font-size: 1rem;
-                        font-weight: 600;
-                        cursor: pointer;
-                        transition: all 0.3s ease;
-                        position: relative;
-                        overflow: hidden;
-                    }
-
-                    .login-btn:hover:not(:disabled) {
-                        transform: translateY(-1px);
-                        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-                    }
-
-                    .login-btn:disabled {
-                        opacity: 0.7;
-                        cursor: not-allowed;
-                        transform: none;
-                    }
-
-                    /* 消息提示样式 */
-                    .message {
-                        margin-top: 1rem;
-                        padding: 0.75rem;
-                        border-radius: 6px;
-                        font-size: 0.9rem;
-                        text-align: center;
-                        display: none;
-                        animation: slideIn 0.3s ease;
-                    }
-
-                    .message.error {
-                        background: #fee;
-                        color: #c53030;
-                        border: 1px solid #feb2b2;
-                    }
-
-                    .message.success {
-                        background: #f0fff4;
-                        color: #2f855a;
-                        border: 1px solid #9ae6b4;
-                    }
-
-                    /* 动画效果 */
-                    @keyframes slideIn {
-                        from {
-                            opacity: 0;
-                            transform: translateY(-10px);
-                        }
-                        to {
-                            opacity: 1;
-                            transform: translateY(0);
-                        }
-                    }
-
-                    /* 加载动画 */
-                    .spinner {
-                        display: inline-block;
-                        width: 16px;
-                        height: 16px;
-                        border: 2px solid #ffffff33;
-                        border-radius: 50%;
-                        border-top-color: #fff;
-                        animation: spin 1s ease-in-out infinite;
-                        margin-right: 0.5rem;
-                    }
-
-                    @keyframes spin {
-                        to { transform: rotate(360deg); }
-                    }
-
-                    /* 响应式设计 */
-                    @media (max-width: 480px) {
-                        .login-container {
-                            padding: 2rem 1.5rem;
-                            margin: 0.5rem;
-                        }
-
-                        .title {
-                            font-size: 1.75rem;
-                        }
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="login-container">
-                    <h1 class="title">Dockit4j</h1>
-                    <p class="subtitle">请输入密码以访问API文档</p>
-
-                    <!-- 注销提示信息 -->
-                    <div id="logoutInfo" class="logout-info">
-                        <strong>安全提示：</strong> 您已安全退出，请重新进行身份认证
-                    </div>
-
-                    <!-- 登录表单 -->
-                    <form id="loginForm">
-                        <div class="form-group">
-                            <label for="password">访问密码</label>
-                            <input type="password" id="password" placeholder="请输入密码" required
-                                   autocomplete="current-password">
-                        </div>
-                        <button type="submit" class="login-btn" id="loginBtn">
-                            <span id="btnText">访问文档</span>
-                        </button>
-                        <div id="message" class="message"></div>
-                    </form>
-                </div>
-
-                <script>
-                    // ==================== 页面初始化 ====================
-
-                    /**
-                     * 页面加载完成后的初始化操作
-                     */
-                    document.addEventListener('DOMContentLoaded', function() {
-                        // 检查是否来自注销操作
-                        if (window.location.search.includes('action=logout')) {
-                            document.getElementById('logoutInfo').style.display = 'block';
-                            // 清理URL中的logout参数，避免刷新时重复显示
-                            history.replaceState({}, '', window.location.pathname);
-                        }
-
-                        // 自动聚焦到密码输入框
-                        document.getElementById('password').focus();
-                    });
-
-                    // ==================== 表单提交处理 ====================
-
-                    /**
-                     * 处理登录表单提交
-                     */
-                    document.getElementById('loginForm').addEventListener('submit', function(e) {
-                        e.preventDefault();
-
-                        const password = document.getElementById('password').value.trim();
-                        const loginBtn = document.getElementById('loginBtn');
-                        const btnText = document.getElementById('btnText');
-                        const messageEl = document.getElementById('message');
-
-                        // 验证输入
-                        if (!password) {
-                            showMessage('请输入访问密码', 'error');
-                            return;
-                        }
-
-                        // 设置加载状态
-                        setLoadingState(true);
-                        hideMessage();
-
-                        // 构造认证信息（用户名为空，只使用密码）
-                        const credentials = btoa(':' + password);
-
-                        // 发送认证请求
-                        fetch(window.location.href, {
-                            method: 'GET',
-                            headers: {
-                                'Authorization': 'Basic ' + credentials,
-                                'X-Requested-With': 'XMLHttpRequest',
-                                'Accept': 'application/json',
-                                'Cache-Control': 'no-cache'
-                            }
-                        })
-                        .then(response => {
-                            if (response.ok) {
-                                // 认证成功
-                                return response.json().then(data => {
-                                    showMessage('认证成功，正在跳转到文档页面...', 'success');
-                                    // 延迟跳转，让用户看到成功提示
-                                    setTimeout(() => {
-                                        window.location.href = window.location.pathname + '?t=' + Date.now();
-                                    }, 1200);
-                                });
-                            } else if (response.status === 401) {
-                                // 认证失败
-                                return response.json().then(data => {
-                                    showMessage(data.message || '密码错误，请重新输入', 'error');
-                                    // 清空密码输入框
-                                    document.getElementById('password').value = '';
-                                    document.getElementById('password').focus();
-                                }).catch(() => {
-                                    showMessage('密码错误，请重新输入', 'error');
-                                    document.getElementById('password').value = '';
-                                    document.getElementById('password').focus();
-                                });
-                            } else {
-                                // 其他HTTP错误
-                                showMessage('服务器响应异常，请稍后重试', 'error');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('认证请求失败:', error);
-                            showMessage('网络连接异常，请检查网络后重试', 'error');
-                        })
-                        .finally(() => {
-                            // 恢复按钮状态
-                            setLoadingState(false);
-                        });
-                    });
-
-                    // ==================== 辅助函数 ====================
-
-                    /**
-                     * 设置按钮加载状态
-                     * @param {boolean} loading 是否为加载状态
-                     */
-                    function setLoadingState(loading) {
-                        const loginBtn = document.getElementById('loginBtn');
-                        const btnText = document.getElementById('btnText');
-
-                        if (loading) {
-                            loginBtn.disabled = true;
-                            btnText.innerHTML = '<span class="spinner"></span>认证中...';
-                        } else {
-                            loginBtn.disabled = false;
-                            btnText.textContent = '访问文档';
-                        }
-                    }
-
-                    /**
-                     * 显示消息提示
-                     * @param {string} text 消息内容
-                     * @param {string} type 消息类型：'success' | 'error'
-                     */
-                    function showMessage(text, type) {
-                        const messageEl = document.getElementById('message');
-                        messageEl.textContent = text;
-                        messageEl.className = 'message ' + type;
-                        messageEl.style.display = 'block';
-
-                        // 自动隐藏成功消息
-                        if (type === 'success') {
-                            setTimeout(() => {
-                                hideMessage();
-                            }, 3000);
-                        }
-                    }
-
-                    /**
-                     * 隐藏消息提示
-                     */
-                    function hideMessage() {
-                        const messageEl = document.getElementById('message');
-                        messageEl.style.display = 'none';
-                    }
-
-                    // ==================== 键盘事件处理 ====================
-
-                    /**
-                     * 处理键盘快捷键
-                     */
-                    document.addEventListener('keydown', function(e) {
-                        // Ctrl/Cmd + Enter 提交表单
-                        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-                            e.preventDefault();
-                            document.getElementById('loginForm').dispatchEvent(new Event('submit'));
-                        }
-
-                        // ESC 清空输入和消息
-                        if (e.key === 'Escape') {
-                            document.getElementById('password').value = '';
-                            hideMessage();
-                            document.getElementById('password').focus();
-                        }
-                    });
-
-                    // ==================== 页面可见性处理 ====================
-
-                    /**
-                     * 处理页面可见性变化（防止页面长时间后台运行）
-                     */
-                    document.addEventListener('visibilitychange', function() {
-                        if (!document.hidden) {
-                            // 页面重新可见时，聚焦到密码输入框
-                            document.getElementById('password').focus();
-                        }
-                    });
-                </script>
-            </body>
-            </html>
-            """;
+        } catch (Exception e) {
+            throw new RuntimeException("加载登录页面资源失败: " + e.getMessage(), e);
+        }
     }
+
+    /**
+     * 检查模板是否包含需要替换的占位符
+     */
+    private boolean isTemplateWithPlaceholders(String template) {
+        // 检查是否包含任何一个占位符标记
+        return template.contains("LOGO_SRC_PLACEHOLDER") || template.contains("LOGO_CLASS_PLACEHOLDER") || template
+            .contains("TITLE_CLASS_PLACEHOLDER") || template.contains("TITLE_PLACEHOLDER") || template
+                .contains("<!-- LOGO_PLACEHOLDER_START -->") || template
+                    .contains("<!-- LOGO_PLACEHOLDER_END -->") || template.contains("${title}");
+    }
+
+    /**
+     * 处理包含占位符的模板
+     */
+    private String processTemplateWithPlaceholders(String htmlTemplate) {
+        // 初始化默认值
+        String logo = "";
+        String title = "Dockit4j - API文档认证";
+
+        // 安全获取配置
+        if (dockit4jExtension != null) {
+            Dockit4jBrand brand = dockit4jExtension.getBrand();
+            if (brand != null) {
+                // 使用工具类获取logo
+                logo = Dockit4jResourceUtils.resolveLogo(brand.getLogo(), resourceLoader);
+
+                // 获取标题
+                if (StrUtil.isNotBlank(brand.getTitle())) {
+                    title = brand.getTitle();
+                }
+            }
+        }
+
+        // 如果brand中没有title,尝试从OpenAPI获取
+        if (title.equals("Dockit4j - API文档认证") && openAPI != null && openAPI.getInfo() != null) {
+            String apiTitle = openAPI.getInfo().getTitle();
+            if (StrUtil.isNotBlank(apiTitle)) {
+                title = apiTitle;
+            }
+        }
+
+        // 处理Logo显示逻辑
+        if (StrUtil.isNotBlank(logo)) {
+            // 使用工具类确保logo格式正确
+            logo = Dockit4jResourceUtils.ensureDataUrlFormat(logo);
+
+            // 替换logo相关占位符
+            htmlTemplate = replacePlaceholder(htmlTemplate, "LOGO_SRC_PLACEHOLDER", logo);
+            htmlTemplate = replacePlaceholder(htmlTemplate, "LOGO_CLASS_PLACEHOLDER", StrUtil.isBlank(title)
+                ? "logo-only"
+                : "");
+            htmlTemplate = replacePlaceholder(htmlTemplate, "TITLE_CLASS_PLACEHOLDER", "with-logo");
+        } else {
+            // 没有logo时,移除整个logo容器
+            htmlTemplate = removeLogoContainer(htmlTemplate);
+            htmlTemplate = replacePlaceholder(htmlTemplate, "TITLE_CLASS_PLACEHOLDER", "");
+        }
+
+        // 使用工具类进行HTML转义并替换标题
+        htmlTemplate = replacePlaceholder(htmlTemplate, "TITLE_PLACEHOLDER", Dockit4jResourceUtils.escapeHtml(title));
+        htmlTemplate = replacePlaceholder(htmlTemplate, "${title}", Dockit4jResourceUtils.escapeHtml(title));
+
+        return htmlTemplate;
+    }
+
+    /**
+     * 安全替换占位符，只有占位符存在时才替换
+     */
+    private String replacePlaceholder(String template, String placeholder, String value) {
+        if (template.contains(placeholder)) {
+            return template.replace(placeholder, value);
+        }
+        return template;
+    }
+
+    /**
+     * 移除Logo容器标记
+     */
+    private String removeLogoContainer(String htmlTemplate) {
+        // 检查是否存在Logo容器标记
+        String startMarker = "<!-- LOGO_PLACEHOLDER_START -->";
+        String endMarker = "<!-- LOGO_PLACEHOLDER_END -->";
+
+        int startIndex = htmlTemplate.indexOf(startMarker);
+        int endIndex = htmlTemplate.indexOf(endMarker);
+
+        if (startIndex != -1 && endIndex != -1 && endIndex > startIndex) {
+            // 移除整个logo容器，包括结束标记
+            endIndex = endIndex + endMarker.length();
+            return htmlTemplate.substring(0, startIndex) + htmlTemplate.substring(endIndex);
+        }
+        return htmlTemplate;
+    }
+
 }
