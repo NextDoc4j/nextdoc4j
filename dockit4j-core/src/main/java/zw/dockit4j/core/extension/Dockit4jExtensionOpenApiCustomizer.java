@@ -20,6 +20,12 @@ public class Dockit4jExtensionOpenApiCustomizer implements GlobalOpenApiCustomiz
 
     private static final Logger log = LoggerFactory.getLogger(Dockit4jExtensionOpenApiCustomizer.class);
 
+
+    /**
+     * springdoc 扩展属性 key 值
+     */
+    public static final String X_EXPAND = "x-dockit4j";
+
     private final Dockit4jProperties properties;
     private final Dockit4jExtensionResolver resolver;
 
@@ -36,7 +42,7 @@ public class Dockit4jExtensionOpenApiCustomizer implements GlobalOpenApiCustomiz
             Map<String, Object> extensionData = resolver.buildExtensionData(extension);
             if (!extensionData.isEmpty()) {
                 // 添加到 OpenAPI 的扩展属性中
-                openApi.addExtension(Dockit4jBaseConstant.X_EXPAND, extensionData);
+                openApi.addExtension(X_EXPAND, extensionData);
             }
         } catch (Exception e) {
             log.error("Failed to customize OpenAPI with dockit4j extensions", e);
