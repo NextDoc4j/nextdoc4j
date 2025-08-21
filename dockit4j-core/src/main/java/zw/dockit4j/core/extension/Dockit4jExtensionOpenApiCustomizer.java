@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import org.springdoc.core.customizers.GlobalOpenApiCustomizer;
 import zw.dockit4j.core.configuration.Dockit4jExtension;
 import zw.dockit4j.core.configuration.Dockit4jProperties;
-import zw.dockit4j.core.constant.Dockit4jBaseConstant;
 
 import java.util.Map;
 
@@ -19,7 +18,6 @@ import java.util.Map;
 public class Dockit4jExtensionOpenApiCustomizer implements GlobalOpenApiCustomizer {
 
     private static final Logger log = LoggerFactory.getLogger(Dockit4jExtensionOpenApiCustomizer.class);
-
 
     /**
      * springdoc 扩展属性 key 值
