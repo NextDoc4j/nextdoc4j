@@ -18,9 +18,10 @@
         <!--dockit4j 项目所需外部依赖版本-->
         <jakarta-servlet.version>6.1.0</jakarta-servlet.version>
         <jackson.version>2.18.2</jackson.version>
-        <spring-boot3.version>3.4.6</spring-boot3.version>
-        <springdoc.version>2.8.9</springdoc.version>
+        <spring-boot3.version>3.5.5</spring-boot3.version>
+        <springdoc.version>2.8.11</springdoc.version>
         <hutool.version>5.8.37</hutool.version>
+        <swagger.version>2.2.36</swagger.version>
 
         <!-- Maven 插件版本 -->
         <spotless-maven-plugin.version>2.43.0</spotless-maven-plugin.version>
@@ -32,7 +33,7 @@
     <!--依赖声明管理-->
     <dependencyManagement>
         <dependencies>
-            <!-- dockit4j 依赖 -->
+            <!-- dockit4j 自身 BOM -->
             <dependency>
                 <groupId>zw.dockit4j</groupId>
                 <artifactId>dockit4j-bom</artifactId>
@@ -41,7 +42,7 @@
                 <scope>import</scope>
             </dependency>
 
-            <!-- Hutool（小而全的 Java 工具类库，通过静态方法封装，降低相关 API 的学习成本，提高工作效率，使 Java 拥有函数式语言般的优雅，让 Java 语言也可以“甜甜的”） -->
+            <!-- Hutool BOM -->
             <dependency>
                 <groupId>cn.hutool</groupId>
                 <artifactId>hutool-bom</artifactId>
@@ -50,32 +51,42 @@
                 <scope>import</scope>
             </dependency>
 
-            <!--Jakarta EE 中用于处理 Web 请求和响应的核心 API-->
+            <!-- Jakarta Servlet API -->
             <dependency>
                 <groupId>jakarta.servlet</groupId>
                 <artifactId>jakarta.servlet-api</artifactId>
                 <version>${jakarta-servlet.version}</version>
+                <optional>true</optional>
             </dependency>
 
-            <!-- Jackson 数据绑定库 -->
+            <!-- Jackson-->
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
                 <version>${jackson.version}</version>
+                <optional>true</optional>
             </dependency>
 
-            <!--springboot3.x 配置处理-->
+            <!-- Spring Boot 配置处理器：只在编译时起作用 -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-configuration-processor</artifactId>
                 <version>${spring-boot3.version}</version>
+                <optional>true</optional>
             </dependency>
 
-            <!--springdoc -->
+            <!-- Springdoc OpenAPI -->
             <dependency>
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
                 <version>${springdoc.version}</version>
+            </dependency>
+
+            <!-- swagger dependencies -->
+            <dependency>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-core-jakarta</artifactId>
+                <version>${swagger.version}</version>
             </dependency>
 
         </dependencies>

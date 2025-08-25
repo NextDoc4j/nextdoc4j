@@ -18,7 +18,7 @@ public class Dockit4jFilterConstant {
 
         // Dockit4j 相关路径
         public static final String DOCKIT_HTML = "/doc.html";
-        public static final String DOCKIT4J_PREFIX = "/webjars/";
+        public static final String DOCKIT4J_PREFIX = "/dk/";
 
         // SpringDoc 相关路径
         public static final String API_DOCS = "/v3/api-docs";
@@ -47,7 +47,7 @@ public class Dockit4jFilterConstant {
             SWAGGER_RESOURCES_PREFIX + "**", WEBJARS_SWAGGER_UI_PREFIX + "*", WEBJARS_SWAGGER_UI_PREFIX + "**"};
 
         // 用于正则匹配的模式
-        public static final String[] REGEX_PATTERNS = {"/assets/.*", "/v3/api-docs/.*", "/swagger-ui/.*",
+        public static final String[] REGEX_PATTERNS = {"/dk/.*", "/v3/api-docs/.*", "/swagger-ui/.*",
             "/swagger-resources/.*", "/webjars/swagger-ui/.*"};
     }
 }

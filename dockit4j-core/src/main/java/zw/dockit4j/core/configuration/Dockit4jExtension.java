@@ -1,7 +1,6 @@
 package zw.dockit4j.core.configuration;
 
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
-import zw.dockit4j.core.configuration.extension.Dockit4jBasicAuth;
 import zw.dockit4j.core.configuration.extension.Dockit4jBrand;
 import zw.dockit4j.core.configuration.extension.Dockit4jMarkdown;
 
@@ -31,12 +30,6 @@ public class Dockit4jExtension implements Serializable {
     private List<Dockit4jMarkdown> markdown;
 
     /**
-     * 认证
-     */
-    @NestedConfigurationProperty
-    private Dockit4jBasicAuth auth;
-
-    /**
      * 品牌信息 - 定制 logo 和页脚信息
      */
     @NestedConfigurationProperty
@@ -56,14 +49,6 @@ public class Dockit4jExtension implements Serializable {
 
     public void setMarkdown(List<Dockit4jMarkdown> markdown) {
         this.markdown = markdown;
-    }
-
-    public Dockit4jBasicAuth getAuth() {
-        return auth;
-    }
-
-    public void setAuth(Dockit4jBasicAuth auth) {
-        this.auth = auth;
     }
 
     public Dockit4jBrand getBrand() {

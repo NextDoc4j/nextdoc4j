@@ -6,7 +6,6 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.ResourceLoader;
-import zw.dockit4j.core.configuration.Dockit4jExtension;
 import zw.dockit4j.core.configuration.Dockit4jProperties;
 import zw.dockit4j.core.constant.Dockit4jBaseConstant;
 import zw.dockit4j.core.constant.Dockit4jFilterConstant;
@@ -66,12 +65,11 @@ public class Dockit4jFilterConfiguration {
     public FilterRegistrationBean<Dockit4jBasicAuthFilter> dockit4jBasicAuthFilter(Dockit4jProperties properties,
                                                                                    ResourceLoader resourceLoader,
                                                                                    OpenAPI openAPI) {
-        Dockit4jExtension extension = properties.getExtension();
         FilterRegistrationBean<Dockit4jBasicAuthFilter> registration = new FilterRegistrationBean<>();
-        registration.setFilter(new Dockit4jBasicAuthFilter(extension, resourceLoader, openAPI));
+        registration.setFilter(new Dockit4jBasicAuthFilter(properties, resourceLoader, openAPI));
         registration.addUrlPatterns(Dockit4jFilterConstant.BlockedPaths.URL_PATTERNS);
         registration.setOrder(Ordered.HIGHEST_PRECEDENCE + 2);
-        registration.setEnabled(properties.isEnabled() && extension.getAuth().isEnabled());
+        registration.setEnabled(properties.isEnabled() && properties.getAuth().isEnabled());
         return registration;
     }
 

@@ -14,17 +14,22 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.http.CacheControl;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import zw.dockit4j.core.configuration.Dockit4jProperties;
 import zw.dockit4j.core.constant.Dockit4jBaseConstant;
+import zw.dockit4j.core.constant.Dockit4jFilterConstant;
 import zw.dockit4j.core.extension.Dockit4jExtensionOpenApiCustomizer;
 import zw.dockit4j.core.extension.Dockit4jExtensionResolver;
 import zw.dockit4j.core.handler.OpenApiHandler;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 自动配置
@@ -44,6 +49,26 @@ public class Dockit4jAutoConfiguration {
     @ConfigurationProperties(prefix = Dockit4jBaseConstant.DOCKIT4J)
     public Dockit4jProperties getDockit4jProperties() {
         return new Dockit4jProperties();
+    }
+
+    /**
+     * dockit4j web mvc配置器
+     *
+     * @return {@link WebMvcConfigurer }
+     */
+    @Bean
+    public WebMvcConfigurer dockit4jWebMvcConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addResourceHandlers(ResourceHandlerRegistry registry) {
+                registry.addResourceHandler("/favicon.ico").addResourceLocations("classpath:/");
+                registry.addResourceHandler(Dockit4jFilterConstant.BlockedPaths.DOCKIT_HTML)
+                    .addResourceLocations("classpath:/META-INF/resources/");
+                registry.addResourceHandler(Dockit4jFilterConstant.BlockedPaths.DOCKIT4J_PREFIX + "**")
+                    .addResourceLocations("classpath:/META-INF/resources/dk/")
+                    .setCacheControl(CacheControl.maxAge(5, TimeUnit.HOURS).cachePublic());
+            }
+        };
     }
 
     /**

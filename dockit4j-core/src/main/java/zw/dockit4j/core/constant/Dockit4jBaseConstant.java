@@ -31,6 +31,6 @@ public class Dockit4jBaseConstant {
     /**
      * 认证
      */
-    public static final String AUTH = EXTENSION + ".auth";
+    public static final String AUTH = DOCKIT4J + ".auth";
 
 }

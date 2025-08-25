@@ -15,6 +15,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.filter.OncePerRequestFilter;
 import zw.dockit4j.core.configuration.Dockit4jExtension;
+import zw.dockit4j.core.configuration.Dockit4jProperties;
 import zw.dockit4j.core.configuration.extension.Dockit4jBasicAuth;
 import zw.dockit4j.core.configuration.extension.Dockit4jBrand;
 import zw.dockit4j.core.constant.Dockit4jFilterConstant;
@@ -86,6 +87,8 @@ public class Dockit4jBasicAuthFilter extends OncePerRequestFilter {
 
     // ==================== 成员变量 ====================
 
+    public final Dockit4jProperties properties;
+
     /**
      * 基本认证配置对象
      */
@@ -111,23 +114,17 @@ public class Dockit4jBasicAuthFilter extends OncePerRequestFilter {
     /**
      * 构造函数
      *
-     * @param resourceLoader    资源加载器
-     * @param dockit4jExtension dockit4j扩展
-     * @param openAPI           OpenAPI对象
+     * @param properties     属性
+     * @param resourceLoader 资源加载器
+     * @param openAPI        OpenAPI对象
      */
-    public Dockit4jBasicAuthFilter(Dockit4jExtension dockit4jExtension,
-                                   ResourceLoader resourceLoader,
-                                   OpenAPI openAPI) {
+    public Dockit4jBasicAuthFilter(Dockit4jProperties properties, ResourceLoader resourceLoader, OpenAPI openAPI) {
 
         this.resourceLoader = Objects.requireNonNull(resourceLoader, "ResourceLoader cannot be null");
-        this.dockit4jExtension = dockit4jExtension;
+        this.properties = properties;
         this.openAPI = openAPI;
-        Dockit4jBasicAuth auth = this.dockit4jExtension.getAuth();
-        if (auth == null) {
-            throw new IllegalArgumentException("basicAuth配置不能为null");
-        }
-        this.basicAuth = dockit4jExtension.getAuth();
-
+        this.basicAuth = properties.getAuth();
+        this.dockit4jExtension = properties.getExtension();
         // 初始化默认密码（如果需要）
         initializeDefaultPassword();
     }

@@ -1,6 +1,7 @@
 package zw.dockit4j.core.configuration;
 
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
+import zw.dockit4j.core.configuration.extension.Dockit4jBasicAuth;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -32,6 +33,12 @@ public class Dockit4jProperties implements Serializable {
     private boolean production = false;
 
     /**
+     * 认证
+     */
+    @NestedConfigurationProperty
+    private Dockit4jBasicAuth auth;
+
+    /**
      * 扩展属性
      */
     @NestedConfigurationProperty
@@ -59,6 +66,14 @@ public class Dockit4jProperties implements Serializable {
 
     public void setProduction(boolean production) {
         this.production = production;
+    }
+
+    public Dockit4jBasicAuth getAuth() {
+        return auth;
+    }
+
+    public void setAuth(Dockit4jBasicAuth auth) {
+        this.auth = auth;
     }
 
     public Dockit4jExtension getExtension() {
