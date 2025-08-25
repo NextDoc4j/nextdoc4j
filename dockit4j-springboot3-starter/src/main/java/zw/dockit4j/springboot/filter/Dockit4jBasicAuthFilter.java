@@ -571,8 +571,8 @@ public class Dockit4jBasicAuthFilter extends OncePerRequestFilter {
         String logo = "";
         String title = "Dockit4j - API文档认证";
 
-        // 安全获取配置
-        if (dockit4jExtension != null) {
+        // 从配置中获取品牌信息
+        if (dockit4jExtension != null && dockit4jExtension.isEnabled()) {
             Dockit4jBrand brand = dockit4jExtension.getBrand();
             if (brand != null) {
                 // 使用工具类获取logo
