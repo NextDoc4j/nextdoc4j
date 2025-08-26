@@ -1,5 +1,6 @@
 package zw.dockit4j.core.extension;
 
+import cn.hutool.core.io.unit.DataSizeUtil;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,9 @@ import zw.dockit4j.core.configuration.extension.Dockit4jMarkdown;
 import zw.dockit4j.core.util.Dockit4jResourceUtils;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 
 /**
@@ -26,7 +30,6 @@ import java.util.*;
  * <li>解析和构建品牌信息（Logo、标题、页脚文本等）</li>
  * <li>解析Markdown文档配置，支持通配符模式</li>
  * <li>处理资源文件的加载和编码转换</li>
- * <li>提供缓存机制以提高性能</li>
  * </ul>
  * </p>
  *
@@ -37,7 +40,7 @@ import java.util.*;
  * <li>支持多种图像格式（PNG、JPG、SVG、GIF、WebP、ICO）</li>
  * <li>Markdown文件通配符匹配（支持 * 和 ? 通配符）</li>
  * <li>自动文件名排序和命名</li>
- * <li>异常处理和日志记录</li>
+ * <li>异常处理</li>
  * </ul>
  * </p>
  *
@@ -218,7 +221,7 @@ public class Dockit4jExtensionResolver {
      * </p>
      *
      * @param markdownList Markdown配置列表，可以为null或空
-     * @return Markdown文档数据列表，每个元素包含group、name、content等字段
+     * @return Markdown文档数据列表，每个元素包含group、filename、content等字段
      */
     private List<Map<String, Object>> buildMarkdownData(List<Dockit4jMarkdown> markdownList) {
         if (CollectionUtils.isEmpty(markdownList)) {
@@ -245,27 +248,6 @@ public class Dockit4jExtensionResolver {
             }
         }
         return result;
-    }
-
-    /**
-     * 判断路径是否包含通配符
-     * <p>
-     * 支持的通配符：
-     * <ul>
-     * <li>* - 匹配任意数量的字符</li>
-     * <li>? - 匹配单个字符</li>
-     * </ul>
-     * </p>
-     *
-     * @param location 文件路径
-     * @return 如果包含通配符返回true，否则返回false
-     */
-    private boolean isWildcardPath(String location) {
-        if (!StringUtils.hasText(location)) {
-            return false;
-        }
-
-        return WILDCARD_CHARS.stream().anyMatch(location::contains);
     }
 
     /**
@@ -312,6 +294,7 @@ public class Dockit4jExtensionResolver {
 
     /**
      * 创建Markdown数据映射对象
+     * 统一处理单文件和通配符文件，确保输出格式一致
      *
      * @param template 模版配置
      * @param resource 资源对象
@@ -326,18 +309,32 @@ public class Dockit4jExtensionResolver {
             markdownData.put("group", template.getGroup());
         }
 
-        // 生成文档名称：优先使用模板名称，否则使用文件名
-        String name = generateMarkdownName(template.getName(), resource);
-        markdownData.put("name", name);
+        // 获取文件名和显示名称
+        String filename = resource.getFilename();
+        if (filename == null) {
+            filename = DEFAULT_DOCUMENT_NAME + ".md";
+        }
+
+        String displayName = extractFileNameWithoutExtension(filename);
+
+        // 统一的字段设置
+        markdownData.put("filename", filename);
+        markdownData.put("displayName", displayName);
         markdownData.put("content", content);
-        markdownData.put("filename", resource.getFilename());
 
         // 添加额外的元数据
         try {
-            markdownData.put("lastModified", resource.lastModified());
-            markdownData.put("contentLength", resource.contentLength());
+            LocalDateTime lastModified = Instant.ofEpochMilli(resource.lastModified())
+                .atZone(ZoneId.of("Asia/Shanghai"))
+                .toLocalDateTime();
+
+            markdownData.put("lastModified", lastModified);
+            markdownData.put("contentLength", DataSizeUtil.format(resource.contentLength()));
         } catch (IOException e) {
             log.debug("Failed to get resource metadata for: {}", resource.getDescription());
+            // 设置默认值避免字段缺失
+            markdownData.put("lastModified", 0L);
+            markdownData.put("contentLength", content.length());
         }
 
         return markdownData;
@@ -356,67 +353,92 @@ public class Dockit4jExtensionResolver {
         String location = markdown.getLocation();
 
         try {
+            // 加载资源
+            Resource resource = resourceLoader.getResource(location);
+            if (!Dockit4jResourceUtils.isResourceValid(resource)) {
+                return null;
+            }
+
             // 使用工具类读取内容
-            String content = Dockit4jResourceUtils.readResourceContent(location, resourceLoader);
+            String content = Dockit4jResourceUtils.readResourceContent(resource);
             if (content == null) {
                 return null;
             }
 
-            Map<String, Object> result = new HashMap<>();
-
-            // 设置分组
-            if (StringUtils.hasText(markdown.getGroup())) {
-                result.put("group", markdown.getGroup());
-            }
-
-            // 设置名称，使用工具类提取文件名
-            String name = StringUtils.hasText(markdown.getName())
-                ? markdown.getName()
-                : Dockit4jResourceUtils.extractFileNameWithoutExtension(location);
-
-            // 如果工具类返回null，使用默认名称
-            if (name == null) {
-                name = DEFAULT_DOCUMENT_NAME;
-            }
-
-            result.put("name", name);
-            result.put("content", content);
-            result.put("location", location);
-
-            return result;
+            // 使用统一的方法创建数据映射，确保格式一致
+            return createMarkdownDataMap(markdown, resource, content);
 
         } catch (Exception e) {
+            log.error("Failed to resolve single markdown: {}", location, e);
             return null;
         }
     }
 
     /**
-     * 生成 Markdown 文档显示名称
+     * 从location路径中提取文件名
+     *
+     * @param location 文件路径
+     * @return 文件名
+     */
+    private String extractFilenameFromLocation(String location) {
+        if (!StringUtils.hasText(location)) {
+            return DEFAULT_DOCUMENT_NAME + ".md";
+        }
+
+        // 处理 classpath: 等前缀
+        String path = location;
+        if (path.contains(":")) {
+            path = path.substring(path.lastIndexOf(":") + 1);
+        }
+
+        // 提取最后的文件名部分
+        if (path.contains("/")) {
+            path = path.substring(path.lastIndexOf("/") + 1);
+        } else if (path.contains("\\")) {
+            path = path.substring(path.lastIndexOf("\\") + 1);
+        }
+
+        return StringUtils.hasText(path) ? path : DEFAULT_DOCUMENT_NAME + ".md";
+    }
+
+    /**
+     * 提取文件名（去掉扩展名）
+     *
+     * @param filename 完整文件名
+     * @return 去掉扩展名的文件名
+     */
+    private String extractFileNameWithoutExtension(String filename) {
+        if (!StringUtils.hasText(filename)) {
+            return DEFAULT_DOCUMENT_NAME;
+        }
+
+        int dotIndex = filename.lastIndexOf('.');
+        if (dotIndex > 0) {
+            return filename.substring(0, dotIndex);
+        }
+
+        return filename;
+    }
+
+    /**
+     * 判断路径是否包含通配符
      * <p>
-     * 名称生成优先级：
-     * 1. 模版中配置的自定义名称
-     * 2. 从资源文件名提取（去掉扩展名）
-     * 3. 默认名称
+     * 支持的通配符：
+     * <ul>
+     * <li>* - 匹配任意数量的字符</li>
+     * <li>? - 匹配单个字符</li>
+     * </ul>
      * </p>
      *
-     * @param templateName 模版名称，可以为null
-     * @param resource     资源对象
-     * @return 生成的文档名称，保证不为null
+     * @param location 文件路径
+     * @return 如果包含通配符返回true，否则返回false
      */
-    private String generateMarkdownName(String templateName, Resource resource) {
-        // 优先使用模版名称
-        if (StringUtils.hasText(templateName)) {
-            return templateName;
+    private boolean isWildcardPath(String location) {
+        if (!StringUtils.hasText(location)) {
+            return false;
         }
 
-        // 从资源文件名中提取
-        String filename = resource.getFilename();
-        if (filename != null) {
-            String nameWithoutExt = Dockit4jResourceUtils.extractFileNameWithoutExtension(filename);
-            return StringUtils.hasText(nameWithoutExt) ? nameWithoutExt : DEFAULT_DOCUMENT_NAME;
-        }
-
-        return DEFAULT_DOCUMENT_NAME;
+        return WILDCARD_CHARS.stream().anyMatch(location::contains);
     }
 
     /**

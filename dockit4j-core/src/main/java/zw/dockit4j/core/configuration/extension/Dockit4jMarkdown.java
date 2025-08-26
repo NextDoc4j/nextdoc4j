@@ -15,17 +15,15 @@ public class Dockit4jMarkdown implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * 分组
+     * 分组名称
      */
     private String group;
 
     /**
-     * 分组名称
-     */
-    private String name;
-
-    /**
-     * markdown 文件的路径或者位置 classpath:markdown/*
+     * markdown 文件的路径或者位置
+     * 支持：
+     * - 单个文件：classpath:markdown/api.md
+     * - 通配符：classpath:markdown/api/**
      */
     private String location;
 
@@ -35,14 +33,6 @@ public class Dockit4jMarkdown implements Serializable {
 
     public void setGroup(String group) {
         this.group = group;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getLocation() {
