@@ -1,7 +1,3 @@
-
-
-# dockit4j
-
 ## 项目信息
 | 属性                | 值                                                                 |
 | ------------------- | ------------------------------------------------------------------ |
@@ -15,7 +11,7 @@
 | 后端仓库            | [https://gitee.com/dockit4j/dockit4j](https://gitee.com/dockit4j/dockit4j) |
 | 文档仓库            | [https://gitee.com/dockit4j/dockit4j-docs](https://gitee.com/dockit4j/dockit4j-docs) |
 
-## �-name
+## 项目简介
 dockit4j 是一款现代化的文档 UI 工具，专为 **SpringDoc** 和 **OpenAPI 3** 设计，旨在替代传统的 Swagger UI。它提供更美观的界面、更强的定制能力以及更流畅的交互体验。
 
 dockit4j 深度适配 SpringDoc 生态系统，在保留 API 文档核心功能的基础上，优化了界面交互、功能扩展和实用性体验，帮助开发团队提高 API 文档的管理和调试效率，使文档系统成为研发流程中的得力助手。
@@ -63,24 +59,6 @@ dockit4j:
 
 ### 3. 访问文档
 启动应用后，访问 `http://localhost:端口/doc.html` 即可使用 dockit4j 文档系统。
-
-## 配置项说明
-### 全局配置
-- `dockit4j.enabled`: 是否启用 dockit4j，默认为 `false`
-- `dockit4j.cors`: 是否启用跨域支持
-- `dockit4j.production`: 是否启用生产模式
-- `dockit4j.auth.enabled`: 是否启用基础认证
-- `dockit4j.auth.password`: 基础认证的密码
-- `dockit4j.extension.logo`: 自定义文档系统的 logo
-- `dockit4j.extension.title`: 自定义文档系统的标题
-- `dockit4j.extension.footerText`: 自定义文档系统的页脚内容
-
-## 使用方式
-启动 SpringBoot 应用后，访问 `/doc.html` 即可打开 dockit4j 的文档界面。在界面中，您可以：
-- 查看 API 接口文档
-- 调试接口
-- 上传或管理 Markdown 文档
-- 自定义文档的样式和品牌信息
 
 ## 贡献指南
 欢迎通过以下方式参与 dockit4j 的开发：
