@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>dw.nextdoc4j</groupId>
+        <artifactId>nextdoc4j</artifactId>
+        <version>${revision}</version>
+    </parent>
+    <artifactId>nextdoc4j-springboot3-starter</artifactId>
+    <description>
+        nextdoc4j springboot3.x 启动模块
+    </description>
+
+    <dependencies>
+
+        <!--核心模块-->
+        <dependency>
+            <groupId>dw.nextdoc4j</groupId>
+            <artifactId>nextdoc4j-core</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
+        <!--UI 模块-->
+        <dependency>
+            <groupId>dw.nextdoc4j</groupId>
+            <artifactId>nextdoc4j-ui</artifactId>
+        </dependency>
+
+        <!--springboot3.x 配置处理-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+    </dependencies>
+
+
+</project>

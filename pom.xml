@@ -5,31 +5,31 @@
 
     <!--父类-->
     <parent>
-        <groupId>zw.dockit4j</groupId>
-        <artifactId>dockit4j-dependencies</artifactId>
+        <groupId>dw.nextdoc4j</groupId>
+        <artifactId>nextdoc4j-dependencies</artifactId>
         <version>${revision}</version>
-        <relativePath>./dockit4j-dependencies</relativePath>
+        <relativePath>./nextdoc4j-dependencies</relativePath>
     </parent>
 
     <!--基础信息-->
-    <artifactId>dockit4j</artifactId>
+    <artifactId>nextdoc4j</artifactId>
     <packaging>pom</packaging>
-    <name>dockit4j</name>
+    <name>nextdoc4j</name>
     <description>
-        dockit4j 是一个专为 SpringDoc 和 OpenAPI 3 设计的现代化文档 UI 工具，旨在替代 Swagger UI，提供更美观、可定制性强、开发者体验更佳的
+        NextDoc4j 是一个专为 SpringDoc 和 OpenAPI 3 设计的现代化文档 UI 工具，旨在替代 Swagger UI，提供更美观、可定制性强、开发者体验更佳的
         API 文档展示解决方案。
-        通过深度适配 SpringDoc，dockit4j 提供更加直观清晰的接口交互界面、增强的调试能力和便捷的开发工具，助力团队更高效地管理和测试
+        通过深度适配 SpringDoc，nextdoc4j 提供更加直观清晰的接口交互界面、增强的调试能力和便捷的开发工具，助力团队更高效地管理和测试
         API。
     </description>
 
     <!--模块管理-->
     <modules>
-        <module>dockit4j-bom</module>
-        <module>dockit4j-dependencies</module>
-        <module>dockit4j-core</module>
-        <module>dockit4j-ui</module>
-        <module>dockit4j-springboot3-starter</module>
-        <module>dockit4j-plugin</module>
+        <module>nextdoc4j-bom</module>
+        <module>nextdoc4j-dependencies</module>
+        <module>nextdoc4j-core</module>
+        <module>nextdoc4j-ui</module>
+        <module>nextdoc4j-springboot3-starter</module>
+        <module>nextdoc4j-plugin</module>
     </modules>
 
 
@@ -117,7 +117,7 @@
     </build>
 
     <!--开源和开发者信息-->
-    <url>https://gitee.com/dockit4j/dockit4j</url>
+    <url>https://gitee.com/nextdoc4j</url>
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
@@ -127,9 +127,9 @@
     </licenses>
     <developers>
         <developer>
-            <id>dockit4j</id>
-            <name>dockit4j</name>
-            <email>dockit4j@126.com</email>
+            <id>nextdoc4j</id>
+            <name>nextdoc4j</name>
+            <email>nextdoc4j@163.com</email>
             <roles>
                 <role>developer</role>
                 <role>maintainer</role>

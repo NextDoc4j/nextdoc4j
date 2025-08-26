@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>dw.nextdoc4j</groupId>
+        <artifactId>nextdoc4j</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <packaging>pom</packaging>
+    <artifactId>nextdoc4j-plugin</artifactId>
+    <description>
+        nextdoc4j 扩展插件模块
+    </description>
+
+    <modules>
+        <module>nextdoc4j-plugin-enums</module>
+    </modules>
+
+    <dependencies>
+        <!--nextdoc4j 核心模块-->
+        <dependency>
+            <groupId>dw.nextdoc4j</groupId>
+            <artifactId>nextdoc4j-core</artifactId>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
+
+
+</project>

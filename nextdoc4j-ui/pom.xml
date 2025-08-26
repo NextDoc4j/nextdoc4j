@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>dw.nextdoc4j</groupId>
+        <artifactId>nextdoc4j</artifactId>
+        <version>${revision}</version>
+    </parent>
+    <artifactId>nextdoc4j-ui</artifactId>
+    <description>
+        nextdoc4j-ui 模块
+    </description>
+
+    <properties>
+        <destDir>${project.build.outputDirectory}/META-INF/resources/</destDir>
+    </properties>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <targetPath>META-INF/resources/</targetPath>
+            </resource>
+        </resources>
+    </build>
+
+
+</project>

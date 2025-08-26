@@ -6,17 +6,17 @@
 | 替代工具            | Swagger UI                                                         |
 | 开源协议            | Apache License 2.0                                                |
 | 官方文档            | [https://docs.dockit4j.top](https://docs.dockit4j.top)           |
-| 联系邮箱            | dockit4j@126.com                                                  |
-| 前端仓库            | [https://gitee.com/dockit4j/dockit4j-ui](https://gitee.com/dockit4j/dockit4j-ui) |
-| 后端仓库            | [https://gitee.com/dockit4j/dockit4j](https://gitee.com/dockit4j/dockit4j) |
-| 文档仓库            | [https://gitee.com/dockit4j/dockit4j-docs](https://gitee.com/dockit4j/dockit4j-docs) |
+| 联系邮箱            | nextdoc4j@163.com                                                |
+| 前端仓库            | [https://gitee.com/nextdoc4j/nextdoc4j-ui](https://gitee.com/nextdoc4j/nextdoc4j-ui) |
+| 后端仓库            | [https://gitee.com/nextdoc4j/nextdoc4j]https://gitee.com/nextdoc4j/nextdoc4j) |
+| 文档仓库            | [https://gitee.com/nextdoc4j/nextdoc4j-docs](https://gitee.com/nextdoc4j/nextdoc4j-docs) |
 
 ## 项目简介
-dockit4j 是一款现代化的文档 UI 工具，专为 **SpringDoc** 和 **OpenAPI 3** 设计，旨在替代传统的 Swagger UI。它提供更美观的界面、更强的定制能力以及更流畅的交互体验。
+NextDoc4j 是一款现代化的文档 UI 工具，专为 **SpringDoc** 和 **OpenAPI 3** 设计，旨在替代传统的 Swagger UI。它提供更美观的界面、更强的定制能力以及更流畅的交互体验。
 
-dockit4j 深度适配 SpringDoc 生态系统，在保留 API 文档核心功能的基础上，优化了界面交互、功能扩展和实用性体验，帮助开发团队提高 API 文档的管理和调试效率，使文档系统成为研发流程中的得力助手。
+NextDoc4j 深度适配 SpringDoc 生态系统，在保留 API 文档核心功能的基础上，优化了界面交互、功能扩展和实用性体验，帮助开发团队提高 API 文档的管理和调试效率，使文档系统成为研发流程中的得力助手。
 
-![dockit4j 主界面效果](.image/interface/主界面.png)
+![NextDoc4j 主界面效果](.image/interface/主界面.png)
 
 ## 主要功能
 ### 1. 全新 UI 体系
@@ -44,8 +44,8 @@ dockit4j 深度适配 SpringDoc 生态系统，在保留 API 文档核心功能�
 在 `pom.xml` 中添加以下依赖：
 ```xml
 <dependency>
-    <groupId>zw.dockit4j</groupId>
-    <artifactId>dockit4j-springboot3-starter</artifactId>
+    <groupId>dw.nextdoc4j</groupId>
+    <artifactId>nextdoc4j-springboot3-starter</artifactId>
     <version>${Latest version}</version>
 </dependency>
 ```
@@ -53,22 +53,22 @@ dockit4j 深度适配 SpringDoc 生态系统，在保留 API 文档核心功能�
 ### 2. 配置参数
 在 `application.yml` 中配置以下内容：
 ```yaml
-dockit4j:
-  enabled: true # 启用 dockit4j，默认 false
+nextdoc4j:
+  enabled: true # 启用 nextdoc4j，默认 false
 ```
 
 ### 3. 访问文档
-启动应用后，访问 `http://localhost:端口/doc.html` 即可使用 dockit4j 文档系统。
+启动应用后，访问 `http://localhost:端口/doc.html` 即可使用 nextdoc4j 文档系统。
 
 ## 贡献指南
-欢迎通过以下方式参与 dockit4j 的开发：
+欢迎通过以下方式参与 nextdoc4j 的开发：
 - 提交 **Issue**：反馈功能建议或 Bug，提供清晰的复现步骤或需求描述
 - 发起 **Pull Request**：提交代码优化或新功能，建议先通过 Issue 沟通方案
 
 ## 开源协议
-dockit4j 采用 [Apache-2.0] 协议开源，详见仓库中的 `LICENSE` 文件。
+nextdoc4j 采用 [Apache-2.0] 协议开源，详见仓库中的 `LICENSE` 文件。
 
 ## 支持与交流
-- 官方文档：[https://docs.dockit4j.top](https://docs.dockit4j.top)
-- 问题反馈：[https://gitee.com/dockit4j/dockit4j/issues](https://gitee.com/dockit4j/dockit4j/issues)
-- 联系邮箱：dockit4j@126.com
+- 官方文档：[nextdoc4j](https://docs.dockit4j.top)
+- 问题反馈：[https://gitee.com/nextdoc4j/nextdoc4j/issues](https://gitee.com/nextdoc4j/nextdoc4j/issues)
+- 联系邮箱：nextdoc4j@163.com
