@@ -1,13 +1,10 @@
 package dw.nextdoc4j.springboot.configuration;
 
-import io.swagger.v3.oas.models.OpenAPI;
-import org.springdoc.core.customizers.OpenApiBuilderCustomizer;
-import org.springdoc.core.customizers.ServerBaseUrlCustomizer;
-import org.springdoc.core.properties.SpringDocConfigProperties;
-import org.springdoc.core.providers.JavadocProvider;
-import org.springdoc.core.service.OpenAPIService;
-import org.springdoc.core.service.SecurityService;
-import org.springdoc.core.utils.PropertyResolverUtils;
+import dw.nextdoc4j.core.configuration.NextDoc4jProperties;
+import dw.nextdoc4j.core.constant.NextDoc4jBaseConstant;
+import dw.nextdoc4j.core.constant.NextDoc4jFilterConstant;
+import dw.nextdoc4j.core.extension.NextDoc4jExtensionOpenApiCustomizer;
+import dw.nextdoc4j.core.extension.NextDoc4jExtensionResolver;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -20,15 +17,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import dw.nextdoc4j.core.configuration.NextDoc4jProperties;
-import dw.nextdoc4j.core.constant.NextDoc4jBaseConstant;
-import dw.nextdoc4j.core.constant.NextDoc4jFilterConstant;
-import dw.nextdoc4j.core.extension.NextDoc4jExtensionOpenApiCustomizer;
-import dw.nextdoc4j.core.extension.NextDoc4jExtensionResolver;
-import dw.nextdoc4j.core.handler.OpenApiHandler;
 
-import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -122,21 +111,6 @@ public class NextDoc4jAutoConfiguration {
     public NextDoc4jExtensionOpenApiCustomizer nextdoc4jExtensionOpenApiCustomizer(NextDoc4jProperties properties,
                                                                                    NextDoc4jExtensionResolver resolver) {
         return new NextDoc4jExtensionOpenApiCustomizer(properties, resolver);
-    }
-
-    /**
-     * 自定义 OpenApi 处理器
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    public OpenAPIService openApiBuilder(Optional<OpenAPI> openAPI,
-                                         SecurityService securityParser,
-                                         SpringDocConfigProperties springDocConfigProperties,
-                                         PropertyResolverUtils propertyResolverUtils,
-                                         Optional<List<OpenApiBuilderCustomizer>> openApiBuilderCustomisers,
-                                         Optional<List<ServerBaseUrlCustomizer>> serverBaseUrlCustomisers,
-                                         Optional<JavadocProvider> javadocProvider) {
-        return new OpenApiHandler(openAPI, securityParser, springDocConfigProperties, propertyResolverUtils, openApiBuilderCustomisers, serverBaseUrlCustomisers, javadocProvider);
     }
 
 }
