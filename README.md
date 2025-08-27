@@ -8,7 +8,7 @@
 | 官方文档            | [https://docs.dockit4j.top](https://docs.dockit4j.top)           |
 | 联系邮箱            | nextdoc4j@163.com                                                |
 | 前端仓库            | [https://gitee.com/nextdoc4j/nextdoc4j-ui](https://gitee.com/nextdoc4j/nextdoc4j-ui) |
-| 后端仓库            | [https://gitee.com/nextdoc4j/nextdoc4j]https://gitee.com/nextdoc4j/nextdoc4j) |
+| 后端仓库            | [https://gitee.com/nextdoc4j/nextdoc4j](https://gitee.com/nextdoc4j/nextdoc4j) |
 | 文档仓库            | [https://gitee.com/nextdoc4j/nextdoc4j-docs](https://gitee.com/nextdoc4j/nextdoc4j-docs) |
 
 ## 项目简介
