@@ -5,11 +5,15 @@ import dw.nextdoc4j.core.constant.NextDoc4jBaseConstant;
 import dw.nextdoc4j.core.constant.NextDoc4jFilterConstant;
 import dw.nextdoc4j.core.extension.NextDoc4jExtensionOpenApiCustomizer;
 import dw.nextdoc4j.core.extension.NextDoc4jExtensionResolver;
+import dw.nextdoc4j.springboot.filter.NextDoc4jBasicAuthFilter;
+import io.swagger.v3.oas.models.OpenAPI;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.Ordered;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.CacheControl;
 import org.springframework.web.cors.CorsConfiguration;
@@ -50,7 +54,6 @@ public class NextDoc4jAutoConfiguration {
         return new WebMvcConfigurer() {
             @Override
             public void addResourceHandlers(ResourceHandlerRegistry registry) {
-                registry.addResourceHandler("/favicon.ico").addResourceLocations("classpath:/");
                 registry.addResourceHandler(NextDoc4jFilterConstant.BlockedPaths.NEXT_DOC4J_HTML)
                     .addResourceLocations("classpath:/META-INF/resources/");
                 registry.addResourceHandler(NextDoc4jFilterConstant.BlockedPaths.NEXT_DOC4J_PREFIX + "**")
@@ -97,6 +100,25 @@ public class NextDoc4jAutoConfiguration {
     public NextDoc4jExtensionResolver nextdoc4jExtensionResolver(ResourceLoader resourceLoader,
                                                                  ApplicationContext applicationContext) {
         return new NextDoc4jExtensionResolver(resourceLoader, applicationContext);
+    }
+
+    /**
+     * NextDoc4j 基础认证 过滤
+     *
+     * @param properties 属性
+     * @return {@link FilterRegistrationBean }<{@link NextDoc4jBasicAuthFilter }>
+     */
+    @Bean
+    @ConditionalOnProperty(prefix = NextDoc4jBaseConstant.AUTH, name = NextDoc4jBaseConstant.ENABLED, havingValue = "true")
+    public FilterRegistrationBean<NextDoc4jBasicAuthFilter> nextdoc4jBasicAuthFilter(NextDoc4jProperties properties,
+                                                                                     ResourceLoader resourceLoader,
+                                                                                     OpenAPI openAPI) {
+        FilterRegistrationBean<NextDoc4jBasicAuthFilter> registration = new FilterRegistrationBean<>();
+        registration.setFilter(new NextDoc4jBasicAuthFilter(properties, resourceLoader, openAPI));
+        registration.addUrlPatterns(NextDoc4jFilterConstant.BlockedPaths.URL_PATTERNS);
+        registration.setOrder(Ordered.HIGHEST_PRECEDENCE + 2);
+        registration.setEnabled(properties.isEnabled() && properties.getAuth().isEnabled());
+        return registration;
     }
 
     /**
