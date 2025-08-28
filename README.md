@@ -1,74 +1,141 @@
-## 项目信息
-| 属性                | 值                                                                 |
-| ------------------- | ------------------------------------------------------------------ |
-| 版本                | v1.0.0                                                            |
-| 支持框架            | SpringDoc, OpenAPI 3, SpringBoot 3.4.x                            |
-| 替代工具            | Swagger UI                                                         |
-| 开源协议            | Apache License 2.0                                                |
-| 官方文档            | [https://docs.dockit4j.top](https://docs.dockit4j.top)           |
-| 联系邮箱            | nextdoc4j@163.com                                                |
-| 前端仓库            | [https://gitee.com/nextdoc4j/nextdoc4j-ui](https://gitee.com/nextdoc4j/nextdoc4j-ui) |
-| 后端仓库            | [https://gitee.com/nextdoc4j/nextdoc4j](https://gitee.com/nextdoc4j/nextdoc4j) |
-| 文档仓库            | [https://gitee.com/nextdoc4j/nextdoc4j-docs](https://gitee.com/nextdoc4j/nextdoc4j-docs) |
+# Nextdoc4j
 
-## 项目简介
-NextDoc4j 是一款现代化的文档 UI 工具，专为 **SpringDoc** 和 **OpenAPI 3** 设计，旨在替代传统的 Swagger UI。它提供更美观的界面、更强的定制能力以及更流畅的交互体验。
+<div align="center">
 
-NextDoc4j 深度适配 SpringDoc 生态系统，在保留 API 文档核心功能的基础上，优化了界面交互、功能扩展和实用性体验，帮助开发团队提高 API 文档的管理和调试效率，使文档系统成为研发流程中的得力助手。
+![Nextdoc4j Logo](.image/logo.png)
 
-![NextDoc4j 主界面效果](.image/interface/主界面.png)
+**现代化的 API 文档后端解决方案**
 
-## 主要功能
-### 1. 全新 UI 体系
-- 界面层级清晰，参数与响应示例排版符合阅读习惯，信息获取更便捷
-- 优化交互逻辑，如调试按钮触发、文档折叠展开等操作，符合开发日常使用场景
+基于 SpringBoot 3.4.x + SpringDoc 构建，完美替代 Swagger UI 的后端支撑
 
-### 2. 灵活配置能力
-- **功能开关**：按需启用或禁用功能（如文档启用、生产启用等）
-- **生产模式**：适配生产环境，优化文档访问权限，保障系统稳定
-- **配置简单**：兼容 Spring 的配置方式，可通过配置文件或代码快速调整行为
+[在线演示](https://demo.dockit4j.top/) | [文档](https://docs.dockit4j.com)
 
-### 3. 安全与品牌定制
-- **认证登录**：新增登录校验，可对接项目权限体系，保障文档访问安全
-- **品牌植入**：支持自定义品牌 logo、系统标题，融入团队或项目风格
+</div>
 
-### 4. 动态界面优化
-- **登录界面**：实现动态 title 和 logo 渲染，支持配置化自定义内容
-- **主页同步**：与登录页风格统一，动态加载标题和 logo，保持视觉一致性
-- **性能优化**：动态效果基于轻量化渲染，不影响加载速度和交互流畅度
+## 📖 项目简介
 
-![登录界面效果](.image/interface/登录.png)
+Nextdoc4j 是一款现代化的 API 文档后端解决方案，专为 **SpringDoc** 和 **OpenAPI 3** 设计。它深度适配 SpringDoc 生态系统，在保留 API 文档核心功能的基础上，提供更强的安全性、灵活的配置能力以及优化的交互体验，完美替代传统的 Swagger UI。
 
-## 快速开始
-### 1. 引入依赖
+NextDoc4j 帮助开发团队提高 API 文档的管理和调试效率，使文档系统成为研发流程中的得力助手。
+
+### ✨ 核心特性
+
+- 🎨 **现代化界面** - 与前端深度整合，提供比 Swagger UI 更优雅的体验
+- 🔒 **安全认证** - 内置简单登录校验，保护接口文档安全
+- 🛠️ **灵活配置** - 支持功能开关、生产模式等多维度配置
+- 🚀 **深度适配** - 专为 SpringDoc 和 OpenAPI 3 优化
+- 🎯 **品牌定制** - 支持自定义 logo、标题等品牌元素
+
+## 🖼️ 界面预览
+
+### 主界面
+
+![主界面截图](.image/screenshot/主界面.png)
+*界面层级清晰，参数与响应示例排版符合阅读习惯*
+
+### 登录界面
+
+![登录界面效果](.image/screenshot/登录.png)
+*支持动态 title 和 logo 渲染，可配置化自定义*
+
+## 🚀 快速开始
+
+### 环境要求
+
+- **Java**: >= 17
+- **SpringBoot**: >= 3.4.x
+- **SpringDoc**: 与 OpenAPI 3 兼容
+
+### 安装使用
+
+#### 1. 引入依赖
+
 在 `pom.xml` 中添加以下依赖：
+
 ```xml
 <dependency>
     <groupId>dw.nextdoc4j</groupId>
     <artifactId>nextdoc4j-springboot3-starter</artifactId>
-    <version>${Latest version}</version>
+    <version>1.0.0</version>
 </dependency>
 ```
 
-### 2. 配置参数
-在 `application.yml` 中配置以下内容：
+#### 2. 基础配置
+
+在 `application.yml` 中配置：
+
 ```yaml
 nextdoc4j:
-  enabled: true # 启用 nextdoc4j，默认 false
+  enabled: true                    # 启用 nextdoc4j，默认 false
 ```
 
-### 3. 访问文档
+#### 3. 访问文档
+
 启动应用后，访问 `http://localhost:端口/doc.html` 即可使用 nextdoc4j 文档系统。
 
-## 贡献指南
-欢迎通过以下方式参与 nextdoc4j 的开发：
-- 提交 **Issue**：反馈功能建议或 Bug，提供清晰的复现步骤或需求描述
-- 发起 **Pull Request**：提交代码优化或新功能，建议先通过 Issue 沟通方案
+## 🔧 技术栈
 
-## 开源协议
-nextdoc4j 采用 [Apache-2.0] 协议开源，详见仓库中的 `LICENSE` 文件。
+- **核心框架**: SpringBoot 3.4.x
+- **文档规范**: SpringDoc + OpenAPI 3
+- **构建工具**: Maven
+- **JDK版本**: Java 17+
 
-## 支持与交流
-- 官方文档：[nextdoc4j](https://docs.dockit4j.top)
-- 问题反馈：[https://gitee.com/nextdoc4j/nextdoc4j/issues](https://gitee.com/nextdoc4j/nextdoc4j/issues)
-- 联系邮箱：nextdoc4j@163.com
+## 🤝 贡献指南
+
+我们欢迎所有形式的贡献！参与方式：
+
+### 问题反馈
+
+- 在 [Issues](https://gitee.com/nextdoc4j/nextdoc4j/issues) 中反馈 Bug
+- 提供清晰的复现步骤和环境信息
+- 建议优先搜索已有问题，避免重复
+
+### 功能建议
+
+- 通过 Issue 提交功能需求
+- 详细描述使用场景和预期效果
+- 欢迎讨论实现方案
+
+### 代码贡献
+
+1. Fork 本仓库
+2. 创建功能分支: `git checkout -b feature/awesome-feature`
+3. 提交更改: `git commit -m 'feat: add awesome feature'`
+4. 推送分支: `git push origin feature/awesome-feature`
+5. 创建 Pull Request
+
+### 提交规范
+
+遵循 [Conventional Commits](https://conventionalcommits.org/) 规范：
+
+- `feat`: 新功能
+- `fix`: 修复问题
+- `docs`: 文档更新
+- `style`: 代码格式调整
+- `refactor`: 代码重构
+- `test`: 测试相关
+- `chore`: 构建/工具链相关
+
+## 📄 许可证
+
+本项目基于 [Apache-2.0 License](LICENSE) 开源协议，详见项目根目录的 `LICENSE` 文件。
+
+## 🙏 致谢
+
+- [SpringDoc](https://springdoc.org/) - 优秀的 OpenAPI 3 集成框架
+- [Spring Boot](https://spring.io/projects/spring-boot) - 强大的 Java 应用框架
+- [OpenAPI](https://swagger.io/specification/) - API 文档标准规范
+
+## 📧 联系方式
+
+- **官方文档**: [https://docs.dockit4j.top](https://docs.dockit4j.top)
+- **问题反馈**: [https://gitee.com/nextdoc4j/nextdoc4j/issues](https://gitee.com/nextdoc4j/nextdoc4j/issues)
+- **联系邮箱**: nextdoc4j@163.com
+
+---
+
+<div align="center">
+
+如果这个项目对你有帮助，请给它一个 ⭐️
+
+span
