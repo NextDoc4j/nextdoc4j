@@ -1,0 +1,12 @@
+blank_issues_enabled: false
+
+issue_templates:
+  - name: 🐞 Bug 报告
+    description: 报告 NextDoc4j 中的缺陷
+    labels: ["bug"]
+    file: ISSUE_TEMPLATE/bug-report.yml
+
+  - name: ✨ 功能请求
+    description: 提出新功能或改进建议
+    labels: ["enhancement"]
+    file: ISSUE_TEMPLATE/feature-request.yml

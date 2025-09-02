@@ -1,0 +1,54 @@
+name: 🐞 Bug 报告
+description: 报告 NextDoc4j 中的缺陷
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢你报告问题
+        请尽量提供 **完整上下文**，包括 SpringDoc / OpenAPI JSON 和报错信息，方便我们重现。
+  - type: input
+    id: version
+    attributes:
+      label: NextDoc4j 版本
+      description: 你使用的 NextDoc4j 版本号
+      placeholder: e.g. v1.2.0
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 复现步骤
+      description: 请描述触发 bug 的操作步骤
+      placeholder: 1. 打开页面 ... 2. 点击 ... 3. 出现错误 ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 预期行为
+      description: 你本来期望的结果
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际行为
+      description: 实际发生了什么
+    validations:
+      required: true
+  - type: textarea
+    id: openapi-json
+    attributes:
+      label: SpringDoc / OpenAPI JSON
+      description: 请附上出问题时使用的 **完整 OpenAPI JSON** 或至少是相关片段
+      render: json
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: 浏览器/控制台报错信息
+      description: 请粘贴报错内容（浏览器控制台、后端日志等）
+      render: shell
