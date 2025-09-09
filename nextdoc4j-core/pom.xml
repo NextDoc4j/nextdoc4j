@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>dw.nextdoc4j</groupId>
+        <groupId>top.nextdoc4j</groupId>
         <artifactId>nextdoc4j</artifactId>
         <version>${revision}</version>
     </parent>

@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <!--基础信息-->
-    <groupId>dw.nextdoc4j</groupId>
+    <groupId>top.nextdoc4j</groupId>
     <artifactId>nextdoc4j-bom</artifactId>
     <version>${revision}</version>
     <packaging>pom</packaging>
@@ -21,28 +21,28 @@
         <dependencies>
             <!--核心模块-->
             <dependency>
-                <groupId>dw.nextdoc4j</groupId>
+                <groupId>top.nextdoc4j</groupId>
                 <artifactId>nextdoc4j-core</artifactId>
                 <version>${revision}</version>
             </dependency>
 
             <!--NextDoc4j springboot3 自动配置模块-->
             <dependency>
-                <groupId>dw.nextdoc4j</groupId>
+                <groupId>top.nextdoc4j</groupId>
                 <artifactId>nextdoc4j-springboot3-starter</artifactId>
                 <version>${revision}</version>
             </dependency>
 
             <!--UI 模块-->
             <dependency>
-                <groupId>dw.nextdoc4j</groupId>
+                <groupId>top.nextdoc4j</groupId>
                 <artifactId>nextdoc4j-ui</artifactId>
                 <version>${revision}</version>
             </dependency>
 
             <!--插件 - 枚举信息展示模块-->
             <dependency>
-                <groupId>dw.nextdoc4j</groupId>
+                <groupId>top.nextdoc4j</groupId>
                 <artifactId>nextdoc4j-plugin-enums</artifactId>
                 <version>${revision}</version>
             </dependency>

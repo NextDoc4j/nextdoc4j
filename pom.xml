@@ -5,7 +5,7 @@
 
     <!--父类-->
     <parent>
-        <groupId>dw.nextdoc4j</groupId>
+        <groupId>top.nextdoc4j</groupId>
         <artifactId>nextdoc4j-dependencies</artifactId>
         <version>${revision}</version>
         <relativePath>./nextdoc4j-dependencies</relativePath>

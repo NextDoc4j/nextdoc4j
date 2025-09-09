@@ -1,2 +1,2 @@
-dw.nextdoc4j.springboot.configuration.NextDoc4jAutoConfiguration
-dw.nextdoc4j.springboot.configuration.NextDoc4jFilterConfiguration
+top.nextdoc4j.springboot.configuration.NextDoc4jAutoConfiguration
+top.nextdoc4j.springboot.configuration.NextDoc4jFilterConfiguration

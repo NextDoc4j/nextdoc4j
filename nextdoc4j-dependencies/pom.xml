@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <!--基础信息-->
-    <groupId>dw.nextdoc4j</groupId>
+    <groupId>top.nextdoc4j</groupId>
     <artifactId>nextdoc4j-dependencies</artifactId>
     <description>nextdoc4j 依赖模块</description>
     <version>${revision}</version>
@@ -35,7 +35,7 @@
         <dependencies>
             <!-- nextdoc4j 自身 BOM -->
             <dependency>
-                <groupId>dw.nextdoc4j</groupId>
+                <groupId>top.nextdoc4j</groupId>
                 <artifactId>nextdoc4j-bom</artifactId>
                 <version>${revision}</version>
                 <type>pom</type>
