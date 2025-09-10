@@ -61,7 +61,7 @@ NextDoc4j 帮助开发团队提高 API 文档的管理和调试效率，使文�
 ```
 
 
-## 2. 基础配置
+#### 2. 基础配置
 
 在 `application.yml` 或 `application.properties` 中添加配置：
 
