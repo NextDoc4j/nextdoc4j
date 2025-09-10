@@ -11,6 +11,7 @@
 
     <packaging>pom</packaging>
     <artifactId>nextdoc4j-plugin</artifactId>
+    <name>${project.artifactId}</name>
     <description>
         nextdoc4j 扩展插件模块
     </description>

@@ -6,6 +6,7 @@
     <!--基础信息-->
     <groupId>top.nextdoc4j</groupId>
     <artifactId>nextdoc4j-dependencies</artifactId>
+    <name>${project.artifactId}</name>
     <description>nextdoc4j 依赖模块</description>
     <version>${revision}</version>
     <packaging>pom</packaging>
@@ -259,6 +260,66 @@
         </pluginManagement>
     </build>
 
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <executions>
+                            <execution>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>0.8.0</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>central</publishingServerId>
+                            <autoPublish>false</autoPublish>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
 
     <!--开源和开发者信息-->
     <url>https://gitee.com/nextdoc4j</url>
@@ -272,7 +333,7 @@
     <developers>
         <developer>
             <id>nextdoc4j</id>
-            <name>nextdoc4j</name>
+            <name>echo</name>
             <email>nextdoc4j@163.com</email>
             <roles>
                 <role>developer</role>
@@ -282,6 +343,14 @@
             <url>https://github.com/Time-w</url>
         </developer>
     </developers>
+    <scm>
+        <!-- 只读连接 -->
+        <connection>scm:git:https://gitee.com/nextdoc4j/nextdoc4j.git</connection>
+        <!-- 可写连接 -->
+        <developerConnection>scm:git:ssh://git@gitee.com/nextdoc4j/nextdoc4j.git</developerConnection>
+        <!-- 仓库主页 -->
+        <url>https://gitee.com/nextdoc4j/nextdoc4j</url>
+    </scm>
 
 
 </project>

@@ -8,7 +8,7 @@
 
 基于 SpringBoot 3.4.x + SpringDoc 构建，完美替代 Swagger UI 的后端支撑
 
-[在线演示](https://demo.dockit4j.top/) | [文档](https://docs.dockit4j.com)
+[在线演示](https://demo.nextdoc4j.top/) | [文档](https://nextdoc4j.top/)
 
 </div>
 
@@ -62,12 +62,20 @@ NextDoc4j 帮助开发团队提高 API 文档的管理和调试效率，使文�
 
 #### 2. 基础配置
 
-在 `application.yml` 中配置：
+在 `application.yml` 或 `application.properties` 中添加配置：
 
-```yaml
+::: code-group
+
+```yaml [application.yml]
 nextdoc4j:
-  enabled: true                    # 启用 nextdoc4j，默认 false
+  enabled: true  # 是否启用 NextDoc4j，默认 false
 ```
+
+```properties [application.properties]
+nextdoc4j.enabled=true
+```
+
+:::
 
 #### 3. 访问文档
 
@@ -128,7 +136,7 @@ nextdoc4j:
 
 ## 📧 联系方式
 
-- **官方文档**: [https://docs.dockit4j.top](https://docs.dockit4j.top)
+- **官方文档**: [https://dockit4j.top](https://nextdoc4j.top/)
 - **问题反馈**: [https://gitee.com/nextdoc4j/nextdoc4j/issues](https://gitee.com/nextdoc4j/nextdoc4j/issues)
 - **联系邮箱**: nextdoc4j@163.com
 

@@ -10,6 +10,7 @@
 
 
     <artifactId>nextdoc4j-plugin-enums</artifactId>
+    <name>${project.artifactId}</name>
     <description>
         插件 - 枚举信息展示模块，支持将枚举字段转为可读格式，用于接口文档、元数据展示等场景。
     </description>

@@ -8,6 +8,7 @@
         <version>${revision}</version>
     </parent>
     <artifactId>nextdoc4j-ui</artifactId>
+    <name>${project.artifactId}</name>
     <description>
         nextdoc4j-ui 模块
     </description>

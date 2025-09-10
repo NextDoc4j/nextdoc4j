@@ -8,6 +8,7 @@
     <artifactId>nextdoc4j-bom</artifactId>
     <version>${revision}</version>
     <packaging>pom</packaging>
+    <name>${project.artifactId}</name>
     <description>nextdoc4j bom</description>
 
 
@@ -49,5 +50,152 @@
 
         </dependencies>
     </dependencyManagement>
+
+    <build>
+        <plugins>
+            <!-- 统一版本号插件 -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+                <version>1.7.0</version>
+                <executions>
+                    <execution>
+                        <!-- 为CLI和留档创建有效的POM（扩展版本） -->
+                        <id>flatten-effective-pom</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                        <configuration>
+                            <updatePomFile>false</updatePomFile>
+                            <outputDirectory>${project.build.directory}/effective-pom</outputDirectory>
+                            <flattenedPomFilename>nextdoc4j-bom.xml</flattenedPomFilename>
+                            <flattenMode>oss</flattenMode>
+                            <pomElements>
+                                <dependencyManagement>expand</dependencyManagement>
+                                <pluginManagement>expand</pluginManagement>
+                                <properties>remove</properties>
+                                <repositories>remove</repositories>
+                            </pomElements>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <!-- 简化我们的安装/部署POM -->
+                        <id>flatten</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                        <configuration>
+                            <updatePomFile>true</updatePomFile>
+                            <flattenMode>bom</flattenMode>
+                            <pomElements>
+                                <parent>expand</parent>
+                                <properties>keep</properties>
+                                <pluginManagement>keep</pluginManagement>
+                                <repositories>remove</repositories>
+                            </pomElements>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>flatten-clean</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <executions>
+                            <execution>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>0.8.0</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>central</publishingServerId>
+                            <autoPublish>false</autoPublish>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+
+    <!--开源和开发者信息-->
+    <url>https://gitee.com/nextdoc4j</url>
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <id>nextdoc4j</id>
+            <name>echo</name>
+            <email>nextdoc4j@163.com</email>
+            <roles>
+                <role>developer</role>
+                <role>maintainer</role>
+            </roles>
+            <timezone>+8</timezone>
+            <url>https://github.com/Time-w</url>
+        </developer>
+    </developers>
+    <scm>
+        <connection>scm:git:https://gitee.com/nextdoc4j/nextdoc4j.git</connection>
+        <developerConnection>scm:git:ssh://git@gitee.com/nextdoc4j/nextdoc4j.git</developerConnection>
+        <url>https://gitee.com/nextdoc4j/nextdoc4j</url>
+    </scm>
 
 </project>
