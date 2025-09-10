@@ -60,22 +60,21 @@ NextDoc4j 帮助开发团队提高 API 文档的管理和调试效率，使文�
 </dependency>
 ```
 
-#### 2. 基础配置
+
+## 2. 基础配置
 
 在 `application.yml` 或 `application.properties` 中添加配置：
 
-::: code-group
-
-```yaml [application.yml]
+**application.yml：**
+```yaml
 nextdoc4j:
   enabled: true  # 是否启用 NextDoc4j，默认 false
 ```
 
-```properties [application.properties]
+**application.properties：**
+```properties
 nextdoc4j.enabled=true
 ```
-
-:::
 
 #### 3. 访问文档
 
