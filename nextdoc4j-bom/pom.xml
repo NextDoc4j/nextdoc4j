@@ -171,11 +171,11 @@
 
 
     <!--开源和开发者信息-->
-    <url>https://gitee.com/nextdoc4j</url>
+    <url>https://github.com/NextDoc4j/nextdoc4j</url>
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+            <url>https://www.apache.org/licenses/LICENSE-2.0</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
@@ -193,9 +193,9 @@
         </developer>
     </developers>
     <scm>
-        <connection>scm:git:https://gitee.com/nextdoc4j/nextdoc4j.git</connection>
-        <developerConnection>scm:git:ssh://git@gitee.com/nextdoc4j/nextdoc4j.git</developerConnection>
-        <url>https://gitee.com/nextdoc4j/nextdoc4j</url>
+        <connection>scm:git:https://github.com/NextDoc4j/nextdoc4j.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/nextdoc4j/nextdoc4j.git</developerConnection>
+        <url>https://github.com/NextDoc4j/nextdoc4j</url>
     </scm>
 
 </project>
