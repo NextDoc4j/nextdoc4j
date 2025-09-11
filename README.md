@@ -30,12 +30,16 @@ NextDoc4j 帮助开发团队提高 API 文档的管理和调试效率，使文�
 
 ### 主界面
 
-![主界面截图](.image/screenshot/主界面.png)
-*界面层级清晰，参数与响应示例排版符合阅读习惯*
+![主界面截图](.image/screenshot/home.png)
+*直观的API文档首页，集成项目概览、业务分组和快速定位功能*
+
+### 文档详情界面
+![文档详情界面效果](.image/screenshot/detail.png)
+*接口详情页面，集成在线调试工具，支持参数输入、响应预览和JSON数据结构化展示*
 
 ### 登录界面
 
-![登录界面效果](.image/screenshot/登录.png)
+![登录界面效果](.image/screenshot/login.png)
 *支持动态 title 和 logo 渲染，可配置化自定义*
 
 ## 🚀 快速开始
