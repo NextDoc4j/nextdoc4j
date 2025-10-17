@@ -11,7 +11,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=0"/>
     <title>Nextdoc4j</title>
     <link rel="icon" href="./favicon.ico"/>
-    <script type="module" crossorigin src="./nextdoc/jse/index-index-Cr1u2jcp.js"></script>
+    <script type="module" crossorigin src="./nextdoc/jse/index-index-C_N8fNpC.js"></script>
     <link rel="stylesheet" crossorigin href="./nextdoc/css/index-BBiDquQp.css">
 </head>
 <body>
@@ -66,8 +66,6 @@ document.documentElement.classList.toggle('dark', /dark/.test(theme));</script>
 
 .loader:before {
     animation: shadow-ani .5s linear infinite;
-    background: rgba(0, 128, 255, .5);
-    background: hsl(var(--primary, 210 100% 50%)/50%);
     border-radius: 50%;
     height: 5px;
     top: 60px;
@@ -75,6 +73,7 @@ document.documentElement.classList.toggle('dark', /dark/.test(theme));</script>
 }
 
 .loader:after, .loader:before {
+    background: linear-gradient(-45deg, #fc00ff, #00dbde);
     content: "";
     left: 0;
     position: absolute
@@ -82,8 +81,6 @@ document.documentElement.classList.toggle('dark', /dark/.test(theme));</script>
 
 .loader:after {
     animation: jump-ani .5s linear infinite;
-    background: #0080ff;
-    background: hsl(var(--primary, 210 100% 50%));
     border-radius: 4px;
     height: 100%;
     top: 0;
@@ -119,7 +116,6 @@ document.documentElement.classList.toggle('dark', /dark/.test(theme));</script>
 }</style>
 <div class="loading" id="__app-loading__">
     <div class="loader"></div>
-    <div class="title">Nextdoc4j</div>
 </div>
 <div id="app"></div>
 </body>

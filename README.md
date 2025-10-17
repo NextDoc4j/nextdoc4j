@@ -6,7 +6,7 @@
 
 **现代化的 API 文档后端解决方案**
 
-基于 SpringBoot 3.4.x + SpringDoc 构建，完美替代 Swagger UI 的后端支撑
+基于 SpringBoot 3.4.x + SpringDoc 构建，替代 Swagger UI，提供更美观、更强大的开发体验。 让 API 文档焕然一新。
 
 [在线演示](https://demo.nextdoc4j.top/) | [文档](https://nextdoc4j.top/)
 
