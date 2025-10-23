@@ -1,16 +1,20 @@
 # Nextdoc4j
 
-<div align="center">
-
 ![Nextdoc4j Logo](.image/logo.png)
 
 **现代化的 API 文档后端解决方案**
 
-基于 SpringBoot 3.4.x + SpringDoc 构建，替代 Swagger UI，提供更美观、更强大的开发体验。 让 API 文档焕然一新。
+基于 SpringBoot 3.4.x + SpringDoc 构建，替代 Swagger UI，提供更美观、更强大的开发体验。让 API 文档焕然一新。
 
-[在线演示](https://demo.nextdoc4j.top/) | [文档](https://nextdoc4j.top/)
+[在线演示](https://demo.nextdoc4j.top/) | [官方文档](https://nextdoc4j.top/) | [更新日志](https://nextdoc4j.top/more/changelog.html) | [常见问题](https://nextdoc4j.top/more/faq.html)
 
-</div>
+## 📦 代码仓库
+
+| 平台 | 仓库地址 |
+|:----:|:---------|
+| [![GitCode](https://img.shields.io/badge/GitCode-nextdoc4j-blue)](https://gitcode.com/QAQ_Z/nextdoc4j) | [https://gitcode.com/QAQ_Z/nextdoc4j](https://gitcode.com/QAQ_Z/nextdoc4j) |
+| [![Gitee](https://img.shields.io/badge/Gitee-nextdoc4j-red)](https://gitee.com/nextdoc4j/nextdoc4j) | [https://gitee.com/nextdoc4j/nextdoc4j](https://gitee.com/nextdoc4j/nextdoc4j) |
+| [![GitHub](https://img.shields.io/badge/GitHub-nextdoc4j-black)](https://github.com/NextDoc4j/nextdoc4j) | [https://github.com/NextDoc4j/nextdoc4j](https://github.com/NextDoc4j/nextdoc4j) |
 
 ## 📖 项目简介
 
@@ -34,6 +38,7 @@ NextDoc4j 帮助开发团队提高 API 文档的管理和调试效率，使文�
 *直观的API文档首页，集成项目概览、业务分组和快速定位功能*
 
 ### 文档详情界面
+
 ![文档详情界面效果](.image/screenshot/detail.png)
 *接口详情页面，集成在线调试工具，支持参数输入、响应预览和JSON数据结构化展示*
 
@@ -55,7 +60,6 @@ NextDoc4j 帮助开发团队提高 API 文档的管理和调试效率，使文�
 #### 1. 引入依赖
 
 在 `pom.xml` 中添加以下依赖：
-
 ```xml
 <dependency>
     <groupId>top.nextdoc4j</groupId>
@@ -64,18 +68,17 @@ NextDoc4j 帮助开发团队提高 API 文档的管理和调试效率，使文�
 </dependency>
 ```
 
-
 #### 2. 基础配置
 
 在 `application.yml` 或 `application.properties` 中添加配置：
 
-**application.yml：**
+**application.yml:**
 ```yaml
 nextdoc4j:
   enabled: true  # 是否启用 NextDoc4j，默认 false
 ```
 
-**application.properties：**
+**application.properties:**
 ```properties
 nextdoc4j.enabled=true
 ```
@@ -84,6 +87,8 @@ nextdoc4j.enabled=true
 
 启动应用后，访问 `http://localhost:端口/doc.html` 即可使用 nextdoc4j 文档系统。
 
+更多配置和使用方式请参考 [官方文档](https://nextdoc4j.top/)。
+
 ## 🔧 技术栈
 
 - **核心框架**: SpringBoot 3.4.x
@@ -91,41 +96,24 @@ nextdoc4j.enabled=true
 - **构建工具**: Maven
 - **JDK版本**: Java 17+
 
-## 🤝 贡献指南
+## 🤝 参与贡献
 
-我们欢迎所有形式的贡献！参与方式：
+我们欢迎所有形式的贡献！包括但不限于：
 
-### 问题反馈
+- 🐛 提交 Bug 反馈
+- 💡 提供功能建议
+- 📝 改进文档
+- 💻 贡献代码
 
-- 在 [Issues](https://gitee.com/nextdoc4j/nextdoc4j/issues) 中反馈 Bug
-- 提供清晰的复现步骤和环境信息
-- 建议优先搜索已有问题，避免重复
+详细的贡献指南请访问：[贡献指南](https://nextdoc4j.top/more/contribute.html)
 
-### 功能建议
+## 📚 相关链接
 
-- 通过 Issue 提交功能需求
-- 详细描述使用场景和预期效果
-- 欢迎讨论实现方案
-
-### 代码贡献
-
-1. Fork 本仓库
-2. 创建功能分支: `git checkout -b feature/awesome-feature`
-3. 提交更改: `git commit -m 'feat: add awesome feature'`
-4. 推送分支: `git push origin feature/awesome-feature`
-5. 创建 Pull Request
-
-### 提交规范
-
-遵循 [Conventional Commits](https://conventionalcommits.org/) 规范：
-
-- `feat`: 新功能
-- `fix`: 修复问题
-- `docs`: 文档更新
-- `style`: 代码格式调整
-- `refactor`: 代码重构
-- `test`: 测试相关
-- `chore`: 构建/工具链相关
+- **官方文档**: [https://nextdoc4j.top](https://nextdoc4j.top)
+- **贡献指南**: [https://nextdoc4j.top/more/contribute.html](https://nextdoc4j.top/more/contribute.html)
+- **更新日志**: [https://nextdoc4j.top/more/changelog.html](https://nextdoc4j.top/more/changelog.html)
+- **常见问题**: [https://nextdoc4j.top/more/faq.html](https://nextdoc4j.top/more/faq.html)
+- **团队介绍**: [https://nextdoc4j.top/more/team/team.html](https://nextdoc4j.top/more/team/team.html)
 
 ## 📄 许可证
 
@@ -137,15 +125,6 @@ nextdoc4j.enabled=true
 - [Spring Boot](https://spring.io/projects/spring-boot) - 强大的 Java 应用框架
 - [OpenAPI](https://swagger.io/specification/) - API 文档标准规范
 
-## 📧 联系方式
-
-- **官方文档**: [https://dockit4j.top](https://nextdoc4j.top/)
-- **问题反馈**: [https://gitee.com/nextdoc4j/nextdoc4j/issues](https://gitee.com/nextdoc4j/nextdoc4j/issues)
-- **联系邮箱**: nextdoc4j@163.com
-
 ---
 
-<div align="center">
-
 如果这个项目对你有帮助，请给它一个 ⭐️
-
