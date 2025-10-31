@@ -22,7 +22,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.filter.OncePerRequestFilter;
-import top.nextdoc4j.core.constant.NextDoc4jFilterConstant;
+import top.nextdoc4j.core.util.NextDoc4jPathMatcherUtils;
 
 import java.io.IOException;
 
@@ -39,9 +39,9 @@ public class NextDoc4jResourceFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         String uri = request.getRequestURI();
-        // 如果是 NextDoc4j 资源请求，且未启用 NextDoc4j，则返回 404
-        if (uri.equals(NextDoc4jFilterConstant.BlockedPaths.NEXT_DOC4J_HTML) || uri
-            .startsWith(NextDoc4jFilterConstant.BlockedPaths.NEXT_DOC4J_PREFIX)) {
+
+        // 使用统一的路径匹配工具类，只过滤 NextDoc4j 资源（自动适配 context-path）
+        if (NextDoc4jPathMatcherUtils.isNextDoc4jResource(uri)) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "NextDoc4j is disabled");
             return;
         }

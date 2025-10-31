@@ -17,11 +17,13 @@
  */
 package top.nextdoc4j.core.constant;
 
+import java.util.Arrays;
+
 /**
  * 路径过滤配置常量类
  *
  * @author echo
- * @date 2025/05/27
+ * @since 1.0.1
  */
 public class NextDoc4jFilterConstant {
 
@@ -49,22 +51,73 @@ public class NextDoc4jFilterConstant {
         public static final String SWAGGER_RESOURCES_PREFIX = "/swagger-resources/";
         public static final String WEBJARS_SWAGGER_UI_PREFIX = "/webjars/swagger-ui/";
 
-        // 所有精确匹配的路径
+        /**
+         * 所有精确匹配的路径
+         */
         public static final String[] EXACT_PATHS = {NEXT_DOC4J_HTML, API_DOCS_YAML, API_DOCS, SWAGGER_UI_HTML,
             SWAGGER_RESOURCES};
 
-        // 所有前缀匹配的路径
+        /**
+         * 所有前缀匹配的路径
+         */
         public static final String[] PREFIX_PATHS = {NEXT_DOC4J_PREFIX, API_DOCS_PREFIX, SWAGGER_UI_PREFIX,
             SWAGGER_RESOURCES_PREFIX, WEBJARS_SWAGGER_UI_PREFIX};
 
-        // 用于 FilterRegistrationBean 的 URL 模式
+        /**
+         * 用于 FilterRegistrationBean 的 URL 模式
+         */
         public static final String[] URL_PATTERNS = {NEXT_DOC4J_HTML, NEXT_DOC4J_PREFIX + "*", API_DOCS,
             API_DOCS_PREFIX + "*", API_DOCS_PREFIX + "**", SWAGGER_UI_HTML, SWAGGER_UI_PREFIX + "*",
             SWAGGER_UI_PREFIX + "**", SWAGGER_RESOURCES, SWAGGER_RESOURCES_PREFIX + "*",
             SWAGGER_RESOURCES_PREFIX + "**", WEBJARS_SWAGGER_UI_PREFIX + "*", WEBJARS_SWAGGER_UI_PREFIX + "**"};
 
-        // 用于正则匹配的模式
-        public static final String[] REGEX_PATTERNS = {"/nextdoc/.*", "/v3/api-docs/.*", "/swagger-ui/.*",
-            "/swagger-resources/.*", "/webjars/swagger-ui/.*"};
+        // ==================== Ant 模式转换方法 ====================
+
+        /**
+         * 将精确路径转换为 Ant 模式（支持 context-path）
+         * <p>转换规则：/doc.html -> /**\/doc.html</p>
+         *
+         * @param path 原始路径
+         * @return Ant 模式路径
+         */
+        public static String toAntExactPattern(String path) {
+            if (path == null || path.isEmpty()) {
+                return path;
+            }
+            return path.startsWith("/") ? "/**" + path : path;
+        }
+
+        /**
+         * 将前缀路径转换为 Ant 模式（支持 context-path）
+         * <p>转换规则：/nextdoc/ -> /**\/nextdoc/**</p>
+         *
+         * @param prefix 原始前缀路径
+         * @return Ant 模式路径
+         */
+        public static String toAntPrefixPattern(String prefix) {
+            if (prefix == null || prefix.isEmpty()) {
+                return prefix;
+            }
+            String cleanPrefix = prefix.endsWith("/") ? prefix.substring(0, prefix.length() - 1) : prefix;
+            return cleanPrefix.startsWith("/") ? "/**" + cleanPrefix + "/**" : cleanPrefix + "/**";
+        }
+
+        /**
+         * 获取所有精确匹配的 Ant 路径模式
+         *
+         * @return Ant 路径模式数组
+         */
+        public static String[] getAntExactPatterns() {
+            return Arrays.stream(EXACT_PATHS).map(BlockedPaths::toAntExactPattern).toArray(String[]::new);
+        }
+
+        /**
+         * 获取所有前缀匹配的 Ant 路径模式
+         *
+         * @return Ant 路径模式数组
+         */
+        public static String[] getAntPrefixPatterns() {
+            return Arrays.stream(PREFIX_PATHS).map(BlockedPaths::toAntPrefixPattern).toArray(String[]::new);
+        }
     }
 }

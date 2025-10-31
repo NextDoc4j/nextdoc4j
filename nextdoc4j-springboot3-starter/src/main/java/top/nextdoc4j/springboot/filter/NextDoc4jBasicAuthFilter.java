@@ -35,7 +35,7 @@ import top.nextdoc4j.core.configuration.NextDoc4jExtension;
 import top.nextdoc4j.core.configuration.NextDoc4jProperties;
 import top.nextdoc4j.core.configuration.extension.NextDoc4jBasicAuth;
 import top.nextdoc4j.core.configuration.extension.NextDoc4jBrand;
-import top.nextdoc4j.core.constant.NextDoc4jFilterConstant;
+import top.nextdoc4j.core.util.NextDoc4jPathMatcherUtils;
 import top.nextdoc4j.core.util.NextDoc4jResourceUtils;
 
 import java.io.IOException;
@@ -235,38 +235,13 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
     }
 
     /**
-     * 检查路径是否需要认证
+     * 检查路径是否需要认证（使用新的工具类，自动适配 context-path）
      *
-     * @param uri 请求URI
-     * @return true表示需要认证，false表示不需要认证
+     * @param uri 请求 URI
+     * @return true 表示需要认证，false 表示不需要认证
      */
     private boolean isAuthenticationRequired(String uri) {
-        if (!basicAuth.isEnabled()) {
-            return false;
-        }
-
-        // 精确路径匹配
-        for (String exactPath : NextDoc4jFilterConstant.BlockedPaths.EXACT_PATHS) {
-            if (uri.equals(exactPath)) {
-                return true;
-            }
-        }
-
-        // 前缀路径匹配
-        for (String prefix : NextDoc4jFilterConstant.BlockedPaths.PREFIX_PATHS) {
-            if (uri.startsWith(prefix)) {
-                return true;
-            }
-        }
-
-        // 正则表达式匹配
-        for (String pattern : NextDoc4jFilterConstant.BlockedPaths.REGEX_PATTERNS) {
-            if (uri.matches(pattern)) {
-                return true;
-            }
-        }
-
-        return false;
+        return NextDoc4jPathMatcherUtils.isAuthenticationRequired(uri, basicAuth.isEnabled());
     }
 
     /**
