@@ -53,6 +53,9 @@ NextDoc4j 帮助开发团队提高 API 文档的管理和调试效率，使文�
 ![文档详情界面效果](.image/screenshot/detail.png)
 *接口详情页面，集成在线调试工具，支持参数输入、响应预览和JSON数据结构化展示*
 
+![在线调试效果](.image/screenshot/test.png)
+*接口在线调试页面，支持请求方法选择、参数输入、请求头编辑、实时响应预览及 JSON 结构化展示，可直接发起 API 调用并查看返回数据详情*
+
 ### 登录界面
 
 ![登录界面效果](.image/screenshot/login.png)
@@ -75,7 +78,7 @@ NextDoc4j 帮助开发团队提高 API 文档的管理和调试效率，使文�
 <dependency>
     <groupId>top.nextdoc4j</groupId>
     <artifactId>nextdoc4j-springboot3-starter</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 
