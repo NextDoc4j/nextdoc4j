@@ -1,0 +1,1 @@
+import"./bootstrap-DeX8kNGY.js";import{E as t}from"./el-empty-BqYWssyW.js";import{a4 as r,aJ as a,aq as o,ag as p}from"../jse/index-index-nDv0Qug6.js";import"./index-DJ3V8gZy.js";const f=r({name:"EmptyPage",__name:"empty",props:{description:{type:String,default:"暂无数据"}},setup(e){return(n,i)=>(o(),a(p(t),{description:e.description},null,8,["description"]))}});export{f as default};
