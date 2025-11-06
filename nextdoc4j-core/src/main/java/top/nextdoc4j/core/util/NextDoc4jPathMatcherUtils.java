@@ -42,14 +42,14 @@ public class NextDoc4jPathMatcherUtils {
     private static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();
 
     /**
-     * 精确匹配的 Ant 路径模式
+     * 精确匹配的 Ant 路径模式（类加载时初始化）
      */
-    private static volatile String[] exactPatterns;
+    private static final String[] EXACT_PATTERNS = NextDoc4jFilterConstant.BlockedPaths.getAntExactPatterns();
 
     /**
-     * 前缀匹配的 Ant 路径模式
+     * 前缀匹配的 Ant 路径模式（类加载时初始化）
      */
-    private static volatile String[] prefixPatterns;
+    private static final String[] PREFIX_PATTERNS = NextDoc4jFilterConstant.BlockedPaths.getAntPrefixPatterns();
 
     /**
      * 私有构造函数，防止实例化
@@ -79,14 +79,14 @@ public class NextDoc4jPathMatcherUtils {
         }
 
         // 1. 精确路径匹配
-        for (String pattern : getExactPatterns()) {
+        for (String pattern : EXACT_PATTERNS) {
             if (PATH_MATCHER.match(pattern, requestUri)) {
                 return true;
             }
         }
 
         // 2. 前缀路径匹配
-        for (String pattern : getPrefixPatterns()) {
+        for (String pattern : PREFIX_PATTERNS) {
             if (PATH_MATCHER.match(pattern, requestUri)) {
                 return true;
             }
@@ -137,37 +137,5 @@ public class NextDoc4jPathMatcherUtils {
      */
     public static AntPathMatcher getPathMatcher() {
         return PATH_MATCHER;
-    }
-
-    /**
-     * 获取精确匹配的 Ant 路径模式
-     *
-     * @return Ant 路径模式数组
-     */
-    private static String[] getExactPatterns() {
-        if (exactPatterns == null) {
-            synchronized (NextDoc4jPathMatcherUtils.class) {
-                if (exactPatterns == null) {
-                    exactPatterns = NextDoc4jFilterConstant.BlockedPaths.getAntExactPatterns();
-                }
-            }
-        }
-        return exactPatterns;
-    }
-
-    /**
-     * 获取前缀匹配的 Ant 路径模式
-     *
-     * @return Ant 路径模式数组
-     */
-    private static String[] getPrefixPatterns() {
-        if (prefixPatterns == null) {
-            synchronized (NextDoc4jPathMatcherUtils.class) {
-                if (prefixPatterns == null) {
-                    prefixPatterns = NextDoc4jFilterConstant.BlockedPaths.getAntPrefixPatterns();
-                }
-            }
-        }
-        return prefixPatterns;
     }
 }
