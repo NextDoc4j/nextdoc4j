@@ -14,7 +14,7 @@
     <!--版本号管理-->
     <properties>
         <!-- 项目版本号 -->
-        <revision>1.1.0</revision>
+        <revision>1.1.1</revision>
 
         <!--nextdoc4j 项目所需外部依赖版本-->
         <jakarta-servlet.version>6.1.0</jakarta-servlet.version>
