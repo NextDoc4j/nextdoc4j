@@ -27,6 +27,7 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 import org.springdoc.core.customizers.ParameterCustomizer;
 import org.springdoc.core.customizers.PropertyCustomizer;
 import org.springframework.core.MethodParameter;
+import top.nextdoc4j.enums.configuration.EnumsPluginProperties;
 import top.nextdoc4j.enums.core.BaseEnum;
 import top.nextdoc4j.enums.util.EnumsUtils;
 
@@ -43,7 +44,14 @@ import java.util.List;
  * @author echo
  * @since 1.0.0
  */
+@SuppressWarnings("ClassCanBeRecord")
 public class BaseEnumParameterHandler implements ParameterCustomizer, PropertyCustomizer {
+
+    private final EnumsPluginProperties properties;
+
+    public BaseEnumParameterHandler(EnumsPluginProperties properties) {
+        this.properties = properties;
+    }
 
     @Override
     public Parameter customize(Parameter parameterModel, MethodParameter methodParameter) {
@@ -53,7 +61,8 @@ public class BaseEnumParameterHandler implements ParameterCustomizer, PropertyCu
             return parameterModel;
         }
         String description = parameterModel.getDescription();
-        if (CharSequenceUtil.contains(description, "color:red")) {
+        // 避免重复处理
+        if (CharSequenceUtil.contains(description, "color:" + properties.getDescriptionColor())) {
             return parameterModel;
         }
         // 自定义枚举描述并封装参数配置
@@ -82,6 +91,10 @@ public class BaseEnumParameterHandler implements ParameterCustomizer, PropertyCu
      * @param enumClass 枚举类型
      */
     private void configureSchema(Schema schema, Class<?> enumClass) {
+        if (!properties.isShowValues()) {
+            return;
+        }
+
         BaseEnum[] enums = (BaseEnum[])enumClass.getEnumConstants();
         List<String> valueList = Arrays.stream(enums).map(e -> e.getValue().toString()).toList();
         schema.setEnum(valueList);
@@ -98,7 +111,13 @@ public class BaseEnumParameterHandler implements ParameterCustomizer, PropertyCu
      * @return 追加后的描述字符串
      */
     private String appendEnumDescription(String originalDescription, Class<?> enumClass) {
-        return originalDescription + "<span style='color:red'>" + EnumsUtils.getDescMap(enumClass) + "</span>";
+        if (!properties.isShowDescription()) {
+            return originalDescription;
+        }
+
+        String color = properties.getDescriptionColor();
+        return originalDescription + "<span style='color:" + color + "'>" + EnumsUtils
+            .getDescMap(enumClass) + "</span>";
     }
 
     /**

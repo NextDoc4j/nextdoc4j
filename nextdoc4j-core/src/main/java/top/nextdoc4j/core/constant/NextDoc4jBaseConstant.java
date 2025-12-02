@@ -46,6 +46,16 @@ public class NextDoc4jBaseConstant {
     public static final String EXTENSION = NEXTDOC4J + ".extension";
 
     /**
+     * 插件
+     */
+    public static final String PLUGIN = NEXTDOC4J + ".plugin";
+
+    /**
+     * 插件 - 枚举显示插件
+     */
+    public static final String PLUGIN_ENUM = PLUGIN + ".enum";
+
+    /**
      * 认证
      */
     public static final String AUTH = NEXTDOC4J + ".auth";
