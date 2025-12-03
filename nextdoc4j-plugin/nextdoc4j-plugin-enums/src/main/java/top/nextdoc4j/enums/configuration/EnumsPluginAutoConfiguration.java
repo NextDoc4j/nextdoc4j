@@ -17,8 +17,8 @@
  */
 package top.nextdoc4j.enums.configuration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -37,10 +37,7 @@ import top.nextdoc4j.enums.handler.BaseEnumParameterHandler;
  * @since 2025/12/02
  */
 @AutoConfiguration
-@ConditionalOnClass(name = {"org.springdoc.core.customizers.ParameterCustomizer",
-    "org.springdoc.core.customizers.PropertyCustomizer"})
-@ConditionalOnProperty(prefix = NextDoc4jBaseConstant.PLUGIN_ENUM, name = NextDoc4jBaseConstant.ENABLED, havingValue = "true", matchIfMissing = true  // 默认启用
-)
+@ConditionalOnProperty(prefix = NextDoc4jBaseConstant.PLUGIN_ENUM, name = NextDoc4jBaseConstant.ENABLED, havingValue = "true", matchIfMissing = true)
 @EnableConfigurationProperties(EnumsPluginProperties.class)
 public class EnumsPluginAutoConfiguration {
 
@@ -54,7 +51,8 @@ public class EnumsPluginAutoConfiguration {
      * @return BaseEnumParameterHandler 实例
      */
     @Bean
-    public BaseEnumParameterHandler baseEnumParameterHandler(EnumsPluginProperties properties) {
-        return new BaseEnumParameterHandler(properties);
+    public BaseEnumParameterHandler baseEnumParameterHandler(EnumsPluginProperties properties,
+                                                             ObjectMapper objectMapper) {
+        return new BaseEnumParameterHandler(properties, objectMapper);
     }
 }

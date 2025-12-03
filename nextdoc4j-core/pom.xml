@@ -33,6 +33,12 @@
             <artifactId>hutool-core</artifactId>
         </dependency>
 
+        <!--springboot3.x 配置处理-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+        </dependency>
+
     </dependencies>
 
 

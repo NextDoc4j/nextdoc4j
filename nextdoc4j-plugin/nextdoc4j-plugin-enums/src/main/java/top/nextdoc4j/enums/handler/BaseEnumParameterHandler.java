@@ -19,13 +19,14 @@ package top.nextdoc4j.enums.handler;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.ClassUtil;
-import com.fasterxml.jackson.databind.type.CollectionType;
-import com.fasterxml.jackson.databind.type.SimpleType;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.core.converter.AnnotatedType;
+import io.swagger.v3.core.converter.ModelConverter;
+import io.swagger.v3.core.converter.ModelConverterContext;
+import io.swagger.v3.core.jackson.ModelResolver;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import org.springdoc.core.customizers.ParameterCustomizer;
-import org.springdoc.core.customizers.PropertyCustomizer;
 import org.springframework.core.MethodParameter;
 import top.nextdoc4j.enums.configuration.EnumsPluginProperties;
 import top.nextdoc4j.enums.core.BaseEnum;
@@ -33,6 +34,7 @@ import top.nextdoc4j.enums.util.EnumsUtils;
 
 import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -44,13 +46,15 @@ import java.util.List;
  * @author echo
  * @since 1.0.0
  */
-@SuppressWarnings("ClassCanBeRecord")
-public class BaseEnumParameterHandler implements ParameterCustomizer, PropertyCustomizer {
+public class BaseEnumParameterHandler extends ModelResolver implements ParameterCustomizer {
 
     private final EnumsPluginProperties properties;
+    private final ObjectMapper objectMapper;
 
-    public BaseEnumParameterHandler(EnumsPluginProperties properties) {
+    public BaseEnumParameterHandler(EnumsPluginProperties properties, ObjectMapper mapper) {
+        super(mapper);
         this.properties = properties;
+        this.objectMapper = mapper;
     }
 
     @Override
@@ -72,16 +76,17 @@ public class BaseEnumParameterHandler implements ParameterCustomizer, PropertyCu
     }
 
     @Override
-    public Schema customize(Schema schema, AnnotatedType type) {
+    public Schema resolve(AnnotatedType type, ModelConverterContext context, Iterator<ModelConverter> chain) {
+        Schema resolve = super.resolve(type, context, chain);
         Class<?> rawClass = resolveRawClass(type.getType());
         // 判断是否为 BaseEnum 的子类型
         if (!ClassUtil.isAssignable(BaseEnum.class, rawClass)) {
-            return schema;
+            return resolve;
         }
         // 自定义参数描述并封装参数配置
-        configureSchema(schema, rawClass);
-        schema.setDescription(appendEnumDescription(schema.getDescription(), rawClass));
-        return schema;
+        configureSchema(resolve, rawClass);
+        resolve.setDescription(appendEnumDescription(resolve.getDescription(), rawClass));
+        return resolve;
     }
 
     /**
@@ -91,11 +96,7 @@ public class BaseEnumParameterHandler implements ParameterCustomizer, PropertyCu
      * @param enumClass 枚举类型
      */
     private void configureSchema(Schema schema, Class<?> enumClass) {
-        if (!properties.isShowValues()) {
-            return;
-        }
-
-        BaseEnum[] enums = (BaseEnum[])enumClass.getEnumConstants();
+        BaseEnum[] enums = (BaseEnum[]) enumClass.getEnumConstants();
         List<String> valueList = Arrays.stream(enums).map(e -> e.getValue().toString()).toList();
         schema.setEnum(valueList);
         String enumValueType = EnumsUtils.getEnumValueTypeAsString(enumClass);
@@ -117,7 +118,7 @@ public class BaseEnumParameterHandler implements ParameterCustomizer, PropertyCu
 
         String color = properties.getDescriptionColor();
         return originalDescription + "<span style='color:" + color + "'>" + EnumsUtils
-            .getDescMap(enumClass) + "</span>";
+                .getDescMap(enumClass) + "</span>";
     }
 
     /**
@@ -127,12 +128,6 @@ public class BaseEnumParameterHandler implements ParameterCustomizer, PropertyCu
      * @return 原始类的 Class 对象
      */
     private Class<?> resolveRawClass(Type type) {
-        if (type instanceof SimpleType simpleType) {
-            return simpleType.getRawClass();
-        } else if (type instanceof CollectionType collectionType) {
-            return collectionType.getContentType().getRawClass();
-        } else {
-            return Object.class;
-        }
+        return objectMapper.constructType(type).getRawClass();
     }
 }
