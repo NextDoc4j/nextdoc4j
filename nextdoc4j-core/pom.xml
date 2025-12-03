@@ -21,13 +21,6 @@
             <artifactId>jakarta.servlet-api</artifactId>
         </dependency>
 
-        <!-- Jackson 数据绑定库 -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
         <!--springdoc -->
         <dependency>
             <groupId>org.springdoc</groupId>

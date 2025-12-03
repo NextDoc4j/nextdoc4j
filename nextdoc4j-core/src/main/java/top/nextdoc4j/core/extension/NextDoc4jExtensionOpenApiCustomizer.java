@@ -32,6 +32,7 @@ import java.util.Map;
  * @author echo
  * @since 1.0.0
  **/
+@SuppressWarnings("ClassCanBeRecord")
 public class NextDoc4jExtensionOpenApiCustomizer implements GlobalOpenApiCustomizer {
 
     private static final Logger log = LoggerFactory.getLogger(NextDoc4jExtensionOpenApiCustomizer.class);
