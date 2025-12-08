@@ -1,3 +1,40 @@
+## v1.1.2 (2025-12-08)
+
+### ✨ 功能增强
+
+* **后端（枚举插件）**
+
+  * 实现枚举插件自动配置，基于 SpringDoc 与配置属性自动启用
+  * 新增 `EnumsPluginProperties`，支持通过配置控制插件启用、描述颜色及枚举展示行为
+  * `BaseEnumParameterHandler` 调整为从配置读取描述颜色与展示开关
+  * 优化枚举描述与枚举值展示逻辑，支持可控的显示策略
+  * 新增插件相关常量，统一命名空间与插件标识管理
+  * 升级 Spring Boot 至 `3.5.7`，确保框架兼容性与稳定性
+  * 补充自动配置元数据，增强 Spring Boot 自动加载支持
+
+* **后端（枚举处理能力）**
+
+  * 增强 `BaseEnumParameterHandler`，支持参数与模型中的枚举类型完整自定义处理
+  * 统一设置枚举类型的 `enum` 列表、`type`、`format`
+  * 新增枚举值与描述映射信息追加展示
+  * 增强 `EnumsUtils`，支持枚举值类型解析与格式推断
+  * 优化枚举描述 Map 的生成顺序与安全性，确保展示稳定
+
+* **前端**
+
+  * 新增 JSON 复制能力
+  * 新增 JSON 字段说明展示
+  * 支持渲染 HTML 格式的 API 描述（兼容后端能力增强）
+
+### 🐛 问题修复
+
+* **后端**
+
+  * 从 `nextdoc4j-core` 与 `nextdoc4j-dependencies` 移除 `jackson-databind` 冗余依赖
+  * 为 `NextDoc4jExtensionOpenApiCustomizer` 添加 `@SuppressWarnings` 处理无效警告
+  * 清理多余依赖声明，规整 `pom.xml` 配置
+  * 优化枚举参数处理与自动装配逻辑，移除无效注解，并统一注入 `ObjectMapper`
+
 ## v1.1.1 (2025-11-13)
 ### ✨ 功能优化
 * **后端**：移除 `NextDoc4jPathMatcherUtils` 中不必要的双重检查锁定，精简逻辑结构，提升执行效率

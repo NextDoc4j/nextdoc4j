@@ -78,7 +78,7 @@ NextDoc4j 帮助开发团队提高 API 文档的管理和调试效率，使文�
 <dependency>
     <groupId>top.nextdoc4j</groupId>
     <artifactId>nextdoc4j-springboot3-starter</artifactId>
-    <version>1.1.1</version>
+    <version>{latest-version}</version>
 </dependency>
 ```
 
