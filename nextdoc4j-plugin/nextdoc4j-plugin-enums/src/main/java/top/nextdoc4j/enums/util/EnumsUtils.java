@@ -61,17 +61,11 @@ public class EnumsUtils {
     /**
      * BaseEnum 泛型类型映射表：Java 类型 → OpenAPI type
      */
-    private static final Map<Class<?>, String> ENUM_VALUE_TYPE_MAP = Map.of(
-            Integer.class, TYPE_INTEGER,
-            Long.class, TYPE_LONG,
-            Double.class, TYPE_NUMBER,
-            String.class, TYPE_STRING
-    );
-
+    private static final Map<Class<?>, String> ENUM_VALUE_TYPE_MAP = Map
+        .of(Integer.class, TYPE_INTEGER, Long.class, TYPE_LONG, Double.class, TYPE_NUMBER, String.class, TYPE_STRING);
 
     private EnumsUtils() {
     }
-
 
     /**
      * 获取枚举值类型（字符串形式）
@@ -90,8 +84,8 @@ public class EnumsUtils {
         for (Type type : enumClass.getGenericInterfaces()) {
 
             // 是否为 BaseEnum<T> 泛型接口
-            if (type instanceof ParameterizedType parameterizedType &&
-                    parameterizedType.getRawType() == BaseEnum.class) {
+            if (type instanceof ParameterizedType parameterizedType && parameterizedType
+                .getRawType() == BaseEnum.class) {
 
                 // 获取泛型 T
                 Type actualType = parameterizedType.getActualTypeArguments()[0];
@@ -144,12 +138,7 @@ public class EnumsUtils {
 
         // 此处我们知道每个 enum 常量都实现了 BaseEnum，所以可以安全地强转为 BaseEnum<?>
         return Arrays.stream(constants)
-                .map(e -> (BaseEnum<?>) e)
-                .collect(Collectors.toMap(
-                        BaseEnum::getValue,
-                        BaseEnum::getDescription,
-                        (a, b) -> a,
-                        LinkedHashMap::new
-                ));
+            .map(e -> (BaseEnum<?>)e)
+            .collect(Collectors.toMap(BaseEnum::getValue, BaseEnum::getDescription, (a, b) -> a, LinkedHashMap::new));
     }
 }

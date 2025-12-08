@@ -42,15 +42,15 @@ import java.util.List;
  *
  * <p>用于在 Swagger / OpenAPI 参数与模型解析时，对实现 BaseEnum 的枚举类型进行特殊处理：
  * <ul>
- *     <li>为参数 Schema 设置正确的枚举值类型（integer/string/long 等）</li>
- *     <li>设置枚举值列表（enum）</li>
- *     <li>自动追加描述，用于显示 value → description 的映射关系</li>
+ * <li>为参数 Schema 设置正确的枚举值类型（integer/string/long 等）</li>
+ * <li>设置枚举值列表（enum）</li>
+ * <li>自动追加描述，用于显示 value → description 的映射关系</li>
  * </ul>
  *
  * <p>该类同时实现：
  * <ul>
- *     <li>{@link ParameterCustomizer} —— 用于处理请求参数的 Schema</li>
- *     <li>{@link ModelResolver} —— 用于处理模型字段的 Schema</li>
+ * <li>{@link ParameterCustomizer} —— 用于处理请求参数的 Schema</li>
+ * <li>{@link ModelResolver} —— 用于处理模型字段的 Schema</li>
  * </ul>
  *
  * @author echo
@@ -85,12 +85,12 @@ public class BaseEnumParameterHandler extends ModelResolver implements Parameter
      *
      * <p>当方法参数类型为实现 BaseEnum 的枚举类时：
      * <ul>
-     *     <li>设置 enum 列表</li>
-     *     <li>设置 type 与 format</li>
-     *     <li>追加描述（value → description 映射）</li>
+     * <li>设置 enum 列表</li>
+     * <li>设置 type 与 format</li>
+     * <li>追加描述（value → description 映射）</li>
      * </ul>
      *
-     * @param parameterModel 参数模型
+     * @param parameterModel  参数模型
      * @param methodParameter 反射方法参数
      * @return 处理后的参数模型
      */
@@ -117,12 +117,12 @@ public class BaseEnumParameterHandler extends ModelResolver implements Parameter
      *
      * <p>当模型字段类型为实现 BaseEnum 的枚举类时：
      * <ul>
-     *     <li>设置 enum 列表</li>
-     *     <li>设置 type 与 format</li>
-     *     <li>追加 description</li>
+     * <li>设置 enum 列表</li>
+     * <li>设置 type 与 format</li>
+     * <li>追加 description</li>
      * </ul>
      *
-     * @param type   注解类型
+     * @param type    注解类型
      * @param context 上下文
      * @param chain   模型解析链
      * @return 处理后的 Schema
@@ -146,20 +146,18 @@ public class BaseEnumParameterHandler extends ModelResolver implements Parameter
      *
      * <p>主要设置以下内容：
      * <ul>
-     *     <li>schema.enum = 所有枚举值列表</li>
-     *     <li>schema.type = OpenAPI 类型（string/integer/...）</li>
-     *     <li>schema.format = OpenAPI format（int32/int64/...）</li>
+     * <li>schema.enum = 所有枚举值列表</li>
+     * <li>schema.type = OpenAPI 类型（string/integer/...）</li>
+     * <li>schema.format = OpenAPI format（int32/int64/...）</li>
      * </ul>
      *
      * @param schema    Schema 对象
      * @param enumClass 枚举类型
      */
     private void configureSchema(Schema schema, Class<?> enumClass) {
-        BaseEnum[] enums = (BaseEnum[]) enumClass.getEnumConstants();
+        BaseEnum[] enums = (BaseEnum[])enumClass.getEnumConstants();
 
-        List<String> valueList = Arrays.stream(enums)
-                .map(e -> e.getValue().toString())
-                .toList();
+        List<String> valueList = Arrays.stream(enums).map(e -> e.getValue().toString()).toList();
 
         schema.setEnum(valueList);
         String enumValueType = EnumsUtils.getEnumValueTypeAsString(enumClass);
@@ -182,12 +180,8 @@ public class BaseEnumParameterHandler extends ModelResolver implements Parameter
         }
 
         String color = properties.getDescriptionColor();
-        return originalDescription
-                + "<span style='color:"
-                + color
-                + "'>"
-                + EnumsUtils.getDescMap(enumClass)
-                + "</span>";
+        return originalDescription + "<span style='color:" + color + "'>" + EnumsUtils
+            .getDescMap(enumClass) + "</span>";
     }
 
     /**
