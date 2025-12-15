@@ -68,7 +68,7 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
     private static final Logger log = LoggerFactory.getLogger(NextDoc4jBasicAuthFilter.class);
 
     /**
-     * Session中存储认证状态的键名
+     * Session 中存储认证状态的键名
      */
     private static final String AUTH_SESSION_KEY = "nextdoc4j_authenticated";
 
@@ -78,7 +78,7 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
     private static final int SESSION_TIMEOUT_SECONDS = 30 * 60;
 
     /**
-     * Basic认证头部前缀
+     * Basic 认证头部前缀
      */
     private static final String BASIC_AUTH_PREFIX = "Basic ";
 
@@ -88,12 +88,12 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
     private static final String LOGOUT_ACTION = "logout";
 
     /**
-     * AJAX请求标识头
+     * AJAX 请求标识头
      */
     private static final String AJAX_HEADER = "X-Requested-With";
 
     /**
-     * AJAX请求标识值
+     * AJAX 请求标识值
      */
     private static final String AJAX_HEADER_VALUE = "XMLHttpRequest";
 
@@ -122,7 +122,7 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
     private final ResourceLoader resourceLoader;
 
     /**
-     * 开放api
+     * 开放 api
      */
     private final OpenAPI openAPI;
 
@@ -133,7 +133,7 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
      *
      * @param properties     属性
      * @param resourceLoader 资源加载器
-     * @param openAPI        OpenAPI对象
+     * @param openAPI        OpenAPI 对象
      */
     public NextDoc4jBasicAuthFilter(NextDoc4jProperties properties, ResourceLoader resourceLoader, OpenAPI openAPI) {
 
@@ -156,15 +156,15 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
      * <li>检查路径是否需要认证</li>
      * <li>处理注销请求</li>
      * <li>检查会话认证状态</li>
-     * <li>验证Basic认证信息</li>
+     * <li>验证 Basic 认证信息</li>
      * <li>返回登录页面或继续处理</li>
      * </ol>
      *
-     * @param request     HTTP请求对象
-     * @param response    HTTP响应对象
+     * @param request     HTTP 请求对象
+     * @param response    HTTP 响应对象
      * @param filterChain 过滤器链
-     * @throws ServletException Servlet异常
-     * @throws IOException      IO异常
+     * @throws ServletException Servlet 异常
+     * @throws IOException      IO 异常
      */
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -247,9 +247,9 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
     /**
      * 判断是否为注销请求
      *
-     * @param method  HTTP方法
-     * @param request HTTP请求对象
-     * @return true表示是注销请求
+     * @param method  HTTP 方法
+     * @param request HTTP 请求对象
+     * @return true 表示是注销请求
      */
     private boolean isLogoutRequest(String method, HttpServletRequest request) {
         return HttpUtil.RequestMethod.GET.name().equalsIgnoreCase(method) && LOGOUT_ACTION.equals(request
@@ -259,8 +259,8 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
     /**
      * 检查会话是否已认证
      *
-     * @param request HTTP请求对象
-     * @return true表示已认证
+     * @param request HTTP 请求对象
+     * @return true 表示已认证
      */
     private boolean isSessionAuthenticated(HttpServletRequest request) {
         final HttpSession session = request.getSession(false);
@@ -268,10 +268,10 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
     }
 
     /**
-     * 验证Basic认证信息
+     * 验证 Basic 认证信息
      *
-     * @param authHeader Authorization头部值
-     * @return true表示认证成功
+     * @param authHeader Authorization 头部值
+     * @return true 表示认证成功
      */
     private boolean validateBasicAuthentication(String authHeader) {
         try {
@@ -296,7 +296,7 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
     /**
      * 创建已认证的会话
      *
-     * @param request HTTP请求对象
+     * @param request HTTP 请求对象
      */
     private void createAuthenticatedSession(HttpServletRequest request) {
         final HttpSession session = request.getSession(true);
@@ -307,14 +307,14 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
     /**
      * 处理认证成功的响应
      *
-     * @param request  HTTP请求对象
-     * @param response HTTP响应对象
-     * @throws IOException IO异常
+     * @param request  HTTP 请求对象
+     * @param response HTTP 响应对象
+     * @throws IOException IO 异常
      */
     private void handleAuthenticationSuccess(HttpServletRequest request,
                                              HttpServletResponse response) throws IOException {
         if (isAjaxRequest(request)) {
-            // AJAX请求返回JSON响应
+            // AJAX请求返回 JSON 响应
             sendJsonResponse(response, HttpServletResponse.SC_OK, true, "认证成功");
         } else {
             // 浏览器请求重定向到原始URL，避免显示JSON内容
@@ -326,14 +326,14 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
     /**
      * 处理认证失败的响应
      *
-     * @param request  HTTP请求对象
-     * @param response HTTP响应对象
-     * @throws IOException IO异常
+     * @param request  HTTP 请求对象
+     * @param response HTTP 响应对象
+     * @throws IOException IO 异常
      */
     private void handleAuthenticationFailure(HttpServletRequest request,
                                              HttpServletResponse response) throws IOException {
         if (isAjaxRequest(request)) {
-            // AJAX请求返回错误JSON
+            // AJAX 请求返回错误 JSON
             sendJsonResponse(response, HttpServletResponse.SC_UNAUTHORIZED, false, "认证失败");
         } else {
             // 浏览器请求清除认证缓存
@@ -344,9 +344,9 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
     /**
      * 处理注销请求
      *
-     * @param request  HTTP请求对象
-     * @param response HTTP响应对象
-     * @throws IOException IO异常
+     * @param request  HTTP 请求对象
+     * @param response HTTP 响应对象
+     * @throws IOException IO 异常
      */
     private void handleLogout(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
@@ -366,8 +366,8 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
     /**
      * 显示登录页面
      *
-     * @param response HTTP响应对象
-     * @throws IOException IO异常
+     * @param response HTTP 响应对象
+     * @throws IOException IO 异常
      */
     private void showLoginPage(HttpServletResponse response) throws IOException {
         // 设置响应头
@@ -375,23 +375,23 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
         response.setContentType("text/html;charset=UTF-8");
         setNoCacheHeaders(response);
 
-        // 输出登录页面HTML
+        // 输出登录页面 HTML
         final String loginPageHtml = loadLoginPageFromResources();
         response.getWriter().write(loginPageHtml);
     }
 
     /**
-     * 判断是否为AJAX请求
+     * 判断是否为 AJAX 请求
      *
      * <p>判断标准：</p>
      * <ul>
      * <li>包含X-Requested-With: XMLHttpRequest头</li>
-     * <li>Accept头明确请求JSON且不包含HTML</li>
+     * <li>Accept 头明确请求JSON且不包含 HTML</li>
      * <li>疑似Fetch API请求（基于多个头部综合判断）</li>
      * </ul>
      *
-     * @param request HTTP请求对象
-     * @return true表示是AJAX请求
+     * @param request HTTP 请求对象
+     * @return true 表示是 AJAX 请求
      */
     private boolean isAjaxRequest(HttpServletRequest request) {
         final String xRequestedWith = request.getHeader(AJAX_HEADER);
@@ -415,8 +415,8 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
     /**
      * 检测是否为Fetch API请求
      *
-     * @param request HTTP请求对象
-     * @param accept  Accept头部值
+     * @param request HTTP 请求对象
+     * @param accept  Accept 头部值
      * @return true表示疑似Fetch API请求
      */
     private boolean isFetchApiRequest(HttpServletRequest request, String accept) {
@@ -432,11 +432,11 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
      * 发送JSON格式响应
      * 使用工具类进行JSON字符串转义
      *
-     * @param response   HTTP响应对象
-     * @param statusCode HTTP状态码
+     * @param response   HTTP 响应对象
+     * @param statusCode HTTP 状态码
      * @param success    是否成功
      * @param message    消息内容
-     * @throws IOException IO异常
+     * @throws IOException IO 异常
      */
     private void sendJsonResponse(HttpServletResponse response,
                                   int statusCode,
@@ -445,7 +445,7 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
         response.setStatus(statusCode);
         response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
 
-        // 使用工具类进行JSON转义
+        // 使用工具类进行 JSON 转义
         final String jsonResponse = """
             {
               "success": %s,
@@ -457,10 +457,10 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
     }
 
     /**
-     * 构建重定向URL
+     * 构建重定向 URL
      *
-     * @param request HTTP请求对象
-     * @return 重定向URL
+     * @param request HTTP请 求对象
+     * @return 重定向 URL
      */
     private String buildRedirectUrl(HttpServletRequest request) {
         return request.getRequestURI() + "?t=" + System.currentTimeMillis();
@@ -469,7 +469,7 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
     /**
      * 清除浏览器认证缓存
      *
-     * @param response HTTP响应对象
+     * @param response HTTP 响应对象
      */
     private void clearBrowserAuthCache(HttpServletResponse response) {
         response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "Basic realm=\"NextDoc4j API Documentation\"");
@@ -479,7 +479,7 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
     /**
      * 设置无缓存响应头
      *
-     * @param response HTTP响应对象
+     * @param response HTTP 响应对象
      */
     private void setNoCacheHeaders(HttpServletResponse response) {
         response.setHeader(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate");
@@ -488,10 +488,10 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
     }
 
     /**
-     * 获取客户端IP地址
+     * 获取客户端 IP 地址
      *
-     * @param request HTTP请求对象
-     * @return 客户端IP地址
+     * @param request HTTP 请求对象
+     * @return 客户端 IP 地址
      */
     private String getClientIpAddress(HttpServletRequest request) {
         String clientIp = request.getHeader("X-Forwarded-For");
@@ -513,19 +513,19 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
     }
 
     /**
-     * 从resources目录加载登录页面HTML
+     * 从 resources 目录加载登录页面 HTML
      * <p>页面功能特性：</p>
      * <ul>
-     * <li>AJAX提交表单</li>
+     * <li>AJAX 提交表单</li>
      * <li>加载状态提示</li>
      * <li>错误消息显示</li>
      * </ul>
      *
-     * @return 登录页面HTML内容
+     * @return 登录页面 HTML 内容
      */
     private String loadLoginPageFromResources() {
         try {
-            // 使用工具类加载HTML模板
+            // 使用工具类加载 HTML 模板
             String htmlTemplate = NextDoc4jResourceUtils.readResourceContent(DOC_LOGIN, resourceLoader);
             if (htmlTemplate == null) {
                 throw new RuntimeException("无法加载登录页面模板");
@@ -567,7 +567,7 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
         if (nextDoc4JExtension != null && nextDoc4JExtension.isEnabled()) {
             NextDoc4jBrand brand = nextDoc4JExtension.getBrand();
             if (brand != null) {
-                // 使用工具类获取logo
+                // 使用工具类获取 logo
                 logo = NextDoc4jResourceUtils.resolveLogo(brand.getLogo(), resourceLoader);
 
                 // 获取标题
@@ -585,12 +585,12 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
             }
         }
 
-        // 处理Logo显示逻辑
+        // 处理 Logo 显示逻辑
         if (StrUtil.isNotBlank(logo)) {
-            // 使用工具类确保logo格式正确
+            // 使用工具类确保 logo 格式正确
             logo = NextDoc4jResourceUtils.ensureDataUrlFormat(logo);
 
-            // 替换logo相关占位符
+            // 替换 logo 相关占位符
             htmlTemplate = replacePlaceholder(htmlTemplate, "LOGO_SRC_PLACEHOLDER", logo);
             htmlTemplate = replacePlaceholder(htmlTemplate, "LOGO_CLASS_PLACEHOLDER", StrUtil.isBlank(title)
                 ? "logo-only"
@@ -602,7 +602,7 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
             htmlTemplate = replacePlaceholder(htmlTemplate, "TITLE_CLASS_PLACEHOLDER", "");
         }
 
-        // 使用工具类进行HTML转义并替换标题
+        // 使用工具类进行 HTML 转义并替换标题
         htmlTemplate = replacePlaceholder(htmlTemplate, "TITLE_PLACEHOLDER", NextDoc4jResourceUtils.escapeHtml(title));
         htmlTemplate = replacePlaceholder(htmlTemplate, "${title}", NextDoc4jResourceUtils.escapeHtml(title));
 
@@ -620,10 +620,10 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
     }
 
     /**
-     * 移除Logo容器标记
+     * 移除 Logo 容器标记
      */
     private String removeLogoContainer(String htmlTemplate) {
-        // 检查是否存在Logo容器标记
+        // 检查是否存在 Logo 容器标记
         String startMarker = "<!-- LOGO_PLACEHOLDER_START -->";
         String endMarker = "<!-- LOGO_PLACEHOLDER_END -->";
 

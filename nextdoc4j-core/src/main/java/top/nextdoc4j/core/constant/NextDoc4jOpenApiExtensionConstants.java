@@ -18,46 +18,33 @@
 package top.nextdoc4j.core.constant;
 
 /**
- * 基础常量信息
+ * springdoc 扩展配置常量类
  *
  * @author echo
- * @since 1.0.0
- **/
-public class NextDoc4jBaseConstant {
+ * @since 1.1.3
+ */
+public final class NextDoc4jOpenApiExtensionConstants {
+
+    private NextDoc4jOpenApiExtensionConstants() {
+    }
 
     /**
-     * 是否启用
+     * OpenAPI 扩展统一前缀
      */
-    public static final String ENABLED = "enabled";
+    private static final String X_PREFIX = "x-";
 
     /**
-     * nextdoc4j
+     * nextdoc4j OpenAPI 扩展根节点
+     * <p>
+     * x-nextdoc4j
      */
-    public static final String NEXTDOC4J = "nextdoc4j";
+    public static final String X_NEXTDOC4J = X_PREFIX + "nextdoc4j";
 
     /**
-     * 生产
+     * 枚举扩展
+     * <p>
+     * x-nextdoc4j-enum
      */
-    public static final String PRODUCTION = "production";
-
-    /**
-     * 扩展
-     */
-    public static final String EXTENSION = NEXTDOC4J + ".extension";
-
-    /**
-     * 插件
-     */
-    public static final String PLUGIN = NEXTDOC4J + ".plugin";
-
-    /**
-     * 插件 - 枚举显示插件
-     */
-    public static final String PLUGIN_ENUM = PLUGIN + ".enum";
-
-    /**
-     * 认证
-     */
-    public static final String AUTH = NEXTDOC4J + ".auth";
+    public static final String X_NEXTDOC4J_ENUM = X_NEXTDOC4J + "-enum";
 
 }

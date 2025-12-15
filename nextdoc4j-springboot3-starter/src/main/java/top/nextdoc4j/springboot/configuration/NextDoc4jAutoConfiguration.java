@@ -18,7 +18,7 @@
 package top.nextdoc4j.springboot.configuration;
 
 import top.nextdoc4j.core.configuration.NextDoc4jProperties;
-import top.nextdoc4j.core.constant.NextDoc4jBaseConstant;
+import top.nextdoc4j.core.constant.NextDoc4jConstants;
 import top.nextdoc4j.core.constant.NextDoc4jFilterConstant;
 import top.nextdoc4j.core.extension.NextDoc4jExtensionOpenApiCustomizer;
 import top.nextdoc4j.core.extension.NextDoc4jExtensionResolver;
@@ -47,7 +47,7 @@ import java.util.concurrent.TimeUnit;
  * @author echo
  * @since 1.0.0
  **/
-@ConditionalOnProperty(prefix = NextDoc4jBaseConstant.NEXTDOC4J, name = NextDoc4jBaseConstant.ENABLED, havingValue = "true")
+@ConditionalOnProperty(prefix = NextDoc4jConstants.NEXTDOC4J, name = NextDoc4jConstants.ENABLED, havingValue = "true")
 public class NextDoc4jAutoConfiguration {
 
     /**
@@ -56,7 +56,7 @@ public class NextDoc4jAutoConfiguration {
      * @return {@link NextDoc4jProperties }
      */
     @Bean
-    @ConfigurationProperties(prefix = NextDoc4jBaseConstant.NEXTDOC4J)
+    @ConfigurationProperties(prefix = NextDoc4jConstants.NEXTDOC4J)
     public NextDoc4jProperties getNextDoc4jProperties() {
         return new NextDoc4jProperties();
     }
@@ -87,7 +87,7 @@ public class NextDoc4jAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean(CorsFilter.class)
-    @ConditionalOnProperty(prefix = NextDoc4jBaseConstant.NEXTDOC4J, name = "cors", havingValue = "true")
+    @ConditionalOnProperty(prefix = NextDoc4jConstants.NEXTDOC4J, name = "cors", havingValue = "true")
     public CorsFilter nextdoc4jCorsFilter() {
         CorsConfiguration config = new CorsConfiguration();
         // 允许所有来源
@@ -113,7 +113,7 @@ public class NextDoc4jAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnProperty(prefix = NextDoc4jBaseConstant.EXTENSION, name = NextDoc4jBaseConstant.ENABLED, havingValue = "true")
+    @ConditionalOnProperty(prefix = NextDoc4jConstants.EXTENSION, name = NextDoc4jConstants.ENABLED, havingValue = "true")
     public NextDoc4jExtensionResolver nextdoc4jExtensionResolver(ResourceLoader resourceLoader,
                                                                  ApplicationContext applicationContext) {
         return new NextDoc4jExtensionResolver(resourceLoader, applicationContext);
@@ -126,7 +126,7 @@ public class NextDoc4jAutoConfiguration {
      * @return {@link FilterRegistrationBean }<{@link NextDoc4jBasicAuthFilter }>
      */
     @Bean
-    @ConditionalOnProperty(prefix = NextDoc4jBaseConstant.AUTH, name = NextDoc4jBaseConstant.ENABLED, havingValue = "true")
+    @ConditionalOnProperty(prefix = NextDoc4jConstants.AUTH, name = NextDoc4jConstants.ENABLED, havingValue = "true")
     public FilterRegistrationBean<NextDoc4jBasicAuthFilter> nextdoc4jBasicAuthFilter(NextDoc4jProperties properties,
                                                                                      ResourceLoader resourceLoader,
                                                                                      OpenAPI openAPI) {
@@ -146,7 +146,7 @@ public class NextDoc4jAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnProperty(prefix = NextDoc4jBaseConstant.EXTENSION, name = NextDoc4jBaseConstant.ENABLED, havingValue = "true")
+    @ConditionalOnProperty(prefix = NextDoc4jConstants.EXTENSION, name = NextDoc4jConstants.ENABLED, havingValue = "true")
     public NextDoc4jExtensionOpenApiCustomizer nextdoc4jExtensionOpenApiCustomizer(NextDoc4jProperties properties,
                                                                                    NextDoc4jExtensionResolver resolver) {
         return new NextDoc4jExtensionOpenApiCustomizer(properties, resolver);

@@ -21,7 +21,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
-import top.nextdoc4j.core.constant.NextDoc4jBaseConstant;
+import top.nextdoc4j.core.constant.NextDoc4jConstants;
 import top.nextdoc4j.core.constant.NextDoc4jFilterConstant;
 import top.nextdoc4j.springboot.filter.NextDoc4jProductionFilter;
 import top.nextdoc4j.springboot.filter.NextDoc4jResourceFilter;
@@ -41,7 +41,7 @@ public class NextDoc4jFilterConfiguration {
      * @return {@link FilterRegistrationBean }<{@link NextDoc4jResourceFilter }>
      */
     @Bean
-    @ConditionalOnProperty(prefix = NextDoc4jBaseConstant.NEXTDOC4J, name = NextDoc4jBaseConstant.ENABLED, havingValue = "false", matchIfMissing = true)
+    @ConditionalOnProperty(prefix = NextDoc4jConstants.NEXTDOC4J, name = NextDoc4jConstants.ENABLED, havingValue = "false", matchIfMissing = true)
     public FilterRegistrationBean<NextDoc4jResourceFilter> nextdoc4jResourceFilter() {
         FilterRegistrationBean<NextDoc4jResourceFilter> bean = new FilterRegistrationBean<>();
         bean.setFilter(new NextDoc4jResourceFilter());
@@ -57,7 +57,7 @@ public class NextDoc4jFilterConfiguration {
      * @return {@link FilterRegistrationBean }<{@link NextDoc4jProductionFilter }>
      */
     @Bean
-    @ConditionalOnProperty(prefix = NextDoc4jBaseConstant.NEXTDOC4J, name = NextDoc4jBaseConstant.PRODUCTION, havingValue = "true")
+    @ConditionalOnProperty(prefix = NextDoc4jConstants.NEXTDOC4J, name = NextDoc4jConstants.PRODUCTION, havingValue = "true")
     public FilterRegistrationBean<NextDoc4jProductionFilter> nextdoc4jProductionFilter() {
         FilterRegistrationBean<NextDoc4jProductionFilter> bean = new FilterRegistrationBean<>();
         bean.setFilter(new NextDoc4jProductionFilter());

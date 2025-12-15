@@ -22,37 +22,40 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import top.nextdoc4j.core.constant.NextDoc4jBaseConstant;
-import top.nextdoc4j.enums.handler.BaseEnumParameterHandler;
+import top.nextdoc4j.core.constant.NextDoc4jConstants;
+import top.nextdoc4j.enums.handler.NextDoc4jEnumParameterHandler;
+import top.nextdoc4j.enums.resolver.EnumMetadataResolver;
+
+import java.util.List;
 
 /**
  * 枚举插件自动配置类
- * <p>
- * 当满足以下条件时自动启用:
- * 1. SpringDoc 相关类存在于 classpath
- * 2. 配置项 nextdoc4j.plugin.enums.enabled=true (默认为 true)
- * </p>
  *
  * @author echo
- * @since 2025/12/02
+ * @since 1.1.2
  */
 @AutoConfiguration
-@ConditionalOnProperty(prefix = NextDoc4jBaseConstant.PLUGIN_ENUM, name = NextDoc4jBaseConstant.ENABLED, havingValue = "true", matchIfMissing = true)
-@EnableConfigurationProperties(EnumsPluginProperties.class)
-public class EnumsPluginAutoConfiguration {
+@ConditionalOnProperty(prefix = NextDoc4jConstants.PLUGIN_ENUM, name = NextDoc4jConstants.ENABLED, havingValue = "true")
+@EnableConfigurationProperties(NextDoc4jEnumPluginProperties.class)
+public class NextDoc4jEnumPluginAutoConfiguration {
 
     /**
-     * 注册枚举参数处理器
+     * 注册枚举处理器
      * <p>
      * 该 Bean 会自动被 SpringDoc 扫描并应用到 API 文档生成过程中
+     * 同时处理参数和模型字段中的枚举类型
+     * </p>
+     * <p>
+     * 支持多个解析器，按照注入顺序依次尝试，第一个支持的解析器生效
+     * 如果没有自定义解析器支持，会自动降级到内置的默认解析器
      * </p>
      *
-     * @param properties 插件配置属性
-     * @return BaseEnumParameterHandler 实例
+     * @param resolvers    所有的枚举元数据解析器（可以为空）
+     * @param objectMapper ObjectMapper 实例
+     * @return NextDoc4jEnumParameterHandler 实例
      */
     @Bean
-    public BaseEnumParameterHandler baseEnumParameterHandler(EnumsPluginProperties properties,
-                                                             ObjectMapper objectMapper) {
-        return new BaseEnumParameterHandler(properties, objectMapper);
+    public NextDoc4jEnumParameterHandler enumValueHandler(List<EnumMetadataResolver> resolvers, ObjectMapper objectMapper) {
+        return new NextDoc4jEnumParameterHandler(resolvers, objectMapper);
     }
 }
