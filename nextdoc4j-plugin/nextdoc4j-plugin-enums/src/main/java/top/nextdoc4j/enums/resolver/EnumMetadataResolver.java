@@ -42,57 +42,78 @@ public interface EnumMetadataResolver {
     boolean supports(Class<?> enumClass);
 
     /**
+     * 获取枚举接口类型
+     * <p>
+     * 用于泛型提取，必须重写以支持自定义枚举接口
+     * </p>
+     *
+     * @return 枚举接口类型，返回 null 表示使用默认的 EnumValue.class
+     */
+    default Class<?> getEnumInterfaceType() {
+        return null;
+    }
+
+    /**
+     * 获取枚举值方法名
+     *
+     * @return 获取值的方法名
+     */
+    default String getValueMethodName() {
+        return "getValue";
+    }
+
+    /**
+     * 获取枚举描述方法名
+     *
+     * @return 获取描述的方法名
+     */
+    default String getDescriptionMethodName() {
+        return "getDescription";
+    }
+
+    /**
      * 解析枚举类，返回 value 类型（用于 schema.type）
      * <p>
      * 返回值应该是 OpenAPI 标准类型：string / integer / number / long
-     * 默认实现委托给 DefaultEnumMetadataResolver
      * </p>
      *
      * @param enumClass 枚举类
-     * @return 值类型字符串
+     * @return 值类型字符串，返回 null 表示使用默认实现
      */
     default String resolveValueType(Class<?> enumClass) {
-        return null; // 返回 null 表示使用默认实现
+        return null;
     }
 
     /**
      * 解析枚举类，返回 format（用于 schema.format）
      * <p>
      * 返回值应该是 OpenAPI 标准格式：int32 / int64 / double 或 null
-     * 默认实现委托给 DefaultEnumMetadataResolver
      * </p>
      *
      * @param enumClass 枚举类
-     * @return format 字符串，可为 null
+     * @return format 字符串，返回 null 表示使用默认实现
      */
     default String resolveFormat(Class<?> enumClass) {
-        return null; // 返回 null 表示使用默认实现
+        return null;
     }
 
     /**
      * 解析枚举类，返回所有枚举值列表（用于 schema.enum）
-     * <p>
-     * 默认实现委托给 DefaultEnumMetadataResolver
-     * </p>
      *
      * @param enumClass 枚举类
      * @return 枚举值列表，返回 null 表示使用默认实现
      */
     default List<?> resolveEnumValues(Class<?> enumClass) {
-        return null; // 返回 null 表示使用默认实现
+        return null;
     }
 
     /**
      * 解析枚举类，返回扩展元数据（用于 x-nextdoc4j-enum）
-     * <p>
-     * 如果枚举没有自定义描述，返回 null 或空的 EnumPluginMetadata
-     * 默认实现委托给 DefaultEnumMetadataResolver
-     * </p>
      *
      * @param enumClass 枚举类
-     * @return 枚举扩展元数据，可为 null
+     * @return 枚举扩展元数据，返回 null 表示使用默认实现
      */
     default EnumPluginMetadata resolveMetadata(Class<?> enumClass) {
-        return null; // 返回 null 表示使用默认实现
+        return null;
     }
 }

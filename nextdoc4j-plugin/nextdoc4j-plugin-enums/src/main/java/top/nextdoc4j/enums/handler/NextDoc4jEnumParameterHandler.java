@@ -58,7 +58,7 @@ public class NextDoc4jEnumParameterHandler implements ParameterCustomizer, Model
     private final List<EnumMetadataResolver> resolvers;
 
     /**
-     * 默认解析器（作为兜底）
+     * 默认解析器
      */
     private final DefaultEnumMetadataResolver defaultResolver;
 
@@ -110,13 +110,13 @@ public class NextDoc4jEnumParameterHandler implements ParameterCustomizer, Model
             return schema;
         }
 
-        //解析原始 Class
+        // 解析原始 Class
         Class<?> rawClass = resolveRawClass(annotatedType);
         if (rawClass == null || !rawClass.isEnum()) {
             return schema;
         }
 
-        //  枚举 Schema 增强
+        // 枚举 Schema 增强
         configureEnumSchema(schema, rawClass);
 
         return schema;
@@ -147,24 +147,24 @@ public class NextDoc4jEnumParameterHandler implements ParameterCustomizer, Model
             return;
         }
 
-        // 1. 设置 OpenAPI 原生字段（支持降级到默认实现）
-        String valueType = resolveWithFallback(resolver::resolveValueType, enumClass);
+        // 设置 OpenAPI 原生字段（支持降级到默认实现）
+        String valueType = resolveValueType(resolver, enumClass);
         if (valueType != null) {
             schema.setType(valueType);
         }
 
-        String format = resolveWithFallback(resolver::resolveFormat, enumClass);
+        String format = resolveFormat(resolver, enumClass);
         if (format != null) {
             schema.setFormat(format);
         }
 
-        List<?> enumValues = resolveEnumValuesWithFallback(resolver, enumClass);
+        List<?> enumValues = resolveEnumValues(resolver, enumClass);
         if (enumValues != null && !enumValues.isEmpty()) {
             schema.setEnum((List)enumValues);
         }
 
         // 2. 设置扩展字段（仅当有自定义描述时）
-        EnumPluginMetadata metadata = resolveMetadataWithFallback(resolver, enumClass);
+        EnumPluginMetadata metadata = resolveMetadata(resolver, enumClass);
         if (metadata != null && metadata.getItems() != null && !metadata.getItems().isEmpty()) {
             Map metadataMap = objectMapper.convertValue(metadata, Map.class);
             schema.addExtension(NextDoc4jOpenApiExtensionConstants.X_NEXTDOC4J_ENUM, metadataMap);
@@ -178,6 +178,7 @@ public class NextDoc4jEnumParameterHandler implements ParameterCustomizer, Model
      * @return 解析器，未找到返回 null
      */
     private EnumMetadataResolver findResolver(Class<?> enumClass) {
+        // 优先使用自定义解析器
         for (EnumMetadataResolver resolver : resolvers) {
             if (resolver.supports(enumClass)) {
                 return resolver;
@@ -188,20 +189,23 @@ public class NextDoc4jEnumParameterHandler implements ParameterCustomizer, Model
     }
 
     /**
-     * 解析字符串结果，支持降级到默认实现
+     * 解析 valueType，支持降级到默认实现
      */
-    private String resolveWithFallback(java.util.function.Function<Class<?>, String> resolverMethod,
-                                       Class<?> enumClass) {
-        String result = resolverMethod.apply(enumClass);
-        // 如果返回 null，使用默认解析器
-        if (result == null && defaultResolver.supports(enumClass)) {
-            if (resolverMethod
-                .equals((java.util.function.Function<Class<?>, String>)defaultResolver::resolveValueType)) {
-                result = defaultResolver.resolveValueType(enumClass);
-            } else if (resolverMethod
-                .equals((java.util.function.Function<Class<?>, String>)defaultResolver::resolveFormat)) {
-                result = defaultResolver.resolveFormat(enumClass);
-            }
+    private String resolveValueType(EnumMetadataResolver resolver, Class<?> enumClass) {
+        String result = resolver.resolveValueType(enumClass);
+        if (result == null) {
+            result = defaultResolver.doResolveValueType(resolver, enumClass);
+        }
+        return result;
+    }
+
+    /**
+     * 解析 format，支持降级到默认实现
+     */
+    private String resolveFormat(EnumMetadataResolver resolver, Class<?> enumClass) {
+        String result = resolver.resolveFormat(enumClass);
+        if (result == null) {
+            result = defaultResolver.doResolveFormat(resolver, enumClass);
         }
         return result;
     }
@@ -209,10 +213,10 @@ public class NextDoc4jEnumParameterHandler implements ParameterCustomizer, Model
     /**
      * 解析枚举值列表，支持降级到默认实现
      */
-    private List<?> resolveEnumValuesWithFallback(EnumMetadataResolver resolver, Class<?> enumClass) {
+    private List<?> resolveEnumValues(EnumMetadataResolver resolver, Class<?> enumClass) {
         List<?> result = resolver.resolveEnumValues(enumClass);
-        if (result == null && defaultResolver.supports(enumClass)) {
-            result = defaultResolver.resolveEnumValues(enumClass);
+        if (result == null) {
+            result = defaultResolver.doResolveEnumValues(resolver, enumClass);
         }
         return result;
     }
@@ -220,10 +224,10 @@ public class NextDoc4jEnumParameterHandler implements ParameterCustomizer, Model
     /**
      * 解析元数据，支持降级到默认实现
      */
-    private EnumPluginMetadata resolveMetadataWithFallback(EnumMetadataResolver resolver, Class<?> enumClass) {
+    private EnumPluginMetadata resolveMetadata(EnumMetadataResolver resolver, Class<?> enumClass) {
         EnumPluginMetadata result = resolver.resolveMetadata(enumClass);
-        if (result == null && defaultResolver.supports(enumClass)) {
-            result = defaultResolver.resolveMetadata(enumClass);
+        if (result == null) {
+            result = defaultResolver.doResolveMetadata(resolver, enumClass);
         }
         return result;
     }

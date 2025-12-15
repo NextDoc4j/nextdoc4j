@@ -22,6 +22,7 @@ import top.nextdoc4j.enums.core.EnumValue;
 import top.nextdoc4j.enums.model.EnumPluginMetadata;
 import top.nextdoc4j.enums.util.EnumUtils;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -43,31 +44,54 @@ public class DefaultEnumMetadataResolver implements EnumMetadataResolver {
         return enumClass != null && enumClass.isEnum() && ClassUtil.isAssignable(EnumValue.class, enumClass);
     }
 
-    @Override
-    public String resolveValueType(Class<?> enumClass) {
-        // 从泛型接口中提取值类型
-        Class<?> valueClass = EnumUtils.extractGenericType(enumClass, EnumValue.class);
+    /**
+     * 解析 value 类型（基于泛型提取）
+     * <p>
+     * 使用反射从枚举接口的泛型参数中提取值类型
+     * 支持通过 getEnumInterfaceType() 自定义接口类型
+     * </p>
+     */
+    public String doResolveValueType(EnumMetadataResolver resolver, Class<?> enumClass) {
+        Class<?> interfaceType = resolver.getEnumInterfaceType();
+        if (interfaceType == null) {
+            interfaceType = EnumValue.class;
+        }
+
+        Class<?> valueClass = EnumUtils.extractGenericType(enumClass, interfaceType);
         return EnumUtils.toOpenApiType(valueClass);
     }
 
-    @Override
-    public String resolveFormat(Class<?> enumClass) {
-        String valueType = resolveValueType(enumClass);
+    /**
+     * 解析 format（基于 valueType）
+     */
+    public String doResolveFormat(EnumMetadataResolver resolver, Class<?> enumClass) {
+        String valueType = doResolveValueType(resolver, enumClass);
         return EnumUtils.getFormat(valueType);
     }
 
-    @Override
-    public List<?> resolveEnumValues(Class<?> enumClass) {
+    /**
+     * 解析枚举值列表（基于反射调用 getValue 方法）
+     * <p>
+     * 通过 getValueMethodName() 获取方法名，然后反射调用
+     * </p>
+     */
+    public List<?> doResolveEnumValues(EnumMetadataResolver resolver, Class<?> enumClass) {
         Object[] constants = enumClass.getEnumConstants();
         if (constants == null || constants.length == 0) {
             return List.of();
         }
 
-        return Arrays.stream(constants).map(e -> ((EnumValue<?>)e).getValue()).toList();
+        String methodName = resolver.getValueMethodName();
+        return Arrays.stream(constants).map(e -> invokeMethod(e, methodName)).toList();
     }
 
-    @Override
-    public EnumPluginMetadata resolveMetadata(Class<?> enumClass) {
+    /**
+     * 解析枚举元数据（基于反射调用 getValue 和 getDescription 方法）
+     * <p>
+     * 通过 getValueMethodName() 和 getDescriptionMethodName() 获取方法名，然后反射调用
+     * </p>
+     */
+    public EnumPluginMetadata doResolveMetadata(EnumMetadataResolver resolver, Class<?> enumClass) {
         Object[] constants = enumClass.getEnumConstants();
         if (constants == null || constants.length == 0) {
             return null;
@@ -76,12 +100,15 @@ public class DefaultEnumMetadataResolver implements EnumMetadataResolver {
         List<EnumPluginMetadata.EnumItem> items = new ArrayList<>(constants.length);
         boolean hasCustomDescription = false;
 
+        String valueMethodName = resolver.getValueMethodName();
+        String descMethodName = resolver.getDescriptionMethodName();
+
         for (Object constant : constants) {
-            EnumValue<?> enumValue = (EnumValue<?>)constant;
             Enum<?> enumConstant = (Enum<?>)constant;
 
-            Object value = enumValue.getValue();
-            String description = enumValue.getDescription();
+            // 使用反射调用方法
+            Object value = invokeMethod(constant, valueMethodName);
+            String description = (String)invokeMethod(constant, descMethodName);
             String name = enumConstant.name();
 
             // 判断是否有自定义描述（不等于 name() 的返回值）
@@ -93,5 +120,21 @@ public class DefaultEnumMetadataResolver implements EnumMetadataResolver {
 
         // 如果没有任何自定义描述，返回 null（不添加扩展字段）
         return hasCustomDescription ? new EnumPluginMetadata(items) : null;
+    }
+
+    /**
+     * 反射调用方法
+     *
+     * @param target     目标对象
+     * @param methodName 方法名
+     * @return 方法返回值
+     */
+    protected Object invokeMethod(Object target, String methodName) {
+        try {
+            Method method = target.getClass().getMethod(methodName);
+            return method.invoke(target);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to invoke method: " + methodName + " on " + target.getClass(), e);
+        }
     }
 }
