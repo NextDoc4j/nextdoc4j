@@ -160,7 +160,7 @@ public class NextDoc4jEnumParameterHandler implements ParameterCustomizer, Model
 
         List<?> enumValues = resolveEnumValuesWithFallback(resolver, enumClass);
         if (enumValues != null && !enumValues.isEmpty()) {
-            schema.setEnum((List) enumValues);
+            schema.setEnum((List)enumValues);
         }
 
         // 2. 设置扩展字段（仅当有自定义描述时）
@@ -196,10 +196,10 @@ public class NextDoc4jEnumParameterHandler implements ParameterCustomizer, Model
         // 如果返回 null，使用默认解析器
         if (result == null && defaultResolver.supports(enumClass)) {
             if (resolverMethod
-                    .equals((java.util.function.Function<Class<?>, String>) defaultResolver::resolveValueType)) {
+                .equals((java.util.function.Function<Class<?>, String>)defaultResolver::resolveValueType)) {
                 result = defaultResolver.resolveValueType(enumClass);
             } else if (resolverMethod
-                    .equals((java.util.function.Function<Class<?>, String>) defaultResolver::resolveFormat)) {
+                .equals((java.util.function.Function<Class<?>, String>)defaultResolver::resolveFormat)) {
                 result = defaultResolver.resolveFormat(enumClass);
             }
         }

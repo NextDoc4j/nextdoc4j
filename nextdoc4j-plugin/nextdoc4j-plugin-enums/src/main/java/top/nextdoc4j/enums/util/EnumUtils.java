@@ -17,12 +17,9 @@
  */
 package top.nextdoc4j.enums.util;
 
-import top.nextdoc4j.enums.core.EnumValue;
-
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 枚举工具类，用于解析实现 EnumValue 的枚举类型的值类型、描述映射等辅助能力。

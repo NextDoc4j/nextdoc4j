@@ -55,7 +55,8 @@ public class NextDoc4jEnumPluginAutoConfiguration {
      * @return NextDoc4jEnumParameterHandler 实例
      */
     @Bean
-    public NextDoc4jEnumParameterHandler enumValueHandler(List<EnumMetadataResolver> resolvers, ObjectMapper objectMapper) {
+    public NextDoc4jEnumParameterHandler enumValueHandler(List<EnumMetadataResolver> resolvers,
+                                                          ObjectMapper objectMapper) {
         return new NextDoc4jEnumParameterHandler(resolvers, objectMapper);
     }
 }
