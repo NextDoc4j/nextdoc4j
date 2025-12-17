@@ -63,14 +63,15 @@ public class NextDoc4jSaTokenAnnotationResolver implements NextDoc4jSecurityMeta
     @Override
     public boolean supports(HandlerMethod handlerMethod) {
         return hasAnnotation(handlerMethod
-                .getMethodAnnotation(NextDoc4jSaTokenConstant.SA_CHECK_PERMISSION_CLASS)) || hasAnnotation(handlerMethod
+            .getMethodAnnotation(NextDoc4jSaTokenConstant.SA_CHECK_PERMISSION_CLASS)) || hasAnnotation(handlerMethod
                 .getMethodAnnotation(NextDoc4jSaTokenConstant.SA_CHECK_ROLE_CLASS)) || hasAnnotation(handlerMethod
-                .getMethodAnnotation(NextDoc4jSaTokenConstant.SA_IGNORE_CLASS)) || hasAnnotation(handlerMethod.getBeanType()
-                .getAnnotation(NextDoc4jSaTokenConstant.SA_CHECK_PERMISSION_CLASS)) || hasAnnotation(handlerMethod
-                .getBeanType()
-                .getAnnotation(NextDoc4jSaTokenConstant.SA_CHECK_ROLE_CLASS)) || hasAnnotation(handlerMethod
-                .getBeanType()
-                .getAnnotation(NextDoc4jSaTokenConstant.SA_IGNORE_CLASS));
+                    .getMethodAnnotation(NextDoc4jSaTokenConstant.SA_IGNORE_CLASS)) || hasAnnotation(handlerMethod
+                        .getBeanType()
+                        .getAnnotation(NextDoc4jSaTokenConstant.SA_CHECK_PERMISSION_CLASS)) || hasAnnotation(handlerMethod
+                            .getBeanType()
+                            .getAnnotation(NextDoc4jSaTokenConstant.SA_CHECK_ROLE_CLASS)) || hasAnnotation(handlerMethod
+                                .getBeanType()
+                                .getAnnotation(NextDoc4jSaTokenConstant.SA_IGNORE_CLASS));
     }
 
     @Override
@@ -95,10 +96,11 @@ public class NextDoc4jSaTokenAnnotationResolver implements NextDoc4jSecurityMeta
      */
     private void resolvePermissionCheck(HandlerMethod handlerMethod, NextDoc4jSecurityMetadata metadata) {
         // 获取方法上的注解
-        Annotation methodAnnotation = handlerMethod.getMethodAnnotation(NextDoc4jSaTokenConstant.SA_CHECK_PERMISSION_CLASS);
+        Annotation methodAnnotation = handlerMethod
+            .getMethodAnnotation(NextDoc4jSaTokenConstant.SA_CHECK_PERMISSION_CLASS);
         // 获取类上的注解
         Annotation classAnnotation = handlerMethod.getBeanType()
-                .getAnnotation(NextDoc4jSaTokenConstant.SA_CHECK_PERMISSION_CLASS);
+            .getAnnotation(NextDoc4jSaTokenConstant.SA_CHECK_PERMISSION_CLASS);
 
         // 解析权限信息
         if (hasAnnotation(methodAnnotation)) {
@@ -138,7 +140,8 @@ public class NextDoc4jSaTokenAnnotationResolver implements NextDoc4jSecurityMeta
         // 获取方法上的注解
         Annotation methodAnnotation = handlerMethod.getMethodAnnotation(NextDoc4jSaTokenConstant.SA_CHECK_ROLE_CLASS);
         // 获取类上的注解
-        Annotation classAnnotation = handlerMethod.getBeanType().getAnnotation(NextDoc4jSaTokenConstant.SA_CHECK_ROLE_CLASS);
+        Annotation classAnnotation = handlerMethod.getBeanType()
+            .getAnnotation(NextDoc4jSaTokenConstant.SA_CHECK_ROLE_CLASS);
 
         // 解析角色信息
         if (hasAnnotation(methodAnnotation)) {
@@ -195,10 +198,10 @@ public class NextDoc4jSaTokenAnnotationResolver implements NextDoc4jSecurityMeta
             return new String[0];
         }
         if (value instanceof String[]) {
-            return (String[]) value;
+            return (String[])value;
         }
         if (value instanceof String) {
-            return new String[]{(String) value};
+            return new String[] {(String)value};
         }
         return new String[0];
     }

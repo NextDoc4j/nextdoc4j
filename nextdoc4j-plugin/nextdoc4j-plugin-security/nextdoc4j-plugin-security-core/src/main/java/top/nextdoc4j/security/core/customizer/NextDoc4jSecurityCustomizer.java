@@ -44,7 +44,9 @@ public class NextDoc4jSecurityCustomizer implements GlobalOpenApiCustomizer {
                                        List<NextDoc4jPathExcluder> nextDoc4jPathExcluders) {
         this.extensionProperties = extensionProperties;
         // 按优先级排序
-        this.nextDoc4jPathExcluders = nextDoc4jPathExcluders.stream().sorted(Comparator.comparingInt(NextDoc4jPathExcluder::getOrder)).toList();
+        this.nextDoc4jPathExcluders = nextDoc4jPathExcluders.stream()
+            .sorted(Comparator.comparingInt(NextDoc4jPathExcluder::getOrder))
+            .toList();
     }
 
     @Override

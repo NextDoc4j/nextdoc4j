@@ -43,8 +43,8 @@ public class NextDoc4jSecurityAutoConfiguration {
     /**
      * 全局 OpenAPI 安全定制器
      *
-     * @param extensionProperties 扩展属性
-     * @param nextDoc4jPathExcluders       路径排除器列表
+     * @param extensionProperties    扩展属性
+     * @param nextDoc4jPathExcluders 路径排除器列表
      * @return 全局安全定制器
      */
     @Bean
