@@ -38,17 +38,6 @@ import top.nextdoc4j.security.satoken.excluder.NextDoc4jSaTokenExcluder;
 @EnableConfigurationProperties(NextDoc4jSaTokenProperties.class)
 public class NextDoc4jSaTokenAutoConfiguration {
 
-    //    @Bean
-    //    public NextDoc4jSaTokenResolver saTokenPermissionResolver() {
-    //        return new NextDoc4jSaTokenResolver();
-    //    }
-    //
-    //    @Bean
-    //    @Order(100)
-    //    public SecurityEnhancer saTokenSecurityEnhancer(NextDoc4jSaTokenResolver resolver) {
-    //        return new NextDoc4jSaTokenEnhancer(resolver);
-    //    }
-
     @Bean
     @Order(100)
     public PathExcluder saTokenPathExcluder(RequestMappingHandlerMapping handlerMapping) {
