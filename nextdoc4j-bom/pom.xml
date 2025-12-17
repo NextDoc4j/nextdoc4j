@@ -48,6 +48,20 @@
                 <version>${revision}</version>
             </dependency>
 
+            <!--插件 - 认证信息展示核心模块-->
+            <dependency>
+                <groupId>top.nextdoc4j</groupId>
+                <artifactId>nextdoc4j-plugin-security-core</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
+            <!--插件 - 认证信息展示 - Sa-Token 适配模块-->
+            <dependency>
+                <groupId>top.nextdoc4j</groupId>
+                <artifactId>nextdoc4j-plugin-security-satoken</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 

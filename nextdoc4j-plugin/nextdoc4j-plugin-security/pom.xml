@@ -2,33 +2,24 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <parent>
         <groupId>top.nextdoc4j</groupId>
-        <artifactId>nextdoc4j</artifactId>
+        <artifactId>nextdoc4j-plugin</artifactId>
         <version>${revision}</version>
     </parent>
 
-    <packaging>pom</packaging>
-    <artifactId>nextdoc4j-plugin</artifactId>
+    <artifactId>nextdoc4j-plugin-security</artifactId>
     <name>${project.artifactId}</name>
+    <packaging>pom</packaging>
     <description>
-        nextdoc4j 扩展插件模块
+        插件 - 接口认证信息展示插件
     </description>
 
     <modules>
-        <module>nextdoc4j-plugin-enums</module>
-        <module>nextdoc4j-plugin-security</module>
+        <module>nextdoc4j-plugin-security-core</module>
+        <module>nextdoc4j-plugin-security-satoken</module>
     </modules>
 
-    <dependencies>
-        <!--nextdoc4j 核心模块-->
-        <dependency>
-            <groupId>top.nextdoc4j</groupId>
-            <artifactId>nextdoc4j-core</artifactId>
-            <optional>true</optional>
-        </dependency>
-    </dependencies>
 
 
 </project>

@@ -15,45 +15,32 @@
  *
  * This file is part of the NextDoc4j project.
  */
-package top.nextdoc4j.core.constant;
+package top.nextdoc4j.security.core.enhancer;
+
+import java.util.Set;
 
 /**
- * springdoc 扩展配置常量类
- *
+ * 路径排除器
+ * 
  * @author echo
  * @since 1.1.3
  */
-public final class NextDoc4jOpenApiExtensionConstants {
+public interface PathExcluder {
 
-    private NextDoc4jOpenApiExtensionConstants() {
+    /**
+     * 获取需要排除的路径集合
+     * 支持 Ant 风格通配符，如：/api/public/**, /auth/login
+     *
+     * @return 排除路径集合
+     */
+    Set<String> getExcludedPaths();
+
+    /**
+     * 获取排除器优先级（数字越小优先级越高）
+     *
+     * @return 优先级
+     */
+    default int getOrder() {
+        return 0;
     }
-
-    /**
-     * OpenAPI 扩展统一前缀
-     */
-    private static final String X_PREFIX = "x-";
-
-    /**
-     * nextdoc4j OpenAPI 扩展根节点
-     * <p>
-     * x-nextdoc4j
-     */
-    public static final String X_NEXTDOC4J = X_PREFIX + "nextdoc4j";
-
-    /**
-     * 枚举扩展
-     * <p>
-     * x-nextdoc4j-enum
-     * </p>
-     */
-    public static final String X_NEXTDOC4J_ENUM = X_NEXTDOC4J + "-enum";
-
-    /**
-     * 权限码展示扩展
-     * <p>
-     * x-nextdoc4j-security
-     * </p>
-     */
-    public static final String X_NEXTDOC4J_SECURITY = X_NEXTDOC4J + "-security";
-
 }

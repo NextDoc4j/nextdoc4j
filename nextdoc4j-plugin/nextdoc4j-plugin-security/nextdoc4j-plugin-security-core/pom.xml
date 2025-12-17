@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>top.nextdoc4j</groupId>
+        <artifactId>nextdoc4j-plugin-security</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+
+    <artifactId>nextdoc4j-plugin-security-core</artifactId>
+    <name>${project.artifactId}</name>
+    <description>
+        接口认证信息展示核心模块，提供 OpenAPI Security 元数据的统一解析和展示，仅用于接口文档展示，不参与运行时安全控制
+    </description>
+
+
+
+</project>
