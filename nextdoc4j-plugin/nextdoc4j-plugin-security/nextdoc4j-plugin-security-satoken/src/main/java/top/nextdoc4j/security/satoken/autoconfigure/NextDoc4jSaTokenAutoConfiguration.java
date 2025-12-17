@@ -41,8 +41,7 @@ import top.nextdoc4j.security.satoken.resolver.NextDoc4jSaTokenAnnotationResolve
  * @since 1.1.3
  */
 @AutoConfiguration
-@ConditionalOnProperty(prefix = NextDoc4jConstants.PLUGIN_SECURITY_SA_TOKEN, name = NextDoc4jConstants.ENABLED, havingValue = "true")
-@EnableConfigurationProperties(NextDoc4jSaTokenProperties.class)
+@ConditionalOnProperty(prefix = NextDoc4jConstants.PLUGIN_SECURITY, name = NextDoc4jConstants.ENABLED, havingValue = "true")
 public class NextDoc4jSaTokenAutoConfiguration {
 
     /**

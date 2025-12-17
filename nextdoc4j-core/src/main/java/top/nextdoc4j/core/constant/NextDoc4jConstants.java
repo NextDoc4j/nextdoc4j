@@ -65,9 +65,4 @@ public final class NextDoc4jConstants {
      */
     public static final String PLUGIN_SECURITY = PLUGIN + ".security";
 
-    /**
-     * 插件 - 认证 Sa-token 适配插件
-     */
-    public static final String PLUGIN_SECURITY_SA_TOKEN = PLUGIN_SECURITY + ".sa-token";
-
 }
