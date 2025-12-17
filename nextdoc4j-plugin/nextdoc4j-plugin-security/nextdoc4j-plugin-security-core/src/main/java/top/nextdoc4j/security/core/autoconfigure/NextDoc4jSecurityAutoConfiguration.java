@@ -23,7 +23,9 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import top.nextdoc4j.core.constant.NextDoc4jConstants;
 import top.nextdoc4j.security.core.customizer.NextDoc4jSecurityCustomizer;
-import top.nextdoc4j.security.core.enhancer.PathExcluder;
+import top.nextdoc4j.security.core.customizer.NextDoc4jSecurityMetadataCustomizer;
+import top.nextdoc4j.security.core.enhancer.NextDoc4jPathExcluder;
+import top.nextdoc4j.security.core.enhancer.NextDoc4jSecurityMetadataResolver;
 
 import java.util.List;
 
@@ -38,9 +40,31 @@ import java.util.List;
 @EnableConfigurationProperties({NextDoc4jSecurityProperties.class, NextDoc4jSpringDocProperties.class})
 public class NextDoc4jSecurityAutoConfiguration {
 
+    /**
+     * 全局 OpenAPI 安全定制器
+     *
+     * @param extensionProperties 扩展属性
+     * @param nextDoc4jPathExcluders       路径排除器列表
+     * @return 全局安全定制器
+     */
     @Bean
     public NextDoc4jSecurityCustomizer securityPluginGlobalOpenApiCustomizer(NextDoc4jSpringDocProperties extensionProperties,
-                                                                             List<PathExcluder> pathExcluders) {
-        return new NextDoc4jSecurityCustomizer(extensionProperties, pathExcluders);
+                                                                             List<NextDoc4jPathExcluder> nextDoc4jPathExcluders) {
+        return new NextDoc4jSecurityCustomizer(extensionProperties, nextDoc4jPathExcluders);
+    }
+
+    /**
+     * 安全元数据操作定制器
+     * <p>
+     * 收集所有 NextDoc4jSecurityMetadataResolver 实现，解析权限和角色信息，
+     * 并添加到 OpenAPI 操作的扩展字段中
+     * </p>
+     *
+     * @param resolvers 安全元数据解析器列表
+     * @return 操作定制器
+     */
+    @Bean
+    public NextDoc4jSecurityMetadataCustomizer securityMetadataOperationCustomizer(List<NextDoc4jSecurityMetadataResolver> resolvers) {
+        return new NextDoc4jSecurityMetadataCustomizer(resolvers);
     }
 }

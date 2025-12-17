@@ -17,11 +17,11 @@
  */
 package top.nextdoc4j.security.satoken.excluder;
 
-import cn.dev33.satoken.annotation.SaIgnore;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
-import top.nextdoc4j.security.core.enhancer.PathExcluder;
+import top.nextdoc4j.security.core.enhancer.NextDoc4jPathExcluder;
 import org.springframework.web.method.HandlerMethod;
+import top.nextdoc4j.security.satoken.constant.NextDoc4jSaTokenConstant;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -33,11 +33,11 @@ import java.util.Set;
  * @author echo
  * @since 1.1.3
  */
-public class NextDoc4jSaTokenExcluder implements PathExcluder {
+public class NextDoc4JSaTokenExcluderNextDoc4j implements NextDoc4jPathExcluder {
 
     private final RequestMappingHandlerMapping handlerMapping;
 
-    public NextDoc4jSaTokenExcluder(RequestMappingHandlerMapping handlerMapping) {
+    public NextDoc4JSaTokenExcluderNextDoc4j(RequestMappingHandlerMapping handlerMapping) {
         this.handlerMapping = handlerMapping;
     }
 
@@ -53,8 +53,8 @@ public class NextDoc4jSaTokenExcluder implements PathExcluder {
 
         handlerMethods.forEach((info, method) -> {
             // 检查方法或类上是否有 @SaIgnore 注解
-            if (method.hasMethodAnnotation(SaIgnore.class) || method.getBeanType()
-                .isAnnotationPresent(SaIgnore.class)) {
+            if (method.hasMethodAnnotation(NextDoc4jSaTokenConstant.SA_IGNORE_CLASS) || method.getBeanType()
+                .isAnnotationPresent(NextDoc4jSaTokenConstant.SA_IGNORE_CLASS)) {
                 // 获取路径模式并添加到集合
                 Set<String> patterns = info.getPatternValues();
                 if (!patterns.isEmpty()) {

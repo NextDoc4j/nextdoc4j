@@ -17,32 +17,28 @@
  */
 package top.nextdoc4j.security.core.enhancer;
 
-import io.swagger.v3.oas.models.Operation;
-import org.springframework.web.method.HandlerMethod;
-import top.nextdoc4j.security.core.model.NextDoc4jSecurityMetadata;
+import java.util.Set;
 
 /**
- * 安全增强器接口
+ * 路径排除器
  * 
  * @author echo
  * @since 1.1.3
  */
-public interface SecurityEnhancer {
+public interface NextDoc4jPathExcluder {
 
     /**
-     * 增强 Operation,添加安全相关的扩展信息
+     * 获取需要排除的路径集合
+     * 支持 Ant 风格通配符，如：/api/public/**, /auth/login
      *
-     * @param operation     OpenAPI Operation 对象
-     * @param handlerMethod Spring MVC HandlerMethod
-     * @return 安全信息模型,如果没有安全要求则返回 null
+     * @return 排除路径集合
      */
-    NextDoc4jSecurityMetadata enhance(Operation operation, HandlerMethod handlerMethod);
+    Set<String> getExcludedPaths();
 
     /**
-     * 获取增强器的优先级
-     * 数值越小优先级越高
+     * 获取排除器优先级（数字越小优先级越高）
      *
-     * @return 优先级值
+     * @return 优先级
      */
     default int getOrder() {
         return 0;

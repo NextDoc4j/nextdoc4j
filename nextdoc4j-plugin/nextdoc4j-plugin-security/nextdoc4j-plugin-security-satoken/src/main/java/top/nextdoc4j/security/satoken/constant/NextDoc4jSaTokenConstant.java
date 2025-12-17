@@ -15,32 +15,27 @@
  *
  * This file is part of the NextDoc4j project.
  */
-package top.nextdoc4j.security.core.enhancer;
+package top.nextdoc4j.security.satoken.constant;
 
-import java.util.Set;
+import cn.dev33.satoken.annotation.*;
 
 /**
- * 路径排除器
- * 
+ * Sa-Token 注解常量类
+ * <p>
+ * 存储 Sa-Token 注解类的引用，用于反射解析注解信息
+ * </p>
+ *
  * @author echo
  * @since 1.1.3
  */
-public interface PathExcluder {
+public final class NextDoc4jSaTokenConstant {
 
-    /**
-     * 获取需要排除的路径集合
-     * 支持 Ant 风格通配符，如：/api/public/**, /auth/login
-     *
-     * @return 排除路径集合
-     */
-    Set<String> getExcludedPaths();
-
-    /**
-     * 获取排除器优先级（数字越小优先级越高）
-     *
-     * @return 优先级
-     */
-    default int getOrder() {
-        return 0;
+    private NextDoc4jSaTokenConstant() {
+        // 私有构造器，防止实例化
     }
+
+    // Sa-Token 注解类引用
+    public static final Class<SaCheckRole> SA_CHECK_ROLE_CLASS = SaCheckRole.class;
+    public static final Class<SaCheckPermission> SA_CHECK_PERMISSION_CLASS = SaCheckPermission.class;
+    public static final Class<SaIgnore> SA_IGNORE_CLASS = SaIgnore.class;
 }

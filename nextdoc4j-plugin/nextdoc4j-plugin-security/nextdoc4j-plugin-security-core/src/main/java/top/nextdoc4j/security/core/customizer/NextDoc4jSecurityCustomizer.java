@@ -24,7 +24,7 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springdoc.core.customizers.GlobalOpenApiCustomizer;
 import org.springframework.util.AntPathMatcher;
 import top.nextdoc4j.security.core.autoconfigure.NextDoc4jSpringDocProperties;
-import top.nextdoc4j.security.core.enhancer.PathExcluder;
+import top.nextdoc4j.security.core.enhancer.NextDoc4jPathExcluder;
 
 import java.util.*;
 
@@ -37,14 +37,14 @@ import java.util.*;
 public class NextDoc4jSecurityCustomizer implements GlobalOpenApiCustomizer {
 
     private final NextDoc4jSpringDocProperties extensionProperties;
-    private final List<PathExcluder> pathExcluders;
+    private final List<NextDoc4jPathExcluder> nextDoc4jPathExcluders;
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     public NextDoc4jSecurityCustomizer(NextDoc4jSpringDocProperties extensionProperties,
-                                       List<PathExcluder> pathExcluders) {
+                                       List<NextDoc4jPathExcluder> nextDoc4jPathExcluders) {
         this.extensionProperties = extensionProperties;
         // 按优先级排序
-        this.pathExcluders = pathExcluders.stream().sorted(Comparator.comparingInt(PathExcluder::getOrder)).toList();
+        this.nextDoc4jPathExcluders = nextDoc4jPathExcluders.stream().sorted(Comparator.comparingInt(NextDoc4jPathExcluder::getOrder)).toList();
     }
 
     @Override
@@ -123,19 +123,19 @@ public class NextDoc4jSecurityCustomizer implements GlobalOpenApiCustomizer {
     }
 
     /**
-     * 收集所有需要排除的路径（通过所有 PathExcluder 插件）
+     * 收集所有需要排除的路径（通过所有 NextDoc4jPathExcluder 插件）
      *
      * @return 排除路径集合，支持通配符
      */
     private Set<String> collectExcludedPaths() {
         Set<String> excludedPaths = new HashSet<>();
 
-        if (pathExcluders == null || pathExcluders.isEmpty()) {
+        if (nextDoc4jPathExcluders == null || nextDoc4jPathExcluders.isEmpty()) {
             return excludedPaths;
         }
 
         // 遍历所有排除器，收集排除路径
-        for (PathExcluder excluder : pathExcluders) {
+        for (NextDoc4jPathExcluder excluder : nextDoc4jPathExcluders) {
             Set<String> paths = excluder.getExcludedPaths();
             if (paths != null && !paths.isEmpty()) {
                 excludedPaths.addAll(paths);
