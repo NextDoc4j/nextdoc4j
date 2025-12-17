@@ -15,21 +15,24 @@
  *
  * This file is part of the NextDoc4j project.
  */
-package top.nextdoc4j.security.satoken.config;
+package top.nextdoc4j.enums.configuration;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import top.nextdoc4j.core.constant.NextDoc4jConstants;
 
 /**
- * Sa-Token 安全配置属性
+ * 枚举插件属性
  *
  * @author echo
- * @since 1.1.3
+ * @since 1.1.2
  */
-@ConfigurationProperties(prefix = NextDoc4jConstants.PLUGIN_SECURITY_SA_TOKEN)
-public class SaTokenProperties {
+@ConfigurationProperties(prefix = NextDoc4jConstants.PLUGIN_ENUM)
+public class NextDoc4jEnumProperties {
 
-    private boolean enabled = true;
+    /**
+     * 是否启用枚举插件
+     */
+    private boolean enabled;
 
     public boolean isEnabled() {
         return enabled;

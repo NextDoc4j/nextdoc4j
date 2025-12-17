@@ -23,7 +23,7 @@ import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springdoc.core.customizers.GlobalOpenApiCustomizer;
 import org.springframework.util.AntPathMatcher;
-import top.nextdoc4j.security.core.autoconfigure.NextDoc4jSpringDocExtensionProperties;
+import top.nextdoc4j.security.core.autoconfigure.NextDoc4jSpringDocProperties;
 import top.nextdoc4j.security.core.enhancer.PathExcluder;
 
 import java.util.*;
@@ -34,14 +34,14 @@ import java.util.*;
  * @author echo
  * @since 1.1.3
  */
-public class NextDoc4jSecurityPluginGlobalOpenApiCustomizer implements GlobalOpenApiCustomizer {
+public class NextDoc4jSecurityCustomizer implements GlobalOpenApiCustomizer {
 
-    private final NextDoc4jSpringDocExtensionProperties extensionProperties;
+    private final NextDoc4jSpringDocProperties extensionProperties;
     private final List<PathExcluder> pathExcluders;
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
-    public NextDoc4jSecurityPluginGlobalOpenApiCustomizer(NextDoc4jSpringDocExtensionProperties extensionProperties,
-                                                          List<PathExcluder> pathExcluders) {
+    public NextDoc4jSecurityCustomizer(NextDoc4jSpringDocProperties extensionProperties,
+                                       List<PathExcluder> pathExcluders) {
         this.extensionProperties = extensionProperties;
         // 按优先级排序
         this.pathExcluders = pathExcluders.stream().sorted(Comparator.comparingInt(PathExcluder::getOrder)).toList();

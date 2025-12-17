@@ -15,44 +15,32 @@
  *
  * This file is part of the NextDoc4j project.
  */
-package top.nextdoc4j.security.satoken.autoconfigure;
+package top.nextdoc4j.security.core.autoconfigure;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.annotation.Order;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import top.nextdoc4j.core.constant.NextDoc4jConstants;
+import top.nextdoc4j.security.core.customizer.NextDoc4jSecurityCustomizer;
 import top.nextdoc4j.security.core.enhancer.PathExcluder;
-import top.nextdoc4j.security.satoken.config.SaTokenProperties;
-import top.nextdoc4j.security.satoken.excluder.SaTokenPathExcluder;
+
+import java.util.List;
 
 /**
- * Sa-Token 安全插件自动配置
+ * 安全插件自动配置
  *
  * @author echo
  * @since 1.1.3
  */
 @AutoConfiguration
-@ConditionalOnProperty(prefix = NextDoc4jConstants.PLUGIN_SECURITY_SA_TOKEN, name = NextDoc4jConstants.ENABLED, havingValue = "true")
-@EnableConfigurationProperties(SaTokenProperties.class)
-public class SaTokenAutoConfiguration {
-
-    //    @Bean
-    //    public SaTokenPermissionResolver saTokenPermissionResolver() {
-    //        return new SaTokenPermissionResolver();
-    //    }
-    //
-    //    @Bean
-    //    @Order(100)
-    //    public SecurityEnhancer saTokenSecurityEnhancer(SaTokenPermissionResolver resolver) {
-    //        return new SaTokenSecurityEnhancer(resolver);
-    //    }
+@ConditionalOnProperty(prefix = NextDoc4jConstants.PLUGIN_SECURITY, name = NextDoc4jConstants.ENABLED, havingValue = "true")
+@EnableConfigurationProperties({NextDoc4jSecurityProperties.class, NextDoc4jSpringDocProperties.class})
+public class NextDoc4jSecurityAutoConfiguration {
 
     @Bean
-    @Order(100)
-    public PathExcluder saTokenPathExcluder(RequestMappingHandlerMapping handlerMapping) {
-        return new SaTokenPathExcluder(handlerMapping);
+    public NextDoc4jSecurityCustomizer securityPluginGlobalOpenApiCustomizer(NextDoc4jSpringDocProperties extensionProperties,
+                                                                             List<PathExcluder> pathExcluders) {
+        return new NextDoc4jSecurityCustomizer(extensionProperties, pathExcluders);
     }
 }

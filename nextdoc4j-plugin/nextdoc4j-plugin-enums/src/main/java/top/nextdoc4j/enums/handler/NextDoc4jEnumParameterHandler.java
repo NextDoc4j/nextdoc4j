@@ -26,7 +26,7 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 import org.springdoc.core.customizers.ParameterCustomizer;
 import org.springframework.core.MethodParameter;
 import top.nextdoc4j.core.constant.NextDoc4jOpenApiExtensionConstants;
-import top.nextdoc4j.enums.model.EnumPluginMetadata;
+import top.nextdoc4j.enums.model.NextDoc4jEnumMetadata;
 import top.nextdoc4j.enums.resolver.DefaultEnumMetadataResolver;
 import top.nextdoc4j.enums.resolver.EnumMetadataResolver;
 
@@ -164,7 +164,7 @@ public class NextDoc4jEnumParameterHandler implements ParameterCustomizer, Model
         }
 
         // 2. 设置扩展字段（仅当有自定义描述时）
-        EnumPluginMetadata metadata = resolveMetadata(resolver, enumClass);
+        NextDoc4jEnumMetadata metadata = resolveMetadata(resolver, enumClass);
         if (metadata != null && metadata.getItems() != null && !metadata.getItems().isEmpty()) {
             Map metadataMap = objectMapper.convertValue(metadata, Map.class);
             schema.addExtension(NextDoc4jOpenApiExtensionConstants.X_NEXTDOC4J_ENUM, metadataMap);
@@ -224,8 +224,8 @@ public class NextDoc4jEnumParameterHandler implements ParameterCustomizer, Model
     /**
      * 解析元数据，支持降级到默认实现
      */
-    private EnumPluginMetadata resolveMetadata(EnumMetadataResolver resolver, Class<?> enumClass) {
-        EnumPluginMetadata result = resolver.resolveMetadata(enumClass);
+    private NextDoc4jEnumMetadata resolveMetadata(EnumMetadataResolver resolver, Class<?> enumClass) {
+        NextDoc4jEnumMetadata result = resolver.resolveMetadata(enumClass);
         if (result == null) {
             result = defaultResolver.doResolveMetadata(resolver, enumClass);
         }

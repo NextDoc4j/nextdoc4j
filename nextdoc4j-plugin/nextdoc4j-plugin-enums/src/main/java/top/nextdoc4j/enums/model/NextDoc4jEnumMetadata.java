@@ -32,7 +32,7 @@ import java.util.List;
  * @since 1.1.3
  */
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class EnumPluginMetadata {
+public class NextDoc4jEnumMetadata {
 
     /**
      * 枚举项列表（value 到 description 的映射）
@@ -40,10 +40,10 @@ public class EnumPluginMetadata {
      */
     private List<EnumItem> items;
 
-    public EnumPluginMetadata() {
+    public NextDoc4jEnumMetadata() {
     }
 
-    public EnumPluginMetadata(List<EnumItem> items) {
+    public NextDoc4jEnumMetadata(List<EnumItem> items) {
         this.items = items;
     }
 

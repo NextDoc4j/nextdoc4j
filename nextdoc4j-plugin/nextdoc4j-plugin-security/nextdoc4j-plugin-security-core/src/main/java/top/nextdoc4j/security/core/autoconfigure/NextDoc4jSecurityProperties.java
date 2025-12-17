@@ -15,24 +15,24 @@
  *
  * This file is part of the NextDoc4j project.
  */
-package top.nextdoc4j.enums.configuration;
+package top.nextdoc4j.security.core.autoconfigure;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import top.nextdoc4j.core.constant.NextDoc4jConstants;
 
 /**
- * 枚举插件属性
+ * 安全插件配置属性
  *
  * @author echo
- * @since 1.1.2
+ * @since 1.1.3
  */
-@ConfigurationProperties(prefix = NextDoc4jConstants.PLUGIN_ENUM)
-public class NextDoc4jEnumPluginProperties {
+@ConfigurationProperties(prefix = NextDoc4jConstants.PLUGIN_SECURITY)
+public class NextDoc4jSecurityProperties {
 
     /**
-     * 是否启用枚举插件
+     * 是否启用认证展示插件
      */
-    private boolean enabled;
+    private boolean enabled = true;
 
     public boolean isEnabled() {
         return enabled;

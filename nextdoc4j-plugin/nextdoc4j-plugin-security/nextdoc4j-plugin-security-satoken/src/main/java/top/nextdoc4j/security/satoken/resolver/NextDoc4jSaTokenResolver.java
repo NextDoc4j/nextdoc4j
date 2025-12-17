@@ -31,7 +31,7 @@ import java.util.List;
  * @author echo
  * @since 1.1.3
  */
-public class SaTokenPermissionResolver {
+public class NextDoc4jSaTokenResolver {
 
     public List<String> resolvePermissions(HandlerMethod handlerMethod) {
         List<String> permissions = new ArrayList<>();

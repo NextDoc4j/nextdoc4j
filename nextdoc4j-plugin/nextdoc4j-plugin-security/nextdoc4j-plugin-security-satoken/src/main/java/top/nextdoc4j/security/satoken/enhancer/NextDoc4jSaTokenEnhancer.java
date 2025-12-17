@@ -18,8 +18,8 @@
 package top.nextdoc4j.security.satoken.enhancer;
 
 import top.nextdoc4j.security.core.enhancer.SecurityEnhancer;
-import top.nextdoc4j.security.core.model.SecurityPluginMetadata;
-import top.nextdoc4j.security.satoken.resolver.SaTokenPermissionResolver;
+import top.nextdoc4j.security.core.model.NextDoc4jSecurityMetadata;
+import top.nextdoc4j.security.satoken.resolver.NextDoc4jSaTokenResolver;
 import io.swagger.v3.oas.models.Operation;
 import org.springframework.web.method.HandlerMethod;
 
@@ -31,23 +31,23 @@ import java.util.List;
  * @author echo
  * @since 1.1.3
  */
-public class SaTokenSecurityEnhancer implements SecurityEnhancer {
+public class NextDoc4jSaTokenEnhancer implements SecurityEnhancer {
 
-    private final SaTokenPermissionResolver resolver;
+    private final NextDoc4jSaTokenResolver resolver;
 
-    public SaTokenSecurityEnhancer(SaTokenPermissionResolver resolver) {
+    public NextDoc4jSaTokenEnhancer(NextDoc4jSaTokenResolver resolver) {
         this.resolver = resolver;
     }
 
     @Override
-    public SecurityPluginMetadata enhance(Operation operation, HandlerMethod handlerMethod) {
+    public NextDoc4jSecurityMetadata enhance(Operation operation, HandlerMethod handlerMethod) {
         List<String> permissions = resolver.resolvePermissions(handlerMethod);
 
         if (permissions.isEmpty()) {
             return null;
         }
 
-        return new SecurityPluginMetadata(permissions);
+        return new NextDoc4jSecurityMetadata(permissions);
     }
 
     @Override

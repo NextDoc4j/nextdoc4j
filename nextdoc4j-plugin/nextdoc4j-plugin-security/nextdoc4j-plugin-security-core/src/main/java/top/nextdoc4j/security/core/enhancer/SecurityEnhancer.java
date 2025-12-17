@@ -19,7 +19,7 @@ package top.nextdoc4j.security.core.enhancer;
 
 import io.swagger.v3.oas.models.Operation;
 import org.springframework.web.method.HandlerMethod;
-import top.nextdoc4j.security.core.model.SecurityPluginMetadata;
+import top.nextdoc4j.security.core.model.NextDoc4jSecurityMetadata;
 
 /**
  * 安全增强器接口
@@ -36,7 +36,7 @@ public interface SecurityEnhancer {
      * @param handlerMethod Spring MVC HandlerMethod
      * @return 安全信息模型,如果没有安全要求则返回 null
      */
-    SecurityPluginMetadata enhance(Operation operation, HandlerMethod handlerMethod);
+    NextDoc4jSecurityMetadata enhance(Operation operation, HandlerMethod handlerMethod);
 
     /**
      * 获取增强器的优先级

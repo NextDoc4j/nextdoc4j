@@ -15,35 +15,27 @@
  *
  * This file is part of the NextDoc4j project.
  */
-package top.nextdoc4j.security.core.model;
+package top.nextdoc4j.security.satoken.autoconfigure;
 
-import java.util.List;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import top.nextdoc4j.core.constant.NextDoc4jConstants;
 
 /**
- * 安全信息模型
+ * Sa-Token 安全配置属性
  *
  * @author echo
  * @since 1.1.3
  */
-public class SecurityPluginMetadata {
+@ConfigurationProperties(prefix = NextDoc4jConstants.PLUGIN_SECURITY_SA_TOKEN)
+public class NextDoc4jSaTokenProperties {
 
-    /**
-     * 权限码列表
-     */
-    private List<String> permissions;
+    private boolean enabled = true;
 
-    public SecurityPluginMetadata() {
+    public boolean isEnabled() {
+        return enabled;
     }
 
-    public SecurityPluginMetadata(List<String> permissions) {
-        this.permissions = permissions;
-    }
-
-    public List<String> getPermissions() {
-        return permissions;
-    }
-
-    public void setPermissions(List<String> permissions) {
-        this.permissions = permissions;
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 }

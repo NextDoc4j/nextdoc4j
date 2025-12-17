@@ -33,11 +33,11 @@ import java.util.Set;
  * @author echo
  * @since 1.1.3
  */
-public class SaTokenPathExcluder implements PathExcluder {
+public class NextDoc4jSaTokenExcluder implements PathExcluder {
 
     private final RequestMappingHandlerMapping handlerMapping;
 
-    public SaTokenPathExcluder(RequestMappingHandlerMapping handlerMapping) {
+    public NextDoc4jSaTokenExcluder(RequestMappingHandlerMapping handlerMapping) {
         this.handlerMapping = handlerMapping;
     }
 

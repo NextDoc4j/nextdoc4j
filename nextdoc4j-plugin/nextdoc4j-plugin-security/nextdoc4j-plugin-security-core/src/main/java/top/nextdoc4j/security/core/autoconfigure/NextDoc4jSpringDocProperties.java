@@ -28,7 +28,7 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty;
  * @since 1.1.3
  */
 @ConfigurationProperties("springdoc")
-public class NextDoc4jSpringDocExtensionProperties {
+public class NextDoc4jSpringDocProperties {
 
     /**
      * 组件配置（包括鉴权配置等）

@@ -36,8 +36,8 @@ import java.util.List;
  */
 @AutoConfiguration
 @ConditionalOnProperty(prefix = NextDoc4jConstants.PLUGIN_ENUM, name = NextDoc4jConstants.ENABLED, havingValue = "true")
-@EnableConfigurationProperties(NextDoc4jEnumPluginProperties.class)
-public class NextDoc4jEnumPluginAutoConfiguration {
+@EnableConfigurationProperties(NextDoc4jEnumProperties.class)
+public class NextDoc4jEnumAutoConfiguration {
 
     /**
      * 注册枚举处理器

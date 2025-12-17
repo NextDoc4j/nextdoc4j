@@ -15,30 +15,35 @@
  *
  * This file is part of the NextDoc4j project.
  */
-package top.nextdoc4j.security.core.autoconfigure;
+package top.nextdoc4j.security.core.model;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import top.nextdoc4j.core.constant.NextDoc4jConstants;
+import java.util.List;
 
 /**
- * 安全插件配置属性
+ * 安全信息模型
  *
  * @author echo
  * @since 1.1.3
  */
-@ConfigurationProperties(prefix = NextDoc4jConstants.PLUGIN_SECURITY)
-public class NextDoc4jSecurityPluginProperties {
+public class NextDoc4jSecurityMetadata {
 
     /**
-     * 是否启用认证展示插件
+     * 权限码列表
      */
-    private boolean enabled = true;
+    private List<String> permissions;
 
-    public boolean isEnabled() {
-        return enabled;
+    public NextDoc4jSecurityMetadata() {
     }
 
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
+    public NextDoc4jSecurityMetadata(List<String> permissions) {
+        this.permissions = permissions;
+    }
+
+    public List<String> getPermissions() {
+        return permissions;
+    }
+
+    public void setPermissions(List<String> permissions) {
+        this.permissions = permissions;
     }
 }

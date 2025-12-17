@@ -19,7 +19,7 @@ package top.nextdoc4j.enums.resolver;
 
 import cn.hutool.core.util.ClassUtil;
 import top.nextdoc4j.enums.core.EnumValue;
-import top.nextdoc4j.enums.model.EnumPluginMetadata;
+import top.nextdoc4j.enums.model.NextDoc4jEnumMetadata;
 import top.nextdoc4j.enums.util.EnumUtils;
 
 import java.lang.reflect.Method;
@@ -91,13 +91,13 @@ public class DefaultEnumMetadataResolver implements EnumMetadataResolver {
      * 通过 getValueMethodName() 和 getDescriptionMethodName() 获取方法名，然后反射调用
      * </p>
      */
-    public EnumPluginMetadata doResolveMetadata(EnumMetadataResolver resolver, Class<?> enumClass) {
+    public NextDoc4jEnumMetadata doResolveMetadata(EnumMetadataResolver resolver, Class<?> enumClass) {
         Object[] constants = enumClass.getEnumConstants();
         if (constants == null || constants.length == 0) {
             return null;
         }
 
-        List<EnumPluginMetadata.EnumItem> items = new ArrayList<>(constants.length);
+        List<NextDoc4jEnumMetadata.EnumItem> items = new ArrayList<>(constants.length);
         boolean hasCustomDescription = false;
 
         String valueMethodName = resolver.getValueMethodName();
@@ -115,11 +115,11 @@ public class DefaultEnumMetadataResolver implements EnumMetadataResolver {
             if (!name.equals(description)) {
                 hasCustomDescription = true;
             }
-            items.add(new EnumPluginMetadata.EnumItem(value, description));
+            items.add(new NextDoc4jEnumMetadata.EnumItem(value, description));
         }
 
         // 如果没有任何自定义描述，返回 null（不添加扩展字段）
-        return hasCustomDescription ? new EnumPluginMetadata(items) : null;
+        return hasCustomDescription ? new NextDoc4jEnumMetadata(items) : null;
     }
 
     /**

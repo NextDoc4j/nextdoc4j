@@ -17,7 +17,7 @@
  */
 package top.nextdoc4j.enums.resolver;
 
-import top.nextdoc4j.enums.model.EnumPluginMetadata;
+import top.nextdoc4j.enums.model.NextDoc4jEnumMetadata;
 
 import java.util.List;
 
@@ -113,7 +113,7 @@ public interface EnumMetadataResolver {
      * @param enumClass 枚举类
      * @return 枚举扩展元数据，返回 null 表示使用默认实现
      */
-    default EnumPluginMetadata resolveMetadata(Class<?> enumClass) {
+    default NextDoc4jEnumMetadata resolveMetadata(Class<?> enumClass) {
         return null;
     }
 }
