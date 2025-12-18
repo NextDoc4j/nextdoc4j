@@ -132,6 +132,8 @@ public class DefaultEnumMetadataResolver implements EnumMetadataResolver {
     protected Object invokeMethod(Object target, String methodName) {
         try {
             Method method = target.getClass().getMethod(methodName);
+            // 设置方法可访问,解决匿名内部类枚举的访问权限问题
+            method.setAccessible(true);
             return method.invoke(target);
         } catch (Exception e) {
             throw new RuntimeException("Failed to invoke method: " + methodName + " on " + target.getClass(), e);

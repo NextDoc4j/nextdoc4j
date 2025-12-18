@@ -18,7 +18,6 @@
 package top.nextdoc4j.security.satoken.autoconfigure;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
@@ -52,7 +51,7 @@ public class NextDoc4jSaTokenAutoConfiguration {
      * @return 注解解析器实例
      */
     @Bean
-    @ConditionalOnMissingBean
+    @Order(100)
     public NextDoc4jSecurityMetadataResolver saTokenAnnotationResolver() {
         return new NextDoc4jSaTokenAnnotationResolver();
     }
