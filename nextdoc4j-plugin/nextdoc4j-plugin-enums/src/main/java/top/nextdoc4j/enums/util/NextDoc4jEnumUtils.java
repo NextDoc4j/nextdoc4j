@@ -31,7 +31,7 @@ import java.util.*;
  * @author echo
  * @since 1.1.3
  */
-public class EnumUtils {
+public class NextDoc4jEnumUtils {
 
     /**
      * OpenAPI 类型常量
@@ -60,7 +60,7 @@ public class EnumUtils {
     private static final Map<String, String> FORMAT_MAPPING = Map
         .of(TYPE_INTEGER, FORMAT_INT32, TYPE_LONG, FORMAT_INT64, TYPE_NUMBER, FORMAT_DOUBLE);
 
-    private EnumUtils() {
+    private NextDoc4jEnumUtils() {
     }
 
     /**

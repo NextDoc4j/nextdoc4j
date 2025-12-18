@@ -20,7 +20,7 @@ package top.nextdoc4j.enums.resolver;
 import cn.hutool.core.util.ClassUtil;
 import top.nextdoc4j.enums.core.EnumValue;
 import top.nextdoc4j.enums.model.NextDoc4jEnumMetadata;
-import top.nextdoc4j.enums.util.EnumUtils;
+import top.nextdoc4j.enums.util.NextDoc4jEnumUtils;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -57,8 +57,8 @@ public class DefaultEnumMetadataResolver implements EnumMetadataResolver {
             interfaceType = EnumValue.class;
         }
 
-        Class<?> valueClass = EnumUtils.extractGenericType(enumClass, interfaceType);
-        return EnumUtils.toOpenApiType(valueClass);
+        Class<?> valueClass = NextDoc4jEnumUtils.extractGenericType(enumClass, interfaceType);
+        return NextDoc4jEnumUtils.toOpenApiType(valueClass);
     }
 
     /**
@@ -66,7 +66,7 @@ public class DefaultEnumMetadataResolver implements EnumMetadataResolver {
      */
     public String doResolveFormat(EnumMetadataResolver resolver, Class<?> enumClass) {
         String valueType = doResolveValueType(resolver, enumClass);
-        return EnumUtils.getFormat(valueType);
+        return NextDoc4jEnumUtils.getFormat(valueType);
     }
 
     /**
