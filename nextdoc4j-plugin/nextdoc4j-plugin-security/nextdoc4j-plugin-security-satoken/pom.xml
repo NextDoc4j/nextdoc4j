@@ -30,6 +30,12 @@
             <optional>true</optional>
         </dependency>
 
+        <!--hutool 扩展-->
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-extra</artifactId>
+        </dependency>
+
 
     </dependencies>
 

@@ -21,7 +21,6 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import top.nextdoc4j.core.constant.NextDoc4jConstants;
 import top.nextdoc4j.security.core.enhancer.NextDoc4jPathExcluder;
 import top.nextdoc4j.security.core.enhancer.NextDoc4jSecurityMetadataResolver;
@@ -59,12 +58,11 @@ public class NextDoc4jSaTokenAutoConfiguration {
     /**
      * 路径排除器
      *
-     * @param handlerMapping 请求映射处理器
      * @return 路径排除器实例
      */
     @Bean
     @Order(100)
-    public NextDoc4jPathExcluder saTokenPathExcluder(RequestMappingHandlerMapping handlerMapping) {
-        return new NextDoc4JSaTokenExcluderNextDoc4j(handlerMapping);
+    public NextDoc4jPathExcluder saTokenPathExcluder() {
+        return new NextDoc4JSaTokenExcluderNextDoc4j();
     }
 }
