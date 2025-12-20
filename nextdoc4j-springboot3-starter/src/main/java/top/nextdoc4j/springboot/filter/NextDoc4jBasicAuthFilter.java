@@ -17,7 +17,6 @@
  */
 package top.nextdoc4j.springboot.filter;
 
-import ch.qos.logback.core.joran.spi.HttpUtil;
 import cn.hutool.core.util.StrUtil;
 import io.swagger.v3.oas.models.OpenAPI;
 import jakarta.servlet.FilterChain;
@@ -29,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.web.filter.OncePerRequestFilter;
 import top.nextdoc4j.core.configuration.NextDoc4jExtension;
@@ -252,8 +252,7 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
      * @return true 表示是注销请求
      */
     private boolean isLogoutRequest(String method, HttpServletRequest request) {
-        return HttpUtil.RequestMethod.GET.name().equalsIgnoreCase(method) && LOGOUT_ACTION.equals(request
-            .getParameter("action"));
+        return HttpMethod.GET.name().equalsIgnoreCase(method) && LOGOUT_ACTION.equals(request.getParameter("action"));
     }
 
     /**
