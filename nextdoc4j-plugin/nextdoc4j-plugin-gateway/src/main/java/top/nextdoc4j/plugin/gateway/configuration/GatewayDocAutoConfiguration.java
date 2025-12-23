@@ -18,7 +18,6 @@
 package top.nextdoc4j.plugin.gateway.configuration;
 
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.info.Info;
 import org.springdoc.core.properties.SwaggerUiConfigProperties;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -28,13 +27,14 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cloud.gateway.route.RouteDefinitionLocator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableAsync;
+import top.nextdoc4j.core.constant.NextDoc4jConstants;
 import top.nextdoc4j.plugin.gateway.customizer.GatewayAggregationCustomizer;
 import top.nextdoc4j.plugin.gateway.customizer.GatewaySwaggerConfigCustomizer;
-import top.nextdoc4j.plugin.gateway.filter.DefaultRouteFilter;
-import top.nextdoc4j.plugin.gateway.filter.RouteFilter;
+import top.nextdoc4j.plugin.gateway.filter.NextDoc4jDefaultGatewayRouteFilter;
+import top.nextdoc4j.plugin.gateway.filter.NextDoc4jGatewayRouteFilter;
 import top.nextdoc4j.plugin.gateway.provider.GatewayRouteDocProvider;
-import top.nextdoc4j.plugin.gateway.resolver.DefaultRouteMetadataResolver;
-import top.nextdoc4j.plugin.gateway.resolver.RouteMetadataResolver;
+import top.nextdoc4j.plugin.gateway.resolver.NextDoc4jDefaultGatewayRouteMetadataResolver;
+import top.nextdoc4j.plugin.gateway.resolver.NextDoc4jGatewayRouteMetadataResolver;
 
 /**
  * Gateway 聚合文档自动配置
@@ -45,17 +45,17 @@ import top.nextdoc4j.plugin.gateway.resolver.RouteMetadataResolver;
 @AutoConfiguration
 @EnableAsync
 @ConditionalOnClass({RouteDefinitionLocator.class, SwaggerUiConfigProperties.class})
-@ConditionalOnProperty(prefix = "nextdoc4j.gateway", name = "enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(prefix = NextDoc4jConstants.PLUGIN_GATEWAY, name = NextDoc4jConstants.ENABLED, havingValue = "true")
 @EnableConfigurationProperties(GatewayDocProperties.class)
 public class GatewayDocAutoConfiguration {
 
     /**
-     * 默认的 OpenAPI Bean（如果用户没有配置）
+     * 默认的 OpenAPI Bean
      */
     @Bean
     @ConditionalOnMissingBean
     public OpenAPI gatewayOpenApi() {
-        return new OpenAPI().info(new Info().title("API Gateway").description("API Gateway 聚合文档").version("1.0.0"));
+        return new OpenAPI();
     }
 
     /**
@@ -63,8 +63,8 @@ public class GatewayDocAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public RouteFilter gatewayRouteFilter() {
-        return new DefaultRouteFilter();
+    public NextDoc4jGatewayRouteFilter gatewayRouteFilter() {
+        return new NextDoc4jDefaultGatewayRouteFilter();
     }
 
     /**
@@ -72,8 +72,8 @@ public class GatewayDocAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public RouteMetadataResolver routeMetadataResolver(GatewayDocProperties properties) {
-        return new DefaultRouteMetadataResolver(properties);
+    public NextDoc4jGatewayRouteMetadataResolver routeMetadataResolver(GatewayDocProperties properties) {
+        return new NextDoc4jDefaultGatewayRouteMetadataResolver(properties);
     }
 
     /**
@@ -83,8 +83,8 @@ public class GatewayDocAutoConfiguration {
     @ConditionalOnMissingBean
     public GatewayRouteDocProvider gatewayRouteDocProvider(RouteDefinitionLocator routeDefinitionLocator,
                                                            GatewayDocProperties properties,
-                                                           RouteFilter routeFilter,
-                                                           RouteMetadataResolver metadataResolver) {
+                                                           NextDoc4jGatewayRouteFilter routeFilter,
+                                                           NextDoc4jGatewayRouteMetadataResolver metadataResolver) {
         return new GatewayRouteDocProvider(routeDefinitionLocator, properties, routeFilter, metadataResolver);
     }
 

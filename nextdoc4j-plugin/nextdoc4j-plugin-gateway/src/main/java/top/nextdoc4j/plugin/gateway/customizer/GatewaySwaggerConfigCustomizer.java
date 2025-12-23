@@ -69,7 +69,6 @@ public class GatewaySwaggerConfigCustomizer {
     @EventListener(RefreshRoutesEvent.class)
     public void onRoutesRefresh(RefreshRoutesEvent event) {
         if (properties.isEnabled()) {
-            log.info("Gateway routes refreshed, updating swagger urls...");
             refreshUrls();
         }
     }
@@ -77,31 +76,10 @@ public class GatewaySwaggerConfigCustomizer {
     private synchronized void refreshUrls() {
         try {
             Set<AbstractSwaggerUiConfigProperties.SwaggerUrl> urls = new LinkedHashSet<>();
-
-            int autoCount = 0;
-            int manualCount = 0;
-
-            routeDocProvider.getAutoDiscoveredUrls().doOnNext(swaggerUrl -> {
-                urls.add(swaggerUrl);
-                log.debug("Auto discovered service: {} -> {}", swaggerUrl.getName(), swaggerUrl.getUrl());
-            }).blockLast();
-            autoCount = urls.size();
-
+            routeDocProvider.getAutoDiscoveredUrls().doOnNext(urls::add).blockLast();
             List<AbstractSwaggerUiConfigProperties.SwaggerUrl> manualUrls = routeDocProvider.getManualConfiguredUrls();
-            for (AbstractSwaggerUiConfigProperties.SwaggerUrl manualUrl : manualUrls) {
-                boolean added = urls.add(manualUrl);
-                if (added) {
-                    manualCount++;
-                    log.debug("Manual configured service: {} -> {}", manualUrl.getName(), manualUrl.getUrl());
-                } else {
-                    log.debug("Manual configured service already exists (skipped): {} -> {}", manualUrl
-                        .getName(), manualUrl.getUrl());
-                }
-            }
-
+            urls.addAll(manualUrls);
             swaggerUiConfigProperties.setUrls(urls);
-            log.info("Updated swagger urls: {} auto-discovered, {} manual-configured, {} total", autoCount, manualCount, urls
-                .size());
         } catch (Exception e) {
             log.error("Failed to refresh swagger urls", e);
         }

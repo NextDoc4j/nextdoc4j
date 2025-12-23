@@ -17,38 +17,32 @@
  */
 package top.nextdoc4j.plugin.gateway.resolver;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.cloud.gateway.route.RouteDefinition;
 import org.springframework.util.StringUtils;
 import top.nextdoc4j.plugin.gateway.configuration.GatewayDocProperties;
+import top.nextdoc4j.plugin.gateway.constant.GatewayMetadataConstants;
+import top.nextdoc4j.plugin.gateway.enums.DocPathStrategy;
+import top.nextdoc4j.plugin.gateway.enums.NameResolveStrategy;
 
 import java.util.Map;
 
 /**
- * 默认路由元数据解析器实现
+ * NextDoc4j 默认路由元数据解析器实现
  *
  * @author echo
  * @since 1.2.0
  */
-public class DefaultRouteMetadataResolver implements RouteMetadataResolver {
-
-    private static final Logger log = LoggerFactory.getLogger(DefaultRouteMetadataResolver.class);
-
-    private static final String METADATA_DOC_PATH = "nextdoc4j.doc-path";
-    private static final String METADATA_NAME = "nextdoc4j.name";
-    private static final String METADATA_SPRINGDOC_PATH = "springdoc.path";
-    private static final String METADATA_NAME_ALT = "name";
+public class NextDoc4jDefaultGatewayRouteMetadataResolver implements NextDoc4jGatewayRouteMetadataResolver {
 
     private final GatewayDocProperties properties;
 
-    public DefaultRouteMetadataResolver(GatewayDocProperties properties) {
+    public NextDoc4jDefaultGatewayRouteMetadataResolver(GatewayDocProperties properties) {
         this.properties = properties;
     }
 
     @Override
     public String extractDocPath(RouteDefinition route) {
-        GatewayDocProperties.DocPathStrategy strategy = properties.getDocPathStrategy();
+        DocPathStrategy strategy = properties.getDocPathStrategy();
 
         return switch (strategy) {
             case METADATA -> extractFromMetadata(route);
@@ -61,7 +55,7 @@ public class DefaultRouteMetadataResolver implements RouteMetadataResolver {
     @Override
     public String resolveDisplayName(RouteDefinition route) {
         String routeId = route.getId();
-        GatewayDocProperties.NameResolveStrategy strategy = properties.getNameResolveStrategy();
+        NameResolveStrategy strategy = properties.getNameResolveStrategy();
 
         return switch (strategy) {
             case METADATA -> resolveFromMetadata(route);
@@ -80,51 +74,48 @@ public class DefaultRouteMetadataResolver implements RouteMetadataResolver {
      * 自动模式提取文档路径
      */
     private String extractAuto(RouteDefinition route) {
+        Map<String, Object> metadata = route.getMetadata();
+
         // 1. 优先从 metadata.nextdoc4j.doc-path 获取
-        String docPath = getMetadataValue(route, METADATA_DOC_PATH);
+        String docPath = getNextDoc4jDocPath(metadata);
         if (StringUtils.hasText(docPath)) {
-            log.debug("DocPath from metadata.nextdoc4j.doc-path: {}", docPath);
             return docPath;
         }
 
         // 2. 从 metadata.springdoc.path 获取
-        docPath = getMetadataValue(route, METADATA_SPRINGDOC_PATH);
+        docPath = getMetadataValue(metadata, GatewayMetadataConstants.SPRINGDOC_PATH);
         if (StringUtils.hasText(docPath)) {
-            log.debug("DocPath from metadata.springdoc.path: {}", docPath);
             return docPath;
         }
 
         // 3. 从 Path 谓词提取（这是网关实际的路由路径）
         docPath = extractFromPathPredicate(route);
         if (StringUtils.hasText(docPath)) {
-            log.debug("DocPath from Path predicate: {}", docPath);
             return docPath;
         }
 
         // 4. 尝试从 URI 提取服务名
         String serviceName = extractServiceNameFromUri(route);
         if (StringUtils.hasText(serviceName)) {
-            String path = "/" + serviceName + properties.getDocPath();
-            log.debug("DocPath from URI: {}", path);
-            return path;
+            return "/" + serviceName + properties.getDocPath();
         }
 
         // 5. 从路由 ID 推断
-        String path = "/" + route.getId() + properties.getDocPath();
-        log.debug("DocPath from routeId: {}", path);
-        return path;
+        return "/" + route.getId() + properties.getDocPath();
     }
 
     /**
      * 从 metadata 提取文档路径
      */
     private String extractFromMetadata(RouteDefinition route) {
-        String docPath = getMetadataValue(route, METADATA_DOC_PATH);
+        Map<String, Object> metadata = route.getMetadata();
+
+        String docPath = getNextDoc4jDocPath(metadata);
         if (StringUtils.hasText(docPath)) {
             return docPath;
         }
 
-        docPath = getMetadataValue(route, METADATA_SPRINGDOC_PATH);
+        docPath = getMetadataValue(metadata, GatewayMetadataConstants.SPRINGDOC_PATH);
         if (StringUtils.hasText(docPath)) {
             return docPath;
         }
@@ -159,25 +150,23 @@ public class DefaultRouteMetadataResolver implements RouteMetadataResolver {
      */
     private String resolveAuto(RouteDefinition route) {
         String routeId = route.getId();
+        Map<String, Object> metadata = route.getMetadata();
 
         // 1. 优先使用配置的映射
         String mappedName = properties.getNameMappings().get(routeId);
         if (StringUtils.hasText(mappedName)) {
-            log.debug("Name from nameMappings: {} -> {}", routeId, mappedName);
             return mappedName;
         }
 
         // 2. 从 metadata.nextdoc4j.name 获取
-        String metaName = getMetadataValue(route, METADATA_NAME);
+        String metaName = getNextDoc4jName(metadata);
         if (StringUtils.hasText(metaName)) {
-            log.debug("Name from metadata.nextdoc4j.name: {}", metaName);
             return metaName;
         }
 
         // 3. 从 metadata.name 获取
-        metaName = getMetadataValue(route, METADATA_NAME_ALT);
+        metaName = getMetadataValue(metadata, GatewayMetadataConstants.NAME);
         if (StringUtils.hasText(metaName)) {
-            log.debug("Name from metadata.name: {}", metaName);
             return metaName;
         }
 
@@ -195,12 +184,14 @@ public class DefaultRouteMetadataResolver implements RouteMetadataResolver {
      * 从 metadata 解析显示名称
      */
     private String resolveFromMetadata(RouteDefinition route) {
-        String name = getMetadataValue(route, METADATA_NAME);
+        Map<String, Object> metadata = route.getMetadata();
+
+        String name = getNextDoc4jName(metadata);
         if (StringUtils.hasText(name)) {
             return name;
         }
 
-        name = getMetadataValue(route, METADATA_NAME_ALT);
+        name = getMetadataValue(metadata, GatewayMetadataConstants.NAME);
         if (StringUtils.hasText(name)) {
             return name;
         }
@@ -220,10 +211,61 @@ public class DefaultRouteMetadataResolver implements RouteMetadataResolver {
     }
 
     /**
-     * 从 metadata 获取值
+     * 获取 nextdoc4j.doc-path（支持嵌套结构）
+     * <p>
+     * 支持两种 YAML 配置格式：
+     * <pre>
+     * # 扁平结构
+     * metadata:
+     * nextdoc4j.doc-path: /file/v3/api-docs
+     *
+     * # 嵌套结构
+     * metadata:
+     * nextdoc4j:
+     * doc-path: /file/v3/api-docs
+     * </pre>
      */
-    private String getMetadataValue(RouteDefinition route, String key) {
-        Map<String, Object> metadata = route.getMetadata();
+    private String getNextDoc4jDocPath(Map<String, Object> metadata) {
+        // 先尝试扁平结构：metadata["nextdoc4j.doc-path"]
+        String value = getMetadataValue(metadata, GatewayMetadataConstants.NEXTDOC4J_DOC_PATH);
+        if (StringUtils.hasText(value)) {
+            return value;
+        }
+
+        // 再尝试嵌套结构：metadata["nextdoc4j"]["doc-path"]
+        return GatewayMetadataConstants.getNestedValue(metadata, GatewayMetadataConstants.NEXTDOC4J_PREFIX, "doc-path");
+    }
+
+    /**
+     * 获取 nextdoc4j.name（支持嵌套结构）
+     * <p>
+     * 支持两种 YAML 配置格式：
+     * <pre>
+     * # 扁平结构
+     * metadata:
+     * nextdoc4j.name: 文件服务
+     *
+     * # 嵌套结构
+     * metadata:
+     * nextdoc4j:
+     * name: 文件服务
+     * </pre>
+     */
+    private String getNextDoc4jName(Map<String, Object> metadata) {
+        // 先尝试扁平结构：metadata["nextdoc4j.name"]
+        String value = getMetadataValue(metadata, GatewayMetadataConstants.NEXTDOC4J_NAME);
+        if (StringUtils.hasText(value)) {
+            return value;
+        }
+
+        // 再尝试嵌套结构：metadata["nextdoc4j"]["name"]
+        return GatewayMetadataConstants.getNestedValue(metadata, GatewayMetadataConstants.NEXTDOC4J_PREFIX, GatewayMetadataConstants.NAME);
+    }
+
+    /**
+     * 从 metadata 直接获取值（扁平结构）
+     */
+    private String getMetadataValue(Map<String, Object> metadata, String key) {
         if (metadata == null) {
             return null;
         }

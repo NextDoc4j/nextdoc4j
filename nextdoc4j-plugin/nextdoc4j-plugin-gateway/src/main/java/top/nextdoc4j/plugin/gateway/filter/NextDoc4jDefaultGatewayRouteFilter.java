@@ -17,8 +17,6 @@
  */
 package top.nextdoc4j.plugin.gateway.filter;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.cloud.gateway.route.RouteDefinition;
 import org.springframework.util.AntPathMatcher;
 import top.nextdoc4j.plugin.gateway.configuration.GatewayDocProperties;
@@ -26,14 +24,12 @@ import top.nextdoc4j.plugin.gateway.configuration.GatewayDocProperties;
 import java.util.List;
 
 /**
- * 默认路由过滤器实现
+ * NextDoc4j 默认路由过滤器实现
  *
  * @author echo
  * @since 1.2.0
  */
-public class DefaultRouteFilter implements RouteFilter {
-
-    private static final Logger log = LoggerFactory.getLogger(DefaultRouteFilter.class);
+public class NextDoc4jDefaultGatewayRouteFilter implements NextDoc4jGatewayRouteFilter {
 
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
@@ -43,34 +39,25 @@ public class DefaultRouteFilter implements RouteFilter {
 
         // 1. 检查排除列表（支持通配符）
         if (isExcluded(routeId, properties.getExcludeRoutes())) {
-            log.debug("Route excluded: {}", routeId);
             return false;
         }
 
         // 2. 排除注册中心自动生成的路由
         if (isDiscoveryClientRoute(routeId)) {
-            log.debug("DiscoveryClient route excluded: {}", routeId);
             return false;
         }
 
         // 3. 必须有 Path 谓词
         boolean hasPathPredicate = route.getPredicates().stream().anyMatch(p -> "Path".equalsIgnoreCase(p.getName()));
         if (!hasPathPredicate) {
-            log.debug("Route has no Path predicate: {}", routeId);
             return false;
         }
 
         // 4. 包含模式匹配（如果配置了）
         List<String> includePatterns = properties.getIncludePatterns();
         if (!includePatterns.isEmpty()) {
-            boolean matched = includePatterns.stream().anyMatch(pattern -> pathMatcher.match(pattern, routeId));
-            if (!matched) {
-                log.debug("Route not matched by include patterns: {}", routeId);
-                return false;
-            }
+            return includePatterns.stream().anyMatch(pattern -> pathMatcher.match(pattern, routeId));
         }
-
-        log.debug("Route included: {}", routeId);
         return true;
     }
 

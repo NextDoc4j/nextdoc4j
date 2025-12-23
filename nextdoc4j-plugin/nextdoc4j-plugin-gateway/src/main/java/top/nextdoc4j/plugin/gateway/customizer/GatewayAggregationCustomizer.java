@@ -19,10 +19,9 @@ package top.nextdoc4j.plugin.gateway.customizer;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import org.springdoc.core.customizers.GlobalOpenApiCustomizer;
+import top.nextdoc4j.core.constant.NextDoc4jOpenApiExtensionConstants;
 import top.nextdoc4j.plugin.gateway.configuration.GatewayDocProperties;
-
-import java.util.HashMap;
-import java.util.Map;
+import top.nextdoc4j.plugin.gateway.model.GatewayAggregationInfo;
 
 /**
  * Gateway 聚合文档 OpenAPI 定制器
@@ -36,8 +35,6 @@ import java.util.Map;
  */
 public class GatewayAggregationCustomizer implements GlobalOpenApiCustomizer {
 
-    public static final String X_NEXTDOC4J_AGGREGATION = "x-nextdoc4j-aggregation";
-
     private final GatewayDocProperties properties;
 
     public GatewayAggregationCustomizer(GatewayDocProperties properties) {
@@ -50,10 +47,7 @@ public class GatewayAggregationCustomizer implements GlobalOpenApiCustomizer {
             return;
         }
 
-        Map<String, Object> aggregationInfo = new HashMap<>();
-        aggregationInfo.put("isAggregation", true);
-        aggregationInfo.put("docPath", properties.getDocPath());
-
-        openApi.addExtension(X_NEXTDOC4J_AGGREGATION, aggregationInfo);
+        GatewayAggregationInfo aggregationInfo = new GatewayAggregationInfo(properties.getDocPath());
+        openApi.addExtension(NextDoc4jOpenApiExtensionConstants.X_NEXTDOC4J_AGGREGATION, aggregationInfo);
     }
 }

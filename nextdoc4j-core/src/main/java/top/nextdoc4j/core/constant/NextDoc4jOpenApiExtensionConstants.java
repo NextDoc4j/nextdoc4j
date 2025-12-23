@@ -56,4 +56,11 @@ public final class NextDoc4jOpenApiExtensionConstants {
      */
     public static final String X_NEXTDOC4J_SECURITY = X_NEXTDOC4J + "-security";
 
+    /**
+     * 网关聚合扩展
+     * <p>
+     * x-nextdoc4j-aggregation
+     */
+    public static final String X_NEXTDOC4J_AGGREGATION = X_NEXTDOC4J + "-aggregation";
+
 }
