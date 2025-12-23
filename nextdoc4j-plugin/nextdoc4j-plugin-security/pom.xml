@@ -20,6 +20,14 @@
         <module>nextdoc4j-plugin-security-satoken</module>
     </modules>
 
+    <dependencies>
+        <!--nextdoc4j 核心模块-->
+        <dependency>
+            <groupId>top.nextdoc4j</groupId>
+            <artifactId>nextdoc4j-core</artifactId>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
 
 
 </project>

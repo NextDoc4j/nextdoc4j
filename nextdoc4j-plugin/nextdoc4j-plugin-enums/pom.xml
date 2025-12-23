@@ -15,5 +15,14 @@
         插件 - 枚举信息展示模块，支持将枚举字段转为可读格式，用于接口文档、元数据展示等场景。
     </description>
 
+    <dependencies>
+        <!--nextdoc4j 核心模块-->
+        <dependency>
+            <groupId>top.nextdoc4j</groupId>
+            <artifactId>nextdoc4j-core</artifactId>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
+
 
 </project>
