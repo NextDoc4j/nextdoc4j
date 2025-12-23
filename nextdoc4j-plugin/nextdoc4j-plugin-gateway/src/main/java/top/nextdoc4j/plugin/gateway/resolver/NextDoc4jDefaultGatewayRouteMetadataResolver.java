@@ -259,7 +259,8 @@ public class NextDoc4jDefaultGatewayRouteMetadataResolver implements NextDoc4jGa
         }
 
         // 再尝试嵌套结构：metadata["nextdoc4j"]["name"]
-        return GatewayMetadataConstants.getNestedValue(metadata, GatewayMetadataConstants.NEXTDOC4J_PREFIX, GatewayMetadataConstants.NAME);
+        return GatewayMetadataConstants
+            .getNestedValue(metadata, GatewayMetadataConstants.NEXTDOC4J_PREFIX, GatewayMetadataConstants.NAME);
     }
 
     /**
