@@ -19,16 +19,8 @@
     <modules>
         <module>nextdoc4j-plugin-enums</module>
         <module>nextdoc4j-plugin-security</module>
+        <module>nextdoc4j-plugin-gateway</module>
     </modules>
-
-    <dependencies>
-        <!--nextdoc4j 核心模块-->
-        <dependency>
-            <groupId>top.nextdoc4j</groupId>
-            <artifactId>nextdoc4j-core</artifactId>
-            <optional>true</optional>
-        </dependency>
-    </dependencies>
 
 
 </project>

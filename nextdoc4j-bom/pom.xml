@@ -62,6 +62,15 @@
                 <version>${revision}</version>
             </dependency>
 
+            <!--插件 - springcloud 聚合插件-->
+            <dependency>
+                <groupId>top.nextdoc4j</groupId>
+                <artifactId>nextdoc4j-plugin-gateway</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
+
+
         </dependencies>
     </dependencyManagement>
 
