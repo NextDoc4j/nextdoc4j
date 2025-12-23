@@ -23,6 +23,13 @@
             <version>${revision}</version>
         </dependency>
 
+        <!--springdoc-openapi-starter-webmvc-ui-->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+        </dependency>
+
+
         <!--UI 模块-->
         <dependency>
             <groupId>top.nextdoc4j</groupId>

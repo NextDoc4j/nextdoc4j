@@ -21,10 +21,10 @@
             <artifactId>jakarta.servlet-api</artifactId>
         </dependency>
 
-        <!--springdoc -->
+        <!--springdoc common -->
         <dependency>
             <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <artifactId>springdoc-openapi-starter-common</artifactId>
         </dependency>
 
         <!--hutool 核心模块-->
