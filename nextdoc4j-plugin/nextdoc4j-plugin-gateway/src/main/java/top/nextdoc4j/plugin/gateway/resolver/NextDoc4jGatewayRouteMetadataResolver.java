@@ -23,7 +23,7 @@ import top.nextdoc4j.plugin.gateway.configuration.GatewayDocProperties;
 import java.net.URI;
 
 /**
- * 路由元数据解析器接口
+ * NextDoc4j 网关路由元数据解析器接口
  * <p>
  * 用于从路由定义中提取文档路径和显示名称
  * </p>
@@ -31,7 +31,7 @@ import java.net.URI;
  * @author echo
  * @since 1.2.0
  */
-public interface RouteMetadataResolver {
+public interface NextDoc4jGatewayRouteMetadataResolver {
 
     /**
      * 从路由定义中提取文档路径

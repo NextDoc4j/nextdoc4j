@@ -21,7 +21,7 @@ import org.springframework.cloud.gateway.route.RouteDefinition;
 import top.nextdoc4j.plugin.gateway.configuration.GatewayDocProperties;
 
 /**
- * 路由过滤器接口
+ * NextDoc4j 网关路由过滤器接口
  * <p>
  * 用于判断 Gateway 路由是否应该被包含在文档聚合中
  * </p>
@@ -30,7 +30,7 @@ import top.nextdoc4j.plugin.gateway.configuration.GatewayDocProperties;
  * @since 1.2.0
  */
 @FunctionalInterface
-public interface RouteFilter {
+public interface NextDoc4jGatewayRouteFilter {
 
     /**
      * 判断路由是否应该被包含
@@ -47,7 +47,7 @@ public interface RouteFilter {
      * @param other 另一个过滤器
      * @return 组合后的过滤器
      */
-    default RouteFilter and(RouteFilter other) {
+    default NextDoc4jGatewayRouteFilter and(NextDoc4jGatewayRouteFilter other) {
         return (route, props) -> this.test(route, props) && other.test(route, props);
     }
 
@@ -57,7 +57,7 @@ public interface RouteFilter {
      * @param other 另一个过滤器
      * @return 组合后的过滤器
      */
-    default RouteFilter or(RouteFilter other) {
+    default NextDoc4jGatewayRouteFilter or(NextDoc4jGatewayRouteFilter other) {
         return (route, props) -> this.test(route, props) || other.test(route, props);
     }
 
@@ -66,7 +66,7 @@ public interface RouteFilter {
      *
      * @return 取反后的过滤器
      */
-    default RouteFilter negate() {
+    default NextDoc4jGatewayRouteFilter negate() {
         return (route, props) -> !this.test(route, props);
     }
 }

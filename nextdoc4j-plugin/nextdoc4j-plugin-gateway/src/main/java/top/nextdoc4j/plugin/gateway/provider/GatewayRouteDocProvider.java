@@ -17,8 +17,6 @@
  */
 package top.nextdoc4j.plugin.gateway.provider;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springdoc.core.properties.AbstractSwaggerUiConfigProperties;
 import org.springframework.cloud.gateway.route.RouteDefinition;
 import org.springframework.cloud.gateway.route.RouteDefinitionLocator;
@@ -26,8 +24,10 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import top.nextdoc4j.plugin.gateway.configuration.GatewayDocProperties;
-import top.nextdoc4j.plugin.gateway.filter.RouteFilter;
-import top.nextdoc4j.plugin.gateway.resolver.RouteMetadataResolver;
+import top.nextdoc4j.plugin.gateway.enums.DocPathStrategy;
+import top.nextdoc4j.plugin.gateway.filter.NextDoc4jGatewayRouteFilter;
+import top.nextdoc4j.plugin.gateway.model.ServiceConfig;
+import top.nextdoc4j.plugin.gateway.resolver.NextDoc4jGatewayRouteMetadataResolver;
 
 import java.util.Collections;
 import java.util.List;
@@ -44,12 +44,10 @@ import java.util.List;
  */
 public class GatewayRouteDocProvider {
 
-    private static final Logger log = LoggerFactory.getLogger(GatewayRouteDocProvider.class);
-
     private final RouteDefinitionLocator routeDefinitionLocator;
     private final GatewayDocProperties properties;
-    private final RouteFilter routeFilter;
-    private final RouteMetadataResolver metadataResolver;
+    private final NextDoc4jGatewayRouteFilter routeFilter;
+    private final NextDoc4jGatewayRouteMetadataResolver metadataResolver;
 
     public GatewayRouteDocProvider(RouteDefinitionLocator routeDefinitionLocator, GatewayDocProperties properties) {
         this(routeDefinitionLocator, properties, null, null);
@@ -57,8 +55,8 @@ public class GatewayRouteDocProvider {
 
     public GatewayRouteDocProvider(RouteDefinitionLocator routeDefinitionLocator,
                                    GatewayDocProperties properties,
-                                   RouteFilter routeFilter,
-                                   RouteMetadataResolver metadataResolver) {
+                                   NextDoc4jGatewayRouteFilter routeFilter,
+                                   NextDoc4jGatewayRouteMetadataResolver metadataResolver) {
         this.routeDefinitionLocator = routeDefinitionLocator;
         this.properties = properties;
         this.routeFilter = routeFilter;
@@ -75,7 +73,7 @@ public class GatewayRouteDocProvider {
             return Flux.empty();
         }
 
-        if (properties.getDocPathStrategy() == GatewayDocProperties.DocPathStrategy.MANUAL_ONLY) {
+        if (properties.getDocPathStrategy() == DocPathStrategy.MANUAL_ONLY) {
             return Flux.empty();
         }
 
@@ -99,7 +97,7 @@ public class GatewayRouteDocProvider {
      * @return Swagger URL 列表
      */
     public List<AbstractSwaggerUiConfigProperties.SwaggerUrl> getManualConfiguredUrls() {
-        List<GatewayDocProperties.ServiceConfig> services = properties.getServices();
+        List<ServiceConfig> services = properties.getServices();
         if (CollectionUtils.isEmpty(services)) {
             return Collections.emptyList();
         }
@@ -113,24 +111,17 @@ public class GatewayRouteDocProvider {
     /**
      * 判断手动配置是否有效
      */
-    private boolean isValidServiceConfig(GatewayDocProperties.ServiceConfig config) {
-        if (!StringUtils.hasText(config.getName()) || !StringUtils.hasText(config.getUrl())) {
-            log.warn("Invalid service config: name or url is empty, name={}, url={}", config.getName(), config
-                .getUrl());
-            return false;
-        }
-        return true;
+    private boolean isValidServiceConfig(ServiceConfig config) {
+        return StringUtils.hasText(config.getName()) && StringUtils.hasText(config.getUrl());
     }
 
     /**
      * 将手动配置转换为 SwaggerUrl
      */
-    private AbstractSwaggerUiConfigProperties.SwaggerUrl convertServiceConfigToSwaggerUrl(GatewayDocProperties.ServiceConfig config) {
+    private AbstractSwaggerUiConfigProperties.SwaggerUrl convertServiceConfigToSwaggerUrl(ServiceConfig config) {
         AbstractSwaggerUiConfigProperties.SwaggerUrl swaggerUrl = new AbstractSwaggerUiConfigProperties.SwaggerUrl();
         swaggerUrl.setName(config.getName());
         swaggerUrl.setUrl(config.getUrl());
-
-        log.debug("Manual configured service: {} -> {}", config.getName(), config.getUrl());
         return swaggerUrl;
     }
 
@@ -141,7 +132,6 @@ public class GatewayRouteDocProvider {
         String routeId = route.getId();
 
         if (properties.getExcludeRoutes().contains(routeId)) {
-            log.debug("Route excluded by configuration: {}", routeId);
             return false;
         }
 
@@ -182,8 +172,6 @@ public class GatewayRouteDocProvider {
         AbstractSwaggerUiConfigProperties.SwaggerUrl swaggerUrl = new AbstractSwaggerUiConfigProperties.SwaggerUrl();
         swaggerUrl.setName(displayName);
         swaggerUrl.setUrl(docUrl);
-
-        log.debug("Converted route to SwaggerUrl: {} -> {}", displayName, docUrl);
         return swaggerUrl;
     }
 
@@ -219,11 +207,11 @@ public class GatewayRouteDocProvider {
         return name;
     }
 
-    public RouteFilter getRouteFilter() {
+    public NextDoc4jGatewayRouteFilter getRouteFilter() {
         return routeFilter;
     }
 
-    public RouteMetadataResolver getMetadataResolver() {
+    public NextDoc4jGatewayRouteMetadataResolver getMetadataResolver() {
         return metadataResolver;
     }
 }
