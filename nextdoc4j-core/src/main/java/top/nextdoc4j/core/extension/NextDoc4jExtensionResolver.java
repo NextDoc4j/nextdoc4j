@@ -40,14 +40,19 @@ import java.time.ZoneId;
 import java.util.*;
 
 /**
- * NextDoc4j扩展解析器
+ * NextDoc4j扩展配置解析器
  * <p>
- * 该类负责解析和构建NextDoc4j扩展配置，主要功能包括：
+ * 该类负责解析和构建NextDoc4j的扩展配置（brand、markdown），主要功能包括：
  * <ul>
  * <li>解析和构建品牌信息（Logo、标题、页脚文本等）</li>
  * <li>解析Markdown文档配置，支持通配符模式</li>
  * <li>处理资源文件的加载和编码转换</li>
  * </ul>
+ * </p>
+ * <p>
+ * <strong>注意：</strong>该类只在 {@code nextdoc4j.extension.enabled=true} 时才会被注入到 Spring 容器，
+ * 用于处理品牌定制和 Markdown 文档等扩展功能。基础版本信息由
+ * {@link top.nextdoc4j.core.extension.NextDoc4jExtensionOpenApiCustomizer} 直接提供。
  * </p>
  *
  * <p>
@@ -115,15 +120,16 @@ public class NextDoc4jExtensionResolver {
     }
 
     /**
-     * 构建完整的扩展数据
+     * 构建扩展配置数据
      * <p>
-     * 这是该类的主入口方法，负责协调各个子模块的数据构建过程
+     * 这是该类的主入口方法，负责协调各个子模块的数据构建过程。
+     * 只包含品牌和 Markdown 配置，不包含基础版本信息。
      * </p>
      *
      * @param extension 扩展配置对象，可以为null
-     * @return 完整的扩展数据Map，键为扩展类型，值为对应的配置数据
+     * @return 扩展配置数据Map，包含 brand、markdown 等字段
      */
-    public Map<String, Object> buildExtensionData(NextDoc4jExtension extension) {
+    public Map<String, Object> buildExtensionConfig(NextDoc4jExtension extension) {
         Map<String, Object> extensionData = new HashMap<>();
 
         if (extension == null) {

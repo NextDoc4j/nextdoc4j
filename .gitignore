@@ -47,3 +47,6 @@ build/
 *.diff
 *.patch
 *.tmp
+
+## claude code
+*.claude
