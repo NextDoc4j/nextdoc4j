@@ -41,5 +41,23 @@
 
     </dependencies>
 
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/nextdoc4j-version.properties</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <excludes>
+                    <exclude>**/nextdoc4j-version.properties</exclude>
+                </excludes>
+            </resource>
+        </resources>
+    </build>
 
 </project>

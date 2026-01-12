@@ -107,6 +107,9 @@ public class NextDoc4jAutoConfiguration {
 
     /**
      * 扩展解析器
+     * <p>
+     * 只在 nextdoc4j.extension.enabled=true 时注入
+     * </p>
      *
      * @param resourceLoader 资源加载器
      * @return {@link NextDoc4jExtensionResolver }
@@ -140,16 +143,18 @@ public class NextDoc4jAutoConfiguration {
 
     /**
      * 全局 openapi 定制器
+     * <p>
+     * 始终注入，负责添加基础版本信息和扩展配置（如果启用）
+     * </p>
      *
-     * @param resolver 旋转变压器
+     * @param applicationContext 应用上下文
      * @return {@link NextDoc4jExtensionOpenApiCustomizer }
      */
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnProperty(prefix = NextDoc4jConstants.EXTENSION, name = NextDoc4jConstants.ENABLED, havingValue = "true")
     public NextDoc4jExtensionOpenApiCustomizer nextdoc4jExtensionOpenApiCustomizer(NextDoc4jProperties properties,
-                                                                                   NextDoc4jExtensionResolver resolver) {
-        return new NextDoc4jExtensionOpenApiCustomizer(properties, resolver);
+                                                                                   ApplicationContext applicationContext) {
+        return new NextDoc4jExtensionOpenApiCustomizer(properties, applicationContext);
     }
 
 }
