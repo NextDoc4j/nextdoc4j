@@ -1,1 +1,0 @@
-import{z as o,A as a}from"./bootstrap-DW5HZtkb.js";import{R as s,q as c,ag as i}from"../jse/index-index--2V_hs0D.js";const t={prefix:Math.floor(Math.random()*1e4),current:0},u=Symbol("elIdInjection"),d=()=>c()?s(u,t):t,p=n=>{const e=d(),r=o();return a(()=>i(n)||`${r.value}-id-${e.prefix}-${e.current++}`)};export{p as a,d as u};
