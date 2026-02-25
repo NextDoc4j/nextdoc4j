@@ -17,6 +17,8 @@
  */
 package top.nextdoc4j.plugin.gateway.constant;
 
+import top.nextdoc4j.core.constant.NextDoc4jConstants;
+
 import java.util.Map;
 
 /**
@@ -67,6 +69,11 @@ public final class GatewayMetadataConstants {
     public static final String NEXTDOC4J_NAME = "nextdoc4j.name";
 
     /**
+     * NextDoc4j 服务 context-path key
+     */
+    public static final String NEXTDOC4J_CONTEXT_PATH = NextDoc4jConstants.CONTEXT_PATH_METADATA_KEY;
+
+    /**
      * SpringDoc 文档路径 key（兼容 springdoc 配置）
      */
     public static final String SPRINGDOC_PATH = "springdoc.path";
@@ -75,6 +82,31 @@ public final class GatewayMetadataConstants {
      * 通用名称 key（兼容其他配置）
      */
     public static final String NAME = "name";
+
+    /**
+     * 通用 context-path key
+     */
+    public static final String CONTEXT_PATH = "context-path";
+
+    /**
+     * 通用 contextPath key（驼峰）
+     */
+    public static final String CONTEXT_PATH_CAMEL = "contextPath";
+
+    /**
+     * 通用 context_path key（下划线）
+     */
+    public static final String CONTEXT_PATH_UNDERSCORE = "context_path";
+
+    /**
+     * 服务端标准 context-path key
+     */
+    public static final String SERVER_SERVLET_CONTEXT_PATH = "server.servlet.context-path";
+
+    /**
+     * 服务端标准 contextPath key（驼峰）
+     */
+    public static final String SERVER_SERVLET_CONTEXT_PATH_CAMEL = "server.servlet.contextPath";
 
     /**
      * 从嵌套的 metadata Map 中获取值

@@ -21,14 +21,17 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import top.nextdoc4j.core.constant.NextDoc4jConstants;
 import top.nextdoc4j.core.constant.NextDoc4jFilterConstant;
+import top.nextdoc4j.plugin.gateway.constant.GatewayMetadataConstants;
 import top.nextdoc4j.plugin.gateway.enums.DocPathStrategy;
 import top.nextdoc4j.plugin.gateway.enums.NameResolveStrategy;
 import top.nextdoc4j.plugin.gateway.model.ServiceConfig;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -87,8 +90,19 @@ public class GatewayDocProperties implements Serializable {
     /**
      * 手动配置的服务列表（补偿逻辑，用于自动发现无法覆盖的场景）
      */
-    @NestedConfigurationProperty
     private List<ServiceConfig> services = new ArrayList<>();
+
+    /**
+     * 网关全局认证配置
+     */
+    @NestedConfigurationProperty
+    private Security security = new Security();
+
+    /**
+     * context-path 自动发现配置
+     */
+    @NestedConfigurationProperty
+    private ContextPath contextPath = new ContextPath();
 
     public boolean isEnabled() {
         return enabled;
@@ -160,5 +174,78 @@ public class GatewayDocProperties implements Serializable {
 
     public void setDocPathStrategy(DocPathStrategy docPathStrategy) {
         this.docPathStrategy = docPathStrategy;
+    }
+
+    public Security getSecurity() {
+        return security;
+    }
+
+    public void setSecurity(Security security) {
+        this.security = security;
+    }
+
+    public ContextPath getContextPath() {
+        return contextPath;
+    }
+
+    public void setContextPath(ContextPath contextPath) {
+        this.contextPath = contextPath;
+    }
+
+    /**
+     * 全局认证配置
+     */
+    public static class Security implements Serializable {
+
+        @Serial
+        private static final long serialVersionUID = 1L;
+
+        /**
+         * 网关全局 SecurityScheme
+         */
+        private Map<String, SecurityScheme> globalSchemes = new LinkedHashMap<>();
+
+        /**
+         * 当服务文档没有 security 字段时，是否自动注入全局安全要求
+         */
+        private boolean applyGlobalRequirement = true;
+
+        public Map<String, SecurityScheme> getGlobalSchemes() {
+            return globalSchemes;
+        }
+
+        public void setGlobalSchemes(Map<String, SecurityScheme> globalSchemes) {
+            this.globalSchemes = globalSchemes;
+        }
+
+        public boolean isApplyGlobalRequirement() {
+            return applyGlobalRequirement;
+        }
+
+        public void setApplyGlobalRequirement(boolean applyGlobalRequirement) {
+            this.applyGlobalRequirement = applyGlobalRequirement;
+        }
+    }
+
+    /**
+     * context-path 自动发现配置
+     */
+    public static class ContextPath implements Serializable {
+
+        @Serial
+        private static final long serialVersionUID = 1L;
+
+        /**
+         * 服务注册 metadata 中的 context-path key
+         */
+        private String metadataKey = GatewayMetadataConstants.NEXTDOC4J_CONTEXT_PATH;
+
+        public String getMetadataKey() {
+            return metadataKey;
+        }
+
+        public void setMetadataKey(String metadataKey) {
+            this.metadataKey = metadataKey;
+        }
     }
 }

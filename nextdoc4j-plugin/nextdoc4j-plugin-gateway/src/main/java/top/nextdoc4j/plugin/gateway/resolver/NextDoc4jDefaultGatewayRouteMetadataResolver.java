@@ -35,9 +35,16 @@ import java.util.Map;
 public class NextDoc4jDefaultGatewayRouteMetadataResolver implements NextDoc4jGatewayRouteMetadataResolver {
 
     private final GatewayDocProperties properties;
+    private final NextDoc4jGatewayServiceContextPathResolver serviceContextPathResolver;
 
     public NextDoc4jDefaultGatewayRouteMetadataResolver(GatewayDocProperties properties) {
+        this(properties, null);
+    }
+
+    public NextDoc4jDefaultGatewayRouteMetadataResolver(GatewayDocProperties properties,
+                                                        NextDoc4jGatewayServiceContextPathResolver serviceContextPathResolver) {
         this.properties = properties;
+        this.serviceContextPathResolver = serviceContextPathResolver;
     }
 
     @Override
@@ -97,11 +104,11 @@ public class NextDoc4jDefaultGatewayRouteMetadataResolver implements NextDoc4jGa
         // 4. 尝试从 URI 提取服务名
         String serviceName = extractServiceNameFromUri(route);
         if (StringUtils.hasText(serviceName)) {
-            return "/" + serviceName + properties.getDocPath();
+            return appendPathSegments("/" + serviceName, resolveServiceContextPath(route), properties.getDocPath());
         }
 
         // 5. 从路由 ID 推断
-        return "/" + route.getId() + properties.getDocPath();
+        return appendPathSegments("/" + route.getId(), resolveServiceContextPath(route), properties.getDocPath());
     }
 
     /**
@@ -127,6 +134,7 @@ public class NextDoc4jDefaultGatewayRouteMetadataResolver implements NextDoc4jGa
      * 从 Path 谓词提取文档路径
      */
     private String extractFromPathPredicate(RouteDefinition route) {
+        String serviceContextPath = resolveServiceContextPath(route);
         return route.getPredicates()
             .stream()
             .filter(p -> "Path".equalsIgnoreCase(p.getName()))
@@ -141,7 +149,7 @@ public class NextDoc4jDefaultGatewayRouteMetadataResolver implements NextDoc4jGa
                 }
                 return path;
             })
-            .map(contextPath -> contextPath + properties.getDocPath())
+            .map(contextPath -> appendPathSegments(contextPath, serviceContextPath, properties.getDocPath()))
             .orElse(null);
     }
 
@@ -272,5 +280,31 @@ public class NextDoc4jDefaultGatewayRouteMetadataResolver implements NextDoc4jGa
         }
         Object value = metadata.get(key);
         return value != null ? value.toString() : null;
+    }
+
+    private String resolveServiceContextPath(RouteDefinition route) {
+        if (serviceContextPathResolver == null) {
+            return "";
+        }
+        return serviceContextPathResolver.resolveContextPath(route);
+    }
+
+    private String appendPathSegments(String... segments) {
+        StringBuilder pathBuilder = new StringBuilder();
+        for (String segment : segments) {
+            if (!StringUtils.hasText(segment)) {
+                continue;
+            }
+            String value = segment.trim();
+            if (!value.startsWith("/")) {
+                value = "/" + value;
+            }
+            if (value.endsWith("/") && value.length() > 1) {
+                value = value.substring(0, value.length() - 1);
+            }
+            pathBuilder.append(value);
+        }
+        String mergedPath = pathBuilder.toString().replaceAll("/{2,}", "/");
+        return StringUtils.hasText(mergedPath) ? mergedPath : "/";
     }
 }
