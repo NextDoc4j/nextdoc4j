@@ -17,24 +17,29 @@
  */
 package top.nextdoc4j.plugin.gateway.configuration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.springdoc.core.properties.SwaggerUiConfigProperties;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
 import org.springframework.cloud.gateway.route.RouteDefinitionLocator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableAsync;
 import top.nextdoc4j.core.constant.NextDoc4jConstants;
 import top.nextdoc4j.plugin.gateway.customizer.GatewayAggregationCustomizer;
 import top.nextdoc4j.plugin.gateway.customizer.GatewaySwaggerConfigCustomizer;
+import top.nextdoc4j.plugin.gateway.filter.GatewayDocResponseRewriteWebFilter;
 import top.nextdoc4j.plugin.gateway.filter.NextDoc4jDefaultGatewayRouteFilter;
 import top.nextdoc4j.plugin.gateway.filter.NextDoc4jGatewayRouteFilter;
 import top.nextdoc4j.plugin.gateway.provider.GatewayRouteDocProvider;
 import top.nextdoc4j.plugin.gateway.resolver.NextDoc4jDefaultGatewayRouteMetadataResolver;
 import top.nextdoc4j.plugin.gateway.resolver.NextDoc4jGatewayRouteMetadataResolver;
+import top.nextdoc4j.plugin.gateway.resolver.NextDoc4jGatewayServiceContextPathResolver;
 
 /**
  * Gateway 聚合文档自动配置
@@ -68,12 +73,23 @@ public class GatewayDocAutoConfiguration {
     }
 
     /**
+     * 服务 context-path 自动发现解析器
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public NextDoc4jGatewayServiceContextPathResolver gatewayServiceContextPathResolver(GatewayDocProperties properties,
+                                                                                        ObjectProvider<ReactiveDiscoveryClient> discoveryClientProvider) {
+        return new NextDoc4jGatewayServiceContextPathResolver(properties, discoveryClientProvider);
+    }
+
+    /**
      * 路由元数据解析器
      */
     @Bean
     @ConditionalOnMissingBean
-    public NextDoc4jGatewayRouteMetadataResolver routeMetadataResolver(GatewayDocProperties properties) {
-        return new NextDoc4jDefaultGatewayRouteMetadataResolver(properties);
+    public NextDoc4jGatewayRouteMetadataResolver routeMetadataResolver(GatewayDocProperties properties,
+                                                                       NextDoc4jGatewayServiceContextPathResolver contextPathResolver) {
+        return new NextDoc4jDefaultGatewayRouteMetadataResolver(properties, contextPathResolver);
     }
 
     /**
@@ -115,5 +131,19 @@ public class GatewayDocAutoConfiguration {
     @ConditionalOnMissingBean
     public GatewayDocWebFluxConfigurer gatewayDocWebFluxConfigurer() {
         return new GatewayDocWebFluxConfigurer();
+    }
+
+    /**
+     * 网关文档响应重写过滤器
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public GatewayDocResponseRewriteWebFilter gatewayDocResponseRewriteWebFilter(GatewayDocProperties properties,
+                                                                                 ObjectMapper objectMapper,
+                                                                                 RouteDefinitionLocator routeDefinitionLocator,
+                                                                                 NextDoc4jGatewayRouteFilter routeFilter,
+                                                                                 NextDoc4jGatewayRouteMetadataResolver metadataResolver,
+                                                                                 NextDoc4jGatewayServiceContextPathResolver contextPathResolver) {
+        return new GatewayDocResponseRewriteWebFilter(properties, objectMapper, routeDefinitionLocator, routeFilter, metadataResolver, contextPathResolver);
     }
 }

@@ -70,4 +70,9 @@ public final class NextDoc4jConstants {
      */
     public static final String PLUGIN_GATEWAY = PLUGIN + ".gateway";
 
+    /**
+     * 网关与微服务约定的 context-path 元数据 key
+     */
+    public static final String CONTEXT_PATH_METADATA_KEY = "nextdoc4j.context-path";
+
 }

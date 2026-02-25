@@ -17,13 +17,11 @@
  */
 package top.nextdoc4j.springboot.configuration;
 
-import top.nextdoc4j.core.configuration.NextDoc4jProperties;
-import top.nextdoc4j.core.constant.NextDoc4jConstants;
-import top.nextdoc4j.core.constant.NextDoc4jFilterConstant;
-import top.nextdoc4j.core.extension.NextDoc4jExtensionOpenApiCustomizer;
-import top.nextdoc4j.core.extension.NextDoc4jExtensionResolver;
-import top.nextdoc4j.springboot.filter.NextDoc4jBasicAuthFilter;
 import io.swagger.v3.oas.models.OpenAPI;
+import org.jspecify.annotations.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -33,12 +31,22 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.CacheControl;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import top.nextdoc4j.core.configuration.NextDoc4jProperties;
+import top.nextdoc4j.core.constant.NextDoc4jConstants;
+import top.nextdoc4j.core.constant.NextDoc4jFilterConstant;
+import top.nextdoc4j.core.extension.NextDoc4jExtensionOpenApiCustomizer;
+import top.nextdoc4j.core.extension.NextDoc4jExtensionResolver;
+import top.nextdoc4j.springboot.filter.NextDoc4jBasicAuthFilter;
 
+import java.lang.reflect.Method;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -49,6 +57,8 @@ import java.util.concurrent.TimeUnit;
  **/
 @ConditionalOnProperty(prefix = NextDoc4jConstants.NEXTDOC4J, name = NextDoc4jConstants.ENABLED, havingValue = "true")
 public class NextDoc4jAutoConfiguration {
+
+    private static final Logger log = LoggerFactory.getLogger(NextDoc4jAutoConfiguration.class);
 
     /**
      * 获取基础配置bean
@@ -70,7 +80,7 @@ public class NextDoc4jAutoConfiguration {
     public WebMvcConfigurer nextdoc4jWebMvcConfigurer() {
         return new WebMvcConfigurer() {
             @Override
-            public void addResourceHandlers(ResourceHandlerRegistry registry) {
+            public void addResourceHandlers(@NonNull ResourceHandlerRegistry registry) {
                 registry.addResourceHandler(NextDoc4jFilterConstant.BlockedPaths.NEXT_DOC4J_HTML)
                     .addResourceLocations("classpath:/META-INF/resources/");
                 registry.addResourceHandler(NextDoc4jFilterConstant.BlockedPaths.NEXT_DOC4J_PREFIX + "**")
@@ -155,6 +165,108 @@ public class NextDoc4jAutoConfiguration {
     public NextDoc4jExtensionOpenApiCustomizer nextdoc4jExtensionOpenApiCustomizer(NextDoc4jProperties properties,
                                                                                    ApplicationContext applicationContext) {
         return new NextDoc4jExtensionOpenApiCustomizer(properties, applicationContext);
+    }
+
+    /**
+     * 自动将 server.servlet.context-path 发布到注册中心 metadata
+     * <p>
+     * 使用反射避免对 Spring Cloud 的编译时强依赖：
+     * 仅在项目引入服务注册时生效，否则自动跳过
+     * </p>
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public ApplicationRunner nextdoc4jContextPathMetadataPublisher(ApplicationContext applicationContext) {
+        return args -> {
+            try {
+                String contextPath = applicationContext.getEnvironment().getProperty("server.servlet.context-path", "");
+                contextPath = normalizeContextPath(contextPath);
+                if (!applyContextPathMetadataToRegistration(applicationContext, contextPath)) {
+                    log.debug("No service registration bean found for NextDoc4j context-path metadata publishing");
+                }
+            } catch (ClassNotFoundException ignored) {
+                // 当前应用未引入服务注册能力，直接跳过
+            } catch (Exception e) {
+                log.debug("Failed to publish NextDoc4j context-path metadata: {}", e.getMessage());
+            }
+        };
+    }
+
+    /**
+     * 提前注入 context-path 到 DiscoveryProperties metadata，确保注册前可见
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public BeanPostProcessor nextdoc4jContextPathMetadataBeanPostProcessor(ApplicationContext applicationContext) {
+        String contextPath = applicationContext.getEnvironment().getProperty("server.servlet.context-path", "");
+        String normalizedContextPath = normalizeContextPath(contextPath);
+        return new BeanPostProcessor() {
+            @Override
+            public Object postProcessBeforeInitialization(@NonNull Object bean, @NonNull String beanName) {
+                try {
+                    Method getMetadataMethod = bean.getClass().getMethod("getMetadata");
+                    Object metadataObject = getMetadataMethod.invoke(bean);
+                    if (!(metadataObject instanceof Map<?, ?> map)) {
+                        return bean;
+                    }
+
+                    @SuppressWarnings("unchecked") Map<String, String> metadata = (Map<String, String>)map;
+
+                    if (!metadata.containsKey(NextDoc4jConstants.CONTEXT_PATH_METADATA_KEY)) {
+                        metadata.put(NextDoc4jConstants.CONTEXT_PATH_METADATA_KEY, normalizedContextPath);
+                    }
+
+                    // 某些 DiscoveryProperties 使用不可变 Map，这里主动回填 setMetadata
+                    try {
+                        Method setMetadataMethod = bean.getClass().getMethod("setMetadata", Map.class);
+                        setMetadataMethod.invoke(bean, new LinkedHashMap<>(metadata));
+                    } catch (NoSuchMethodException ignored) {
+                        // ignore
+                    }
+                } catch (NoSuchMethodException ignored) {
+                    // 当前 bean 无 metadata 能力，忽略
+                } catch (Exception e) {
+                    log.debug("Failed to inject NextDoc4j context-path metadata before registration: {}", e
+                        .getMessage());
+                }
+                return bean;
+            }
+        };
+    }
+
+    private boolean applyContextPathMetadataToRegistration(ApplicationContext applicationContext,
+                                                           String contextPath) throws Exception {
+        Class<?> registrationClass = Class.forName("org.springframework.cloud.client.serviceregistry.Registration");
+        String[] beanNames = applicationContext.getBeanNamesForType(registrationClass);
+        if (beanNames.length == 0) {
+            return false;
+        }
+
+        Object registration = applicationContext.getBean(beanNames[0]);
+        Method getMetadataMethod = registrationClass.getMethod("getMetadata");
+        Object metadataObject = getMetadataMethod.invoke(registration);
+
+        if (!(metadataObject instanceof Map<?, ?> map)) {
+            return false;
+        }
+
+        @SuppressWarnings("unchecked") Map<String, String> metadata = (Map<String, String>)map;
+        metadata.putIfAbsent(NextDoc4jConstants.CONTEXT_PATH_METADATA_KEY, contextPath);
+        return true;
+    }
+
+    private String normalizeContextPath(String contextPath) {
+        if (!org.springframework.util.StringUtils.hasText(contextPath) || "/".equals(contextPath)) {
+            return "";
+        }
+        String normalized = contextPath.trim();
+        if (!normalized.startsWith("/")) {
+            normalized = "/" + normalized;
+        }
+        if (normalized.endsWith("/")) {
+            normalized = normalized.substring(0, normalized.length() - 1);
+        }
+        return normalized;
     }
 
 }
