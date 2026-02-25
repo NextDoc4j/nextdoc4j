@@ -175,15 +175,13 @@ public class NextDoc4jAutoConfiguration {
      * </p>
      */
     @Bean
-    @ConditionalOnMissingBean
+    @ConditionalOnMissingBean(name = "nextdoc4jContextPathMetadataPublisher")
     public ApplicationRunner nextdoc4jContextPathMetadataPublisher(ApplicationContext applicationContext) {
         return args -> {
             try {
                 String contextPath = applicationContext.getEnvironment().getProperty("server.servlet.context-path", "");
                 contextPath = normalizeContextPath(contextPath);
-                if (!applyContextPathMetadataToRegistration(applicationContext, contextPath)) {
-                    log.debug("No service registration bean found for NextDoc4j context-path metadata publishing");
-                }
+                applyContextPathMetadataToRegistration(applicationContext, contextPath);
             } catch (ClassNotFoundException ignored) {
                 // 当前应用未引入服务注册能力，直接跳过
             } catch (Exception e) {
@@ -196,7 +194,7 @@ public class NextDoc4jAutoConfiguration {
      * 提前注入 context-path 到 DiscoveryProperties metadata，确保注册前可见
      */
     @Bean
-    @ConditionalOnMissingBean
+    @ConditionalOnMissingBean(name = "nextdoc4jContextPathMetadataBeanPostProcessor")
     public BeanPostProcessor nextdoc4jContextPathMetadataBeanPostProcessor(ApplicationContext applicationContext) {
         String contextPath = applicationContext.getEnvironment().getProperty("server.servlet.context-path", "");
         String normalizedContextPath = normalizeContextPath(contextPath);
@@ -234,12 +232,12 @@ public class NextDoc4jAutoConfiguration {
         };
     }
 
-    private boolean applyContextPathMetadataToRegistration(ApplicationContext applicationContext,
-                                                           String contextPath) throws Exception {
+    private void applyContextPathMetadataToRegistration(ApplicationContext applicationContext,
+                                                        String contextPath) throws Exception {
         Class<?> registrationClass = Class.forName("org.springframework.cloud.client.serviceregistry.Registration");
         String[] beanNames = applicationContext.getBeanNamesForType(registrationClass);
         if (beanNames.length == 0) {
-            return false;
+            return;
         }
 
         Object registration = applicationContext.getBean(beanNames[0]);
@@ -247,12 +245,11 @@ public class NextDoc4jAutoConfiguration {
         Object metadataObject = getMetadataMethod.invoke(registration);
 
         if (!(metadataObject instanceof Map<?, ?> map)) {
-            return false;
+            return;
         }
 
         @SuppressWarnings("unchecked") Map<String, String> metadata = (Map<String, String>)map;
         metadata.putIfAbsent(NextDoc4jConstants.CONTEXT_PATH_METADATA_KEY, contextPath);
-        return true;
     }
 
     private String normalizeContextPath(String contextPath) {
