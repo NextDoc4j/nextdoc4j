@@ -24,8 +24,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.jspecify.annotations.NonNull;
 import org.reactivestreams.Publisher;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.cloud.gateway.route.RouteDefinition;
 import org.springframework.cloud.gateway.route.RouteDefinitionLocator;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -66,7 +64,7 @@ import java.util.Set;
  * @author echo
  * @since 1.1.7
  */
-public class GatewayDocResponseRewriteWebFilter implements WebFilter { ;
+public class GatewayDocResponseRewriteWebFilter implements WebFilter {
 
     private static final Duration ROUTE_TIMEOUT = Duration.ofMillis(1500);
     private static final String SWAGGER_CONFIG_SUFFIX = NextDoc4jFilterConstant.BlockedPaths.API_DOCS + "/swagger-config";
