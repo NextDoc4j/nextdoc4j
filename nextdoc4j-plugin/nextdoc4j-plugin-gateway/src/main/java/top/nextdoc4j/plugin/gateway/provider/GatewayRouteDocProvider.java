@@ -49,10 +49,16 @@ public class GatewayRouteDocProvider {
     private final NextDoc4jGatewayRouteFilter routeFilter;
     private final NextDoc4jGatewayRouteMetadataResolver metadataResolver;
 
+    /**
+     * 构造提供者（兼容旧版本，无自定义过滤器和元数据解析器）。
+     */
     public GatewayRouteDocProvider(RouteDefinitionLocator routeDefinitionLocator, GatewayDocProperties properties) {
         this(routeDefinitionLocator, properties, null, null);
     }
 
+    /**
+     * 构造提供者。
+     */
     public GatewayRouteDocProvider(RouteDefinitionLocator routeDefinitionLocator,
                                    GatewayDocProperties properties,
                                    NextDoc4jGatewayRouteFilter routeFilter,
@@ -80,15 +86,6 @@ public class GatewayRouteDocProvider {
         return routeDefinitionLocator.getRouteDefinitions()
             .filter(route -> routeFilter != null ? routeFilter.test(route, properties) : isValidRoute(route))
             .map(this::convertToSwaggerUrl);
-    }
-
-    /**
-     * 获取自动发现的服务 Swagger URL（阻塞）
-     *
-     * @return Swagger URL 列表
-     */
-    public List<AbstractSwaggerUiConfigProperties.SwaggerUrl> getAutoDiscoveredUrlsBlocking() {
-        return getAutoDiscoveredUrls().collectList().block();
     }
 
     /**
@@ -207,11 +204,4 @@ public class GatewayRouteDocProvider {
         return name;
     }
 
-    public NextDoc4jGatewayRouteFilter getRouteFilter() {
-        return routeFilter;
-    }
-
-    public NextDoc4jGatewayRouteMetadataResolver getMetadataResolver() {
-        return metadataResolver;
-    }
 }

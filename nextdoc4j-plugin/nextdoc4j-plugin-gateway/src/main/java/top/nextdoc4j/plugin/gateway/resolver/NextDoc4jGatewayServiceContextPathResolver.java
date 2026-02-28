@@ -48,6 +48,9 @@ public class NextDoc4jGatewayServiceContextPathResolver {
     private final DiscoveryClient discoveryClient;
     private final Map<String, String> contextPathCache = new ConcurrentHashMap<>();
 
+    /**
+     * 创建 context-path 解析器。
+     */
     public NextDoc4jGatewayServiceContextPathResolver(GatewayDocProperties properties,
                                                       ObjectProvider<ReactiveDiscoveryClient> reactiveDiscoveryClientProvider,
                                                       ObjectProvider<DiscoveryClient> discoveryClientProvider) {
@@ -138,6 +141,9 @@ public class NextDoc4jGatewayServiceContextPathResolver {
         return null;
     }
 
+    /**
+     * 从网关路由 metadata 中提取服务 context-path。
+     */
     private String resolveFromRouteMetadata(Map<String, Object> metadata) {
         if (metadata == null || metadata.isEmpty()) {
             return "";
@@ -188,6 +194,9 @@ public class NextDoc4jGatewayServiceContextPathResolver {
         return "";
     }
 
+    /**
+     * 从注册中心实例 metadata 中提取服务 context-path。
+     */
     private String resolveFromDiscovery(String serviceId) {
         if (!StringUtils.hasText(serviceId)) {
             return "";
@@ -219,6 +228,9 @@ public class NextDoc4jGatewayServiceContextPathResolver {
         return "";
     }
 
+    /**
+     * 获取指定服务的实例列表（优先 ReactiveDiscoveryClient，失败后降级 DiscoveryClient）。
+     */
     private List<ServiceInstance> getInstances(String serviceId) {
         if (!StringUtils.hasText(serviceId)) {
             return Collections.emptyList();
@@ -249,6 +261,9 @@ public class NextDoc4jGatewayServiceContextPathResolver {
         return Collections.emptyList();
     }
 
+    /**
+     * 选择最新可用的 context-path（注册中心 > 路由 metadata > 本地缓存）。
+     */
     private String pickLatestContextPath(String discoveredContextPath,
                                          String metadataContextPath,
                                          String cachedContextPath) {
@@ -264,6 +279,9 @@ public class NextDoc4jGatewayServiceContextPathResolver {
         return "";
     }
 
+    /**
+     * 从服务实例 metadata 中提取 context-path。
+     */
     private String extractContextPathFromMetadata(Map<String, String> metadata) {
         if (metadata == null || metadata.isEmpty()) {
             return "";
@@ -308,6 +326,9 @@ public class NextDoc4jGatewayServiceContextPathResolver {
         return "";
     }
 
+    /**
+     * 归一化 context-path（补前导 /，去末尾 /）。
+     */
     private String normalizeContextPath(String contextPath) {
         if (!StringUtils.hasText(contextPath) || "/".equals(contextPath)) {
             return "";
@@ -322,6 +343,9 @@ public class NextDoc4jGatewayServiceContextPathResolver {
         return normalized;
     }
 
+    /**
+     * 将 metadata 值安全转换为字符串。
+     */
     private String toStringValue(Object value) {
         return value == null ? null : value.toString();
     }

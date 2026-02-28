@@ -62,6 +62,9 @@ public class GatewaySwaggerConfigCustomizer {
         this.properties = properties;
     }
 
+    /**
+     * 初始化时执行一次 URL 刷新，确保网关冷启动后即可返回服务列表。
+     */
     @PostConstruct
     public void init() {
         if (properties.isEnabled()) {
@@ -69,6 +72,9 @@ public class GatewaySwaggerConfigCustomizer {
         }
     }
 
+    /**
+     * 路由刷新事件触发后，异步刷新 Swagger URL。
+     */
     @Async
     @EventListener(RefreshRoutesEvent.class)
     public void onRoutesRefresh(RefreshRoutesEvent event) {
@@ -77,6 +83,9 @@ public class GatewaySwaggerConfigCustomizer {
         }
     }
 
+    /**
+     * 注册中心心跳事件触发后，异步刷新 Swagger URL。
+     */
     @Async
     @EventListener(HeartbeatEvent.class)
     public void onHeartbeat(HeartbeatEvent event) {
@@ -107,6 +116,9 @@ public class GatewaySwaggerConfigCustomizer {
         refreshUrlsAsync().subscribe();
     }
 
+    /**
+     * 合并自动发现与手动配置 URL，并在数据变化时更新 springdoc 配置。
+     */
     private synchronized void applyUrls(List<AbstractSwaggerUiConfigProperties.SwaggerUrl> autoUrls) {
         Set<AbstractSwaggerUiConfigProperties.SwaggerUrl> urls = new LinkedHashSet<>(autoUrls);
         List<AbstractSwaggerUiConfigProperties.SwaggerUrl> manualUrls = routeDocProvider.getManualConfiguredUrls();
@@ -117,6 +129,9 @@ public class GatewaySwaggerConfigCustomizer {
         swaggerUiConfigProperties.setUrls(urls);
     }
 
+    /**
+     * 比较两份 URL 集合是否语义一致（按 name+url）。
+     */
     private boolean isSameUrls(Collection<AbstractSwaggerUiConfigProperties.SwaggerUrl> currentUrls,
                                Collection<AbstractSwaggerUiConfigProperties.SwaggerUrl> latestUrls) {
         if (currentUrls == null && latestUrls == null) {
@@ -128,6 +143,9 @@ public class GatewaySwaggerConfigCustomizer {
         return toUrlIdentitySet(currentUrls).equals(toUrlIdentitySet(latestUrls));
     }
 
+    /**
+     * 将 SwaggerUrl 列表转换为可比较的唯一标识集合。
+     */
     private Set<String> toUrlIdentitySet(Collection<AbstractSwaggerUiConfigProperties.SwaggerUrl> urls) {
         Set<String> identitySet = new LinkedHashSet<>();
         for (AbstractSwaggerUiConfigProperties.SwaggerUrl url : urls) {

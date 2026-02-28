@@ -306,7 +306,7 @@ public class NextDoc4jDefaultGatewayRouteMetadataResolver implements NextDoc4jGa
             }
             pathBuilder.append(value);
         }
-        String mergedPath = pathBuilder.toString().replaceAll("/{2,}", "/");
+        String mergedPath = pathBuilder.toString().replaceAll(GatewayMetadataConstants.MULTIPLE_SLASH_PATTERN, "/");
         return StringUtils.hasText(mergedPath) ? mergedPath : "/";
     }
 

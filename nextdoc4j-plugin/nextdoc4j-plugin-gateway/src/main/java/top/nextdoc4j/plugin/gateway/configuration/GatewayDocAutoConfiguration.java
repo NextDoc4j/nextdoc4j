@@ -142,11 +142,7 @@ public class GatewayDocAutoConfiguration {
     @ConditionalOnMissingBean
     public GatewayDocResponseRewriteWebFilter gatewayDocResponseRewriteWebFilter(GatewayDocProperties properties,
                                                                                  ObjectMapper objectMapper,
-                                                                                 RouteDefinitionLocator routeDefinitionLocator,
-                                                                                 NextDoc4jGatewayRouteFilter routeFilter,
-                                                                                 NextDoc4jGatewayRouteMetadataResolver metadataResolver,
-                                                                                 NextDoc4jGatewayServiceContextPathResolver contextPathResolver,
                                                                                  ObjectProvider<GatewaySwaggerConfigCustomizer> swaggerConfigCustomizerProvider) {
-        return new GatewayDocResponseRewriteWebFilter(properties, objectMapper, routeDefinitionLocator, routeFilter, metadataResolver, contextPathResolver, swaggerConfigCustomizerProvider);
+        return new GatewayDocResponseRewriteWebFilter(properties, objectMapper, swaggerConfigCustomizerProvider);
     }
 }

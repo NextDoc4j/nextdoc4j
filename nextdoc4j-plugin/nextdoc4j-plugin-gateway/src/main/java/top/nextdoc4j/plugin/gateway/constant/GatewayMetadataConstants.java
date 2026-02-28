@@ -18,6 +18,7 @@
 package top.nextdoc4j.plugin.gateway.constant;
 
 import top.nextdoc4j.core.constant.NextDoc4jConstants;
+import top.nextdoc4j.core.constant.NextDoc4jFilterConstant;
 
 import java.util.Map;
 
@@ -107,6 +108,21 @@ public final class GatewayMetadataConstants {
      * 服务端标准 contextPath key（驼峰）
      */
     public static final String SERVER_SERVLET_CONTEXT_PATH_CAMEL = "server.servlet.contextPath";
+
+    /**
+     * OpenAPI 文档路径前缀
+     */
+    public static final String API_DOCS_PATH = NextDoc4jFilterConstant.BlockedPaths.API_DOCS;
+
+    /**
+     * Swagger 配置路径后缀
+     */
+    public static final String SWAGGER_CONFIG_SUFFIX = API_DOCS_PATH + "/swagger-config";
+
+    /**
+     * 连续斜杠归一化正则
+     */
+    public static final String MULTIPLE_SLASH_PATTERN = "/{2,}";
 
     /**
      * 从嵌套的 metadata Map 中获取值
