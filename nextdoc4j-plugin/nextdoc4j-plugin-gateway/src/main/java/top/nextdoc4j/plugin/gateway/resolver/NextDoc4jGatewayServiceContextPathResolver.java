@@ -19,6 +19,7 @@ package top.nextdoc4j.plugin.gateway.resolver;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
 import org.springframework.cloud.gateway.route.RouteDefinition;
 import org.springframework.util.StringUtils;
@@ -27,6 +28,7 @@ import top.nextdoc4j.plugin.gateway.constant.GatewayMetadataConstants;
 
 import java.net.URI;
 import java.time.Duration;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -42,12 +44,15 @@ public class NextDoc4jGatewayServiceContextPathResolver {
     private static final Duration DISCOVERY_TIMEOUT = Duration.ofMillis(1200);
 
     private final GatewayDocProperties properties;
-    private final ReactiveDiscoveryClient discoveryClient;
+    private final ReactiveDiscoveryClient reactiveDiscoveryClient;
+    private final DiscoveryClient discoveryClient;
     private final Map<String, String> contextPathCache = new ConcurrentHashMap<>();
 
     public NextDoc4jGatewayServiceContextPathResolver(GatewayDocProperties properties,
-                                                      ObjectProvider<ReactiveDiscoveryClient> discoveryClientProvider) {
+                                                      ObjectProvider<ReactiveDiscoveryClient> reactiveDiscoveryClientProvider,
+                                                      ObjectProvider<DiscoveryClient> discoveryClientProvider) {
         this.properties = properties;
+        this.reactiveDiscoveryClient = reactiveDiscoveryClientProvider.getIfAvailable();
         this.discoveryClient = discoveryClientProvider.getIfAvailable();
     }
 
@@ -63,28 +68,22 @@ public class NextDoc4jGatewayServiceContextPathResolver {
         }
 
         String metadataContextPath = resolveFromRouteMetadata(route.getMetadata());
-        if (StringUtils.hasText(metadataContextPath)) {
-            return metadataContextPath;
-        }
-
         String serviceId = extractServiceId(route);
         if (!StringUtils.hasText(serviceId)) {
-            return "";
+            return StringUtils.hasText(metadataContextPath) ? metadataContextPath : "";
         }
 
         String cachedContextPath = contextPathCache.get(serviceId);
-        if (StringUtils.hasText(cachedContextPath)) {
-            return cachedContextPath;
-        }
-
         String resolvedContextPath = resolveFromDiscovery(serviceId);
-        if (StringUtils.hasText(resolvedContextPath)) {
-            contextPathCache.put(serviceId, resolvedContextPath);
-            return resolvedContextPath;
+        String latestContextPath = pickLatestContextPath(resolvedContextPath, metadataContextPath, cachedContextPath);
+        if (StringUtils.hasText(latestContextPath)) {
+            if (!latestContextPath.equals(cachedContextPath)) {
+                contextPathCache.put(serviceId, latestContextPath);
+            }
+            return latestContextPath;
         }
 
-        // 发现为空时不缓存，避免启动阶段服务未就绪导致后续一直使用空值
-        return "";
+        return cachedContextPath != null ? cachedContextPath : "";
     }
 
     /**
@@ -94,12 +93,19 @@ public class NextDoc4jGatewayServiceContextPathResolver {
      * @return 是否可用
      */
     public boolean isServiceAvailable(String serviceId) {
-        if (!StringUtils.hasText(serviceId) || discoveryClient == null) {
+        if (!StringUtils.hasText(serviceId)) {
             return false;
         }
         try {
-            Boolean result = discoveryClient.getInstances(serviceId).hasElements().block(DISCOVERY_TIMEOUT);
-            return Boolean.TRUE.equals(result);
+            if (!getInstances(serviceId).isEmpty()) {
+                return true;
+            }
+
+            String lowerCaseServiceId = serviceId.toLowerCase();
+            if (!serviceId.equals(lowerCaseServiceId)) {
+                return !getInstances(lowerCaseServiceId).isEmpty();
+            }
+            return false;
         } catch (Exception ignored) {
             return false;
         }
@@ -183,14 +189,15 @@ public class NextDoc4jGatewayServiceContextPathResolver {
     }
 
     private String resolveFromDiscovery(String serviceId) {
-        if (discoveryClient == null || !StringUtils.hasText(serviceId)) {
+        if (!StringUtils.hasText(serviceId)) {
             return "";
         }
 
         try {
-            List<ServiceInstance> instances = discoveryClient.getInstances(serviceId)
-                .collectList()
-                .block(DISCOVERY_TIMEOUT);
+            List<ServiceInstance> instances = getInstances(serviceId);
+            if (instances.isEmpty() && !serviceId.equals(serviceId.toLowerCase())) {
+                instances = getInstances(serviceId.toLowerCase());
+            }
             if (instances == null || instances.isEmpty()) {
                 return "";
             }
@@ -209,6 +216,51 @@ public class NextDoc4jGatewayServiceContextPathResolver {
             return "";
         }
 
+        return "";
+    }
+
+    private List<ServiceInstance> getInstances(String serviceId) {
+        if (!StringUtils.hasText(serviceId)) {
+            return Collections.emptyList();
+        }
+
+        if (reactiveDiscoveryClient != null) {
+            try {
+                List<ServiceInstance> instances = reactiveDiscoveryClient.getInstances(serviceId)
+                    .collectList()
+                    .block(DISCOVERY_TIMEOUT);
+                if (instances != null) {
+                    return instances;
+                }
+            } catch (Exception ignored) {
+                // 尝试阻塞客户端兜底
+            }
+        }
+
+        if (discoveryClient != null) {
+            try {
+                List<ServiceInstance> instances = discoveryClient.getInstances(serviceId);
+                return instances != null ? instances : Collections.emptyList();
+            } catch (Exception ignored) {
+                return Collections.emptyList();
+            }
+        }
+
+        return Collections.emptyList();
+    }
+
+    private String pickLatestContextPath(String discoveredContextPath,
+                                         String metadataContextPath,
+                                         String cachedContextPath) {
+        if (StringUtils.hasText(discoveredContextPath)) {
+            return discoveredContextPath;
+        }
+        if (StringUtils.hasText(metadataContextPath)) {
+            return metadataContextPath;
+        }
+        if (StringUtils.hasText(cachedContextPath)) {
+            return cachedContextPath;
+        }
         return "";
     }
 

@@ -26,6 +26,7 @@ import org.jspecify.annotations.NonNull;
 import org.reactivestreams.Publisher;
 import org.springframework.cloud.gateway.route.RouteDefinition;
 import org.springframework.cloud.gateway.route.RouteDefinitionLocator;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
@@ -38,8 +39,10 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 import top.nextdoc4j.core.constant.NextDoc4jFilterConstant;
 import top.nextdoc4j.plugin.gateway.configuration.GatewayDocProperties;
+import top.nextdoc4j.plugin.gateway.customizer.GatewaySwaggerConfigCustomizer;
 import top.nextdoc4j.plugin.gateway.resolver.NextDoc4jGatewayRouteMetadataResolver;
 import top.nextdoc4j.plugin.gateway.resolver.NextDoc4jGatewayServiceContextPathResolver;
 
@@ -75,19 +78,22 @@ public class GatewayDocResponseRewriteWebFilter implements WebFilter {
     private final NextDoc4jGatewayRouteFilter routeFilter;
     private final NextDoc4jGatewayRouteMetadataResolver metadataResolver;
     private final NextDoc4jGatewayServiceContextPathResolver contextPathResolver;
+    private final ObjectProvider<GatewaySwaggerConfigCustomizer> swaggerConfigCustomizerProvider;
 
     public GatewayDocResponseRewriteWebFilter(GatewayDocProperties properties,
                                               ObjectMapper objectMapper,
                                               RouteDefinitionLocator routeDefinitionLocator,
                                               NextDoc4jGatewayRouteFilter routeFilter,
                                               NextDoc4jGatewayRouteMetadataResolver metadataResolver,
-                                              NextDoc4jGatewayServiceContextPathResolver contextPathResolver) {
+                                              NextDoc4jGatewayServiceContextPathResolver contextPathResolver,
+                                              ObjectProvider<GatewaySwaggerConfigCustomizer> swaggerConfigCustomizerProvider) {
         this.properties = properties;
         this.objectMapper = objectMapper;
         this.routeDefinitionLocator = routeDefinitionLocator;
         this.routeFilter = routeFilter;
         this.metadataResolver = metadataResolver;
         this.contextPathResolver = contextPathResolver;
+        this.swaggerConfigCustomizerProvider = swaggerConfigCustomizerProvider;
     }
 
     @Override
@@ -97,8 +103,15 @@ public class GatewayDocResponseRewriteWebFilter implements WebFilter {
         }
 
         String path = exchange.getRequest().getURI().getPath();
+        Mono<Void> refreshMono = Mono.empty();
+        if (isSwaggerConfig(path)) {
+            GatewaySwaggerConfigCustomizer customizer = swaggerConfigCustomizerProvider.getIfAvailable();
+            if (customizer != null) {
+                refreshMono = customizer.refreshUrlsAsync();
+            }
+        }
         if (!shouldRewrite(path)) {
-            return chain.filter(exchange);
+            return refreshMono.then(chain.filter(exchange));
         }
 
         ServerHttpResponse originalResponse = exchange.getResponse();
@@ -118,11 +131,11 @@ public class GatewayDocResponseRewriteWebFilter implements WebFilter {
                     DataBufferUtils.release(dataBuffer);
 
                     String sourceBody = new String(content, StandardCharsets.UTF_8);
-                    String rewrittenBody = rewriteBody(path, sourceBody);
-                    byte[] rewrittenBytes = rewrittenBody.getBytes(StandardCharsets.UTF_8);
-
-                    getHeaders().setContentLength(rewrittenBytes.length);
-                    return super.writeWith(Mono.just(dataBufferFactory.wrap(rewrittenBytes)));
+                    return rewriteBody(path, sourceBody).flatMap(rewrittenBody -> {
+                        byte[] rewrittenBytes = rewrittenBody.getBytes(StandardCharsets.UTF_8);
+                        getHeaders().setContentLength(rewrittenBytes.length);
+                        return super.writeWith(Mono.just(dataBufferFactory.wrap(rewrittenBytes)));
+                    });
                 });
             }
 
@@ -132,7 +145,7 @@ public class GatewayDocResponseRewriteWebFilter implements WebFilter {
             }
         };
 
-        return chain.filter(exchange.mutate().response(decoratedResponse).build());
+        return refreshMono.then(chain.filter(exchange.mutate().response(decoratedResponse).build()));
     }
 
     private boolean shouldRewrite(String path) {
@@ -146,25 +159,26 @@ public class GatewayDocResponseRewriteWebFilter implements WebFilter {
         return MediaType.APPLICATION_JSON.isCompatibleWith(mediaType) || mediaType.getSubtype().contains("json");
     }
 
-    private String rewriteBody(String path, String sourceBody) {
+    private Mono<String> rewriteBody(String path, String sourceBody) {
         if (!StringUtils.hasText(sourceBody)) {
-            return sourceBody;
+            return Mono.just(sourceBody);
         }
 
         try {
             JsonNode jsonNode = objectMapper.readTree(sourceBody);
             if (!(jsonNode instanceof ObjectNode objectNode)) {
-                return sourceBody;
+                return Mono.just(sourceBody);
             }
 
             if (isSwaggerConfig(path)) {
-                rewriteSwaggerConfig(objectNode);
-            } else {
-                rewriteApiDocs(path, objectNode);
+                // swagger-config 保持 springdoc 原始结构，只在请求前刷新 urls 数据
+                return Mono.just(sourceBody);
             }
-            return objectMapper.writeValueAsString(objectNode);
+
+            rewriteApiDocs(path, objectNode);
+            return Mono.just(objectMapper.writeValueAsString(objectNode));
         } catch (Exception e) {
-            return sourceBody;
+            return Mono.just(sourceBody);
         }
     }
 
@@ -237,9 +251,8 @@ public class GatewayDocResponseRewriteWebFilter implements WebFilter {
         return normalized.replaceAll("/{2,}", "/");
     }
 
-    private void rewriteSwaggerConfig(ObjectNode root) {
+    private void rewriteSwaggerConfig(ObjectNode root, List<ServiceRuntimeInfo> runtimeInfoList) {
         ArrayNode urlsNode = root.withArray("urls");
-        List<ServiceRuntimeInfo> runtimeInfoList = loadRouteRuntimeInfoList();
         Map<String, ServiceRuntimeInfo> runtimeInfoByName = new LinkedHashMap<>();
         for (ServiceRuntimeInfo runtimeInfo : runtimeInfoList) {
             runtimeInfoByName.put(runtimeInfo.name, runtimeInfo);
@@ -286,6 +299,12 @@ public class GatewayDocResponseRewriteWebFilter implements WebFilter {
         gatewayNode.set("globalSecuritySchemes", objectMapper.valueToTree(properties.getSecurity().getGlobalSchemes()));
         gatewayNode.set("services", runtimeServices);
         root.set("x-nextdoc4j-gateway", gatewayNode);
+    }
+
+    private Mono<List<ServiceRuntimeInfo>> loadRouteRuntimeInfoListAsync() {
+        return Mono.fromCallable(this::loadRouteRuntimeInfoList)
+            .subscribeOn(Schedulers.boundedElastic())
+            .onErrorReturn(List.of());
     }
 
     private List<ServiceRuntimeInfo> loadRouteRuntimeInfoList() {

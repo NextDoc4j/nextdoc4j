@@ -82,17 +82,18 @@ public class NextDoc4jDefaultGatewayRouteMetadataResolver implements NextDoc4jGa
      */
     private String extractAuto(RouteDefinition route) {
         Map<String, Object> metadata = route.getMetadata();
+        String serviceContextPath = resolveServiceContextPath(route);
 
         // 1. 优先从 metadata.nextdoc4j.doc-path 获取
         String docPath = getNextDoc4jDocPath(metadata);
         if (StringUtils.hasText(docPath)) {
-            return docPath;
+            return mergeContextPathIntoDocPath(docPath, serviceContextPath);
         }
 
         // 2. 从 metadata.springdoc.path 获取
         docPath = getMetadataValue(metadata, GatewayMetadataConstants.SPRINGDOC_PATH);
         if (StringUtils.hasText(docPath)) {
-            return docPath;
+            return mergeContextPathIntoDocPath(docPath, serviceContextPath);
         }
 
         // 3. 从 Path 谓词提取（这是网关实际的路由路径）
@@ -116,15 +117,16 @@ public class NextDoc4jDefaultGatewayRouteMetadataResolver implements NextDoc4jGa
      */
     private String extractFromMetadata(RouteDefinition route) {
         Map<String, Object> metadata = route.getMetadata();
+        String serviceContextPath = resolveServiceContextPath(route);
 
         String docPath = getNextDoc4jDocPath(metadata);
         if (StringUtils.hasText(docPath)) {
-            return docPath;
+            return mergeContextPathIntoDocPath(docPath, serviceContextPath);
         }
 
         docPath = getMetadataValue(metadata, GatewayMetadataConstants.SPRINGDOC_PATH);
         if (StringUtils.hasText(docPath)) {
-            return docPath;
+            return mergeContextPathIntoDocPath(docPath, serviceContextPath);
         }
 
         return null;
@@ -306,5 +308,37 @@ public class NextDoc4jDefaultGatewayRouteMetadataResolver implements NextDoc4jGa
         }
         String mergedPath = pathBuilder.toString().replaceAll("/{2,}", "/");
         return StringUtils.hasText(mergedPath) ? mergedPath : "/";
+    }
+
+    /**
+     * 将服务 context-path 合并到文档路径中（保持已有路径结构，不改变响应字段结构）
+     * <p>
+     * 示例：
+     * /file/v3/api-docs + /bdca -> /file/bdca/v3/api-docs
+     * /v3/api-docs + /bdca -> /bdca/v3/api-docs
+     * </p>
+     */
+    private String mergeContextPathIntoDocPath(String docPath, String serviceContextPath) {
+        if (!StringUtils.hasText(docPath)) {
+            return docPath;
+        }
+        if (!StringUtils.hasText(serviceContextPath)) {
+            return appendPathSegments(docPath);
+        }
+
+        String normalizedDocPath = appendPathSegments(docPath);
+        String normalizedServiceContextPath = appendPathSegments(serviceContextPath);
+        if ("/".equals(normalizedServiceContextPath) || normalizedDocPath
+            .contains(normalizedServiceContextPath + "/") || normalizedDocPath.equals(normalizedServiceContextPath)) {
+            return normalizedDocPath;
+        }
+
+        String normalizedDocSuffix = appendPathSegments(properties.getDocPath());
+        if (normalizedDocPath.endsWith(normalizedDocSuffix)) {
+            String prefix = normalizedDocPath.substring(0, normalizedDocPath.length() - normalizedDocSuffix.length());
+            return appendPathSegments(prefix, normalizedServiceContextPath, normalizedDocSuffix);
+        }
+
+        return appendPathSegments(normalizedDocPath, normalizedServiceContextPath);
     }
 }

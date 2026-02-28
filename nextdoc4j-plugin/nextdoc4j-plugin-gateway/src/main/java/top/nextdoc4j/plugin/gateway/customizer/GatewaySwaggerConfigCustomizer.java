@@ -22,12 +22,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springdoc.core.properties.AbstractSwaggerUiConfigProperties;
 import org.springdoc.core.properties.SwaggerUiConfigProperties;
+import org.springframework.cloud.client.discovery.event.HeartbeatEvent;
 import org.springframework.cloud.gateway.event.RefreshRoutesEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 import top.nextdoc4j.plugin.gateway.configuration.GatewayDocProperties;
 import top.nextdoc4j.plugin.gateway.provider.GatewayRouteDocProvider;
 
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -61,7 +65,7 @@ public class GatewaySwaggerConfigCustomizer {
     @PostConstruct
     public void init() {
         if (properties.isEnabled()) {
-            refreshUrls();
+            refreshUrlsAsync().subscribe();
         }
     }
 
@@ -69,19 +73,69 @@ public class GatewaySwaggerConfigCustomizer {
     @EventListener(RefreshRoutesEvent.class)
     public void onRoutesRefresh(RefreshRoutesEvent event) {
         if (properties.isEnabled()) {
-            refreshUrls();
+            refreshUrlsAsync().subscribe();
         }
     }
 
-    private synchronized void refreshUrls() {
-        try {
-            Set<AbstractSwaggerUiConfigProperties.SwaggerUrl> urls = new LinkedHashSet<>();
-            routeDocProvider.getAutoDiscoveredUrls().doOnNext(urls::add).blockLast();
-            List<AbstractSwaggerUiConfigProperties.SwaggerUrl> manualUrls = routeDocProvider.getManualConfiguredUrls();
-            urls.addAll(manualUrls);
-            swaggerUiConfigProperties.setUrls(urls);
-        } catch (Exception e) {
-            log.error("Failed to refresh swagger urls", e);
+    @Async
+    @EventListener(HeartbeatEvent.class)
+    public void onHeartbeat(HeartbeatEvent event) {
+        if (properties.isEnabled()) {
+            refreshUrlsAsync().subscribe();
         }
+    }
+
+    /**
+     * 非阻塞刷新 URL 列表
+     */
+    public Mono<Void> refreshUrlsAsync() {
+        return routeDocProvider.getAutoDiscoveredUrls()
+            .subscribeOn(Schedulers.boundedElastic())
+            .collectList()
+            .doOnNext(this::applyUrls)
+            .then()
+            .onErrorResume(e -> {
+                log.error("Failed to refresh swagger urls", e);
+                return Mono.empty();
+            });
+    }
+
+    /**
+     * 同步入口，保持向后兼容
+     */
+    public void refreshUrls() {
+        refreshUrlsAsync().subscribe();
+    }
+
+    private synchronized void applyUrls(List<AbstractSwaggerUiConfigProperties.SwaggerUrl> autoUrls) {
+        Set<AbstractSwaggerUiConfigProperties.SwaggerUrl> urls = new LinkedHashSet<>(autoUrls);
+        List<AbstractSwaggerUiConfigProperties.SwaggerUrl> manualUrls = routeDocProvider.getManualConfiguredUrls();
+        urls.addAll(manualUrls);
+        if (isSameUrls(swaggerUiConfigProperties.getUrls(), urls)) {
+            return;
+        }
+        swaggerUiConfigProperties.setUrls(urls);
+    }
+
+    private boolean isSameUrls(Collection<AbstractSwaggerUiConfigProperties.SwaggerUrl> currentUrls,
+                               Collection<AbstractSwaggerUiConfigProperties.SwaggerUrl> latestUrls) {
+        if (currentUrls == null && latestUrls == null) {
+            return true;
+        }
+        if (currentUrls == null || latestUrls == null) {
+            return false;
+        }
+        return toUrlIdentitySet(currentUrls).equals(toUrlIdentitySet(latestUrls));
+    }
+
+    private Set<String> toUrlIdentitySet(Collection<AbstractSwaggerUiConfigProperties.SwaggerUrl> urls) {
+        Set<String> identitySet = new LinkedHashSet<>();
+        for (AbstractSwaggerUiConfigProperties.SwaggerUrl url : urls) {
+            if (url == null) {
+                continue;
+            }
+            identitySet.add(url.getName() + "|" + url.getUrl());
+        }
+        return identitySet;
     }
 }
