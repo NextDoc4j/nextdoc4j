@@ -26,6 +26,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
 import org.springframework.cloud.gateway.route.RouteDefinitionLocator;
 import org.springframework.context.annotation.Bean;
@@ -78,8 +79,9 @@ public class GatewayDocAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public NextDoc4jGatewayServiceContextPathResolver gatewayServiceContextPathResolver(GatewayDocProperties properties,
-                                                                                        ObjectProvider<ReactiveDiscoveryClient> discoveryClientProvider) {
-        return new NextDoc4jGatewayServiceContextPathResolver(properties, discoveryClientProvider);
+                                                                                        ObjectProvider<ReactiveDiscoveryClient> reactiveDiscoveryClientProvider,
+                                                                                        ObjectProvider<DiscoveryClient> discoveryClientProvider) {
+        return new NextDoc4jGatewayServiceContextPathResolver(properties, reactiveDiscoveryClientProvider, discoveryClientProvider);
     }
 
     /**
@@ -143,7 +145,8 @@ public class GatewayDocAutoConfiguration {
                                                                                  RouteDefinitionLocator routeDefinitionLocator,
                                                                                  NextDoc4jGatewayRouteFilter routeFilter,
                                                                                  NextDoc4jGatewayRouteMetadataResolver metadataResolver,
-                                                                                 NextDoc4jGatewayServiceContextPathResolver contextPathResolver) {
-        return new GatewayDocResponseRewriteWebFilter(properties, objectMapper, routeDefinitionLocator, routeFilter, metadataResolver, contextPathResolver);
+                                                                                 NextDoc4jGatewayServiceContextPathResolver contextPathResolver,
+                                                                                 ObjectProvider<GatewaySwaggerConfigCustomizer> swaggerConfigCustomizerProvider) {
+        return new GatewayDocResponseRewriteWebFilter(properties, objectMapper, routeDefinitionLocator, routeFilter, metadataResolver, contextPathResolver, swaggerConfigCustomizerProvider);
     }
 }
