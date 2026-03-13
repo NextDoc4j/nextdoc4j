@@ -18,6 +18,7 @@
 package top.nextdoc4j.security.satoken.autoconfigure;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
@@ -38,6 +39,8 @@ import top.nextdoc4j.security.satoken.resolver.NextDoc4jSaTokenAnnotationResolve
  * @since 1.1.3
  */
 @AutoConfiguration
+@ConditionalOnClass(name = {"cn.dev33.satoken.annotation.SaCheckPermission", "cn.dev33.satoken.annotation.SaCheckRole",
+    "cn.dev33.satoken.annotation.SaIgnore"})
 @ConditionalOnProperty(prefix = NextDoc4jConstants.PLUGIN_SECURITY, name = NextDoc4jConstants.ENABLED, havingValue = "true")
 public class NextDoc4jSaTokenAutoConfiguration {
 

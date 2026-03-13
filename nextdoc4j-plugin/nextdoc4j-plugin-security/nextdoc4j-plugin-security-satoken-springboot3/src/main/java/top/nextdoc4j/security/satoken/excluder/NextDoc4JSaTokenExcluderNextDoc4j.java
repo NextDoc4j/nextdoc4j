@@ -39,7 +39,12 @@ public class NextDoc4JSaTokenExcluderNextDoc4j implements NextDoc4jPathExcluder 
     @Override
     public Set<String> getExcludedPaths() {
         Set<String> paths = new HashSet<>();
-        RequestMappingHandlerMapping handlerMapping = SpringUtil.getBean(RequestMappingHandlerMapping.class);
+        RequestMappingHandlerMapping handlerMapping;
+        try {
+            handlerMapping = SpringUtil.getBean(RequestMappingHandlerMapping.class);
+        } catch (Exception ignored) {
+            return paths;
+        }
         if (handlerMapping == null) {
             return paths;
         }

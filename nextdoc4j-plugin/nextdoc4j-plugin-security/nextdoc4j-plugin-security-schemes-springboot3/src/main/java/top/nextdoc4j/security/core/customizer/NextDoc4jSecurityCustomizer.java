@@ -18,6 +18,7 @@
 package top.nextdoc4j.security.core.customizer;
 
 import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
@@ -101,6 +102,7 @@ public class NextDoc4jSecurityCustomizer implements GlobalOpenApiCustomizer {
         if (securitySchemeMap == null || securitySchemeMap.isEmpty()) {
             return;
         }
+        Set<String> securitySchemeNames = securitySchemeMap.keySet();
 
         // 收集所有需要排除的路径
         Set<String> excludedPaths = collectExcludedPaths();
@@ -114,8 +116,11 @@ public class NextDoc4jSecurityCustomizer implements GlobalOpenApiCustomizer {
 
             // 为路径添加安全认证
             pathItem.readOperations().forEach(operation -> {
+                if (containsSecurityRequirement(operation, securitySchemeNames)) {
+                    return;
+                }
                 SecurityRequirement securityRequirement = new SecurityRequirement();
-                securitySchemeMap.keySet().forEach(securityRequirement::addList);
+                securitySchemeNames.forEach(securityRequirement::addList);
                 operation.addSecurityItem(securityRequirement);
             });
         });
@@ -156,5 +161,21 @@ public class NextDoc4jSecurityCustomizer implements GlobalOpenApiCustomizer {
             return false;
         }
         return excludedPaths.stream().anyMatch(pattern -> pathMatcher.match(pattern, path));
+    }
+
+    /**
+     * 判断当前 Operation 是否已包含相同鉴权要求，避免重复追加。
+     */
+    private boolean containsSecurityRequirement(Operation operation, Set<String> securitySchemeNames) {
+        if (operation == null || securitySchemeNames == null || securitySchemeNames.isEmpty()) {
+            return false;
+        }
+        List<SecurityRequirement> securityRequirements = operation.getSecurity();
+        if (securityRequirements == null || securityRequirements.isEmpty()) {
+            return false;
+        }
+        return securityRequirements.stream()
+            .filter(Objects::nonNull)
+            .anyMatch(requirement -> requirement.keySet().equals(securitySchemeNames));
     }
 }
