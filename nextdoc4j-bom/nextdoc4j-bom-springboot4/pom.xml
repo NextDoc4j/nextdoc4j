@@ -20,8 +20,8 @@
         <spring-boot.version>4.0.3</spring-boot.version>
         <spring-cloud.version>2025.1.1</spring-cloud.version>
         <springdoc.version>3.0.2</springdoc.version>
-        <hutool.version>5.8.41</hutool.version>
-        <swagger.version>2.2.39</swagger.version>
+        <hutool.version>5.8.44</hutool.version>
+        <swagger.version>2.2.45</swagger.version>
         <sa-token.version>1.45.0</sa-token.version>
     </properties>
 
