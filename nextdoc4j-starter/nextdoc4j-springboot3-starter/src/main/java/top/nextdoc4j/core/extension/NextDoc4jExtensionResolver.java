@@ -356,8 +356,8 @@ public class NextDoc4jExtensionResolver {
         } catch (IOException e) {
             log.debug("Failed to get resource metadata for: {}", resource.getDescription());
             // 设置默认值避免字段缺失
-            markdownData.put("lastModified", 0L);
-            markdownData.put("contentLength", content.length());
+            markdownData.put("lastModified", Instant.EPOCH.atZone(ZoneId.of("Asia/Shanghai")).toLocalDateTime());
+            markdownData.put("contentLength", DataSizeUtil.format((long)content.length()));
         }
 
         return markdownData;

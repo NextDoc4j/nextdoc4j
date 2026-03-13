@@ -32,7 +32,6 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ArrayNode;
@@ -157,7 +156,7 @@ public class GatewayDocResponseRewriteWebFilter implements WebFilter {
 
             rewriteApiDocs(path, objectNode);
             return Mono.just(objectMapper.writeValueAsString(objectNode));
-        } catch (JacksonException e) {
+        } catch (Exception e) {
             return Mono.just(sourceBody);
         }
     }
