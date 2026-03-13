@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -9,26 +10,14 @@
         <version>${revision}</version>
     </parent>
 
-    <packaging>pom</packaging>
     <artifactId>nextdoc4j-plugin</artifactId>
     <name>${project.artifactId}</name>
-    <description>
-        nextdoc4j 扩展插件模块
-    </description>
+    <packaging>pom</packaging>
+    <description>nextdoc4j 插件模块</description>
 
     <modules>
-        <module>nextdoc4j-plugin-enums</module>
-        <module>nextdoc4j-plugin-security</module>
+        <module>nextdoc4j-plugin-enum</module>
         <module>nextdoc4j-plugin-gateway</module>
+        <module>nextdoc4j-plugin-security</module>
     </modules>
-
-    <dependencies>
-        <!--核心模块 -->
-        <dependency>
-            <groupId>top.nextdoc4j</groupId>
-            <artifactId>nextdoc4j-core</artifactId>
-            <optional>true</optional>
-        </dependency>
-    </dependencies>
-
 </project>

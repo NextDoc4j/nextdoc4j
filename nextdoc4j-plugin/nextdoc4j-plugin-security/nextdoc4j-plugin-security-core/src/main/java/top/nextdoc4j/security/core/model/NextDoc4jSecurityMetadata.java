@@ -17,37 +17,19 @@
  */
 package top.nextdoc4j.security.core.model;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 安全信息模型
- * <p>
- * 用于存储权限框架注解解析后的权限和角色信息，
- * 并通过 OpenAPI 扩展字段（x-nextdoc4j-security）展示在 API 文档中
- * </p>
+ * 安全信息模型。
  *
  * @author echo
  * @since 1.1.3
  */
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class NextDoc4jSecurityMetadata {
 
-    /**
-     * 权限校验信息列表
-     */
     private List<AuthInfo> permissions;
-
-    /**
-     * 角色校验信息列表
-     */
     private List<AuthInfo> roles;
-
-    /**
-     * 是否忽略校验
-     */
     private boolean ignore = false;
 
     public NextDoc4jSecurityMetadata() {
@@ -55,14 +37,6 @@ public class NextDoc4jSecurityMetadata {
         this.roles = new ArrayList<>();
     }
 
-    /**
-     * 添加权限信息
-     *
-     * @param values  权限值数组
-     * @param mode    校验模式（AND/OR）
-     * @param type    权限类型
-     * @param orRoles 或角色数组
-     */
     public void addPermission(String[] values, String mode, String type, String[] orRoles) {
         if (values != null && values.length > 0) {
             AuthInfo authInfo = new AuthInfo();
@@ -77,13 +51,6 @@ public class NextDoc4jSecurityMetadata {
         }
     }
 
-    /**
-     * 添加角色信息
-     *
-     * @param values 角色值数组
-     * @param mode   校验模式（AND/OR）
-     * @param type   角色类型
-     */
     public void addRole(String[] values, String mode, String type) {
         if (values != null && values.length > 0) {
             AuthInfo authInfo = new AuthInfo();
@@ -94,35 +61,12 @@ public class NextDoc4jSecurityMetadata {
         }
     }
 
-    /**
-     * 认证信息
-     */
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public static class AuthInfo {
 
-        /**
-         * 权限或角色值数组
-         */
         private String[] values;
-
-        /**
-         * 校验模式（AND/OR）
-         */
         private String mode;
-
-        /**
-         * 类型说明
-         */
         private String type;
-
-        /**
-         * 或权限/角色值数组（用于权限校验时的或角色校验）
-         */
         private String[] orValues;
-
-        /**
-         * 或值的类型（role/permission）
-         */
         private String orType;
 
         public String[] getValues() {
@@ -166,7 +110,6 @@ public class NextDoc4jSecurityMetadata {
         }
     }
 
-    // Getters and Setters
     public List<AuthInfo> getPermissions() {
         return permissions;
     }

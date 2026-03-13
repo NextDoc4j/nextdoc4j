@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>top.nextdoc4j</groupId>
+        <artifactId>nextdoc4j</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <artifactId>nextdoc4j-starter</artifactId>
+    <packaging>pom</packaging>
+    <name>${project.artifactId}</name>
+    <description>nextdoc4j Starter 聚合模块</description>
+
+    <modules>
+        <module>nextdoc4j-springboot3-starter</module>
+        <module>nextdoc4j-springboot3-gateway-starter</module>
+        <module>nextdoc4j-springboot4-starter</module>
+        <module>nextdoc4j-springboot4-gateway-starter</module>
+    </modules>
+</project>

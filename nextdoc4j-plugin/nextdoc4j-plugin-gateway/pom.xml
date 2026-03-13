@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -7,40 +8,17 @@
         <groupId>top.nextdoc4j</groupId>
         <artifactId>nextdoc4j-plugin</artifactId>
         <version>${revision}</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>nextdoc4j-plugin-gateway</artifactId>
+    <packaging>pom</packaging>
     <name>${project.artifactId}</name>
-    <description>
-        Spring Cloud Gateway 聚合文档插件，自动聚合网关下所有微服务的 API 文档，
-        基于 SpringDoc 标准接口实现，无第三方接口
-    </description>
+    <description>nextdoc4j 网关插件聚合模块</description>
 
-    <dependencies>
-        <!-- Spring Cloud Gateway (WebFlux) -->
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-gateway</artifactId>
-            <optional>true</optional>
-        </dependency>
-
-        <!-- SpringDoc WebFlux (不是 WebMvc，Gateway 必须用这个) -->
-        <dependency>
-            <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-starter-webflux-ui</artifactId>
-        </dependency>
-
-        <!-- nextdoc4j UI (仅静态资源，无 Java 依赖) -->
-        <dependency>
-            <groupId>top.nextdoc4j</groupId>
-            <artifactId>nextdoc4j-ui</artifactId>
-        </dependency>
-
-        <!-- Spring Boot 配置处理器 -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-configuration-processor</artifactId>
-            <optional>true</optional>
-        </dependency>
-    </dependencies>
+    <modules>
+        <module>nextdoc4j-plugin-gateway-core</module>
+        <module>nextdoc4j-plugin-gateway-springboot3</module>
+        <module>nextdoc4j-plugin-gateway-springboot4</module>
+    </modules>
 </project>

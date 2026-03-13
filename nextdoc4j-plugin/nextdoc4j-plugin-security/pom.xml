@@ -1,24 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>top.nextdoc4j</groupId>
         <artifactId>nextdoc4j-plugin</artifactId>
         <version>${revision}</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>nextdoc4j-plugin-security</artifactId>
-    <name>${project.artifactId}</name>
     <packaging>pom</packaging>
-    <description>
-        插件 - 接口认证信息展示插件
-    </description>
+    <name>${project.artifactId}</name>
+    <description>nextdoc4j 安全插件聚合模块</description>
 
     <modules>
         <module>nextdoc4j-plugin-security-core</module>
-        <module>nextdoc4j-plugin-security-satoken</module>
+        <module>nextdoc4j-plugin-security-schemes-springboot3</module>
+        <module>nextdoc4j-plugin-security-schemes-springboot4</module>
+        <module>nextdoc4j-plugin-security-satoken-springboot3</module>
+        <module>nextdoc4j-plugin-security-satoken-springboot4</module>
     </modules>
-
-
 </project>

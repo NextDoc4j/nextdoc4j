@@ -17,7 +17,6 @@
  */
 package top.nextdoc4j.core.configuration;
 
-import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import top.nextdoc4j.core.configuration.extension.NextDoc4jBasicAuth;
 
 import java.io.Serial;
@@ -52,13 +51,11 @@ public class NextDoc4jProperties implements Serializable {
     /**
      * 认证
      */
-    @NestedConfigurationProperty
     private NextDoc4jBasicAuth auth;
 
     /**
      * 扩展属性
      */
-    @NestedConfigurationProperty
     private NextDoc4jExtension extension;
 
     public boolean isEnabled() {
