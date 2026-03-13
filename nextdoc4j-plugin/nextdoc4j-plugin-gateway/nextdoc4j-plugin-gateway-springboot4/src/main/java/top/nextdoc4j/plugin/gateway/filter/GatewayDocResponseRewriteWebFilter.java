@@ -17,10 +17,6 @@
  */
 package top.nextdoc4j.plugin.gateway.filter;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.ObjectProvider;
@@ -36,6 +32,11 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 import top.nextdoc4j.plugin.gateway.configuration.GatewayDocProperties;
 import top.nextdoc4j.plugin.gateway.constant.GatewayMetadataConstants;
 import top.nextdoc4j.plugin.gateway.customizer.GatewaySwaggerConfigCustomizer;
@@ -156,7 +157,7 @@ public class GatewayDocResponseRewriteWebFilter implements WebFilter {
 
             rewriteApiDocs(path, objectNode);
             return Mono.just(objectMapper.writeValueAsString(objectNode));
-        } catch (Exception e) {
+        } catch (JacksonException e) {
             return Mono.just(sourceBody);
         }
     }
@@ -185,26 +186,26 @@ public class GatewayDocResponseRewriteWebFilter implements WebFilter {
             return;
         }
 
-        ObjectNode componentsNode = root.with("components");
-        ObjectNode localSecuritySchemesNode = componentsNode.with("securitySchemes");
+        ObjectNode componentsNode = root.withObject("components");
+        ObjectNode localSecuritySchemesNode = componentsNode.withObject("securitySchemes");
         ObjectNode mergedSecuritySchemesNode = objectMapper.createObjectNode();
 
         globalSchemes.forEach((name, scheme) -> mergedSecuritySchemesNode.set(name, objectMapper.valueToTree(scheme)));
-        localSecuritySchemesNode.fields()
-            .forEachRemaining(entry -> mergedSecuritySchemesNode.set(entry.getKey(), entry.getValue()));
+        localSecuritySchemesNode.properties()
+                .forEach(entry -> mergedSecuritySchemesNode.set(entry.getKey(), entry.getValue()));
         componentsNode.set("securitySchemes", mergedSecuritySchemesNode);
 
         JsonNode securityNode = root.get("security");
         boolean needInjectGlobalSecurity = properties.getSecurity()
-            .isApplyGlobalRequirement() && (securityNode == null || !securityNode.isArray() || securityNode.isEmpty());
+                .isApplyGlobalRequirement() && (securityNode == null || !securityNode.isArray() || securityNode.isEmpty());
         if (!needInjectGlobalSecurity) {
             return;
         }
 
         ArrayNode globalSecurityArray = objectMapper.createArrayNode();
         ObjectNode securityRequirement = objectMapper.createObjectNode();
-        mergedSecuritySchemesNode.fieldNames()
-            .forEachRemaining(name -> securityRequirement.set(name, objectMapper.createArrayNode()));
+        mergedSecuritySchemesNode.propertyNames()
+                .forEach(name -> securityRequirement.set(name, objectMapper.createArrayNode()));
         globalSecurityArray.add(securityRequirement);
         root.set("security", globalSecurityArray);
     }
