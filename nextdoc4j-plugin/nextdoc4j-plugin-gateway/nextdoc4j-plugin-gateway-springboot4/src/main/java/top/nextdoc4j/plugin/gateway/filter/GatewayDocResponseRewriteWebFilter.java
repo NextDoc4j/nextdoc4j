@@ -17,6 +17,7 @@
  */
 package top.nextdoc4j.plugin.gateway.filter;
 
+import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.ObjectProvider;
@@ -189,7 +190,7 @@ public class GatewayDocResponseRewriteWebFilter implements WebFilter {
         ObjectNode localSecuritySchemesNode = componentsNode.withObject("securitySchemes");
         ObjectNode mergedSecuritySchemesNode = objectMapper.createObjectNode();
 
-        globalSchemes.forEach((name, scheme) -> mergedSecuritySchemesNode.set(name, objectMapper.valueToTree(scheme)));
+        globalSchemes.forEach((name, scheme) -> mergedSecuritySchemesNode.set(name, serializeSecurityScheme(scheme)));
         localSecuritySchemesNode.properties()
                 .forEach(entry -> mergedSecuritySchemesNode.set(entry.getKey(), entry.getValue()));
         componentsNode.set("securitySchemes", mergedSecuritySchemesNode);
@@ -207,6 +208,22 @@ public class GatewayDocResponseRewriteWebFilter implements WebFilter {
                 .forEach(name -> securityRequirement.set(name, objectMapper.createArrayNode()));
         globalSecurityArray.add(securityRequirement);
         root.set("security", globalSecurityArray);
+    }
+
+    /**
+     * 优先使用 swagger-core 的 ObjectMapper 进行 SecurityScheme 序列化，保持与 springdoc 输出对齐。
+     */
+    private JsonNode serializeSecurityScheme(SecurityScheme scheme) {
+        if (scheme == null) {
+            return objectMapper.getNodeFactory().nullNode();
+        }
+        try {
+            String json = Json.mapper().writeValueAsString(scheme);
+            JsonNode node = objectMapper.readTree(json);
+            return node == null ? objectMapper.getNodeFactory().nullNode() : node;
+        } catch (Exception ex) {
+            return objectMapper.valueToTree(scheme);
+        }
     }
 
     /**
