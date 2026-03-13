@@ -17,7 +17,6 @@
  */
 package top.nextdoc4j.plugin.gateway.configuration;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.springdoc.core.properties.SwaggerUiConfigProperties;
 import org.springframework.beans.factory.ObjectProvider;
@@ -31,6 +30,7 @@ import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
 import org.springframework.cloud.gateway.route.RouteDefinitionLocator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableAsync;
+import tools.jackson.databind.ObjectMapper;
 import top.nextdoc4j.core.constant.NextDoc4jConstants;
 import top.nextdoc4j.plugin.gateway.customizer.GatewayAggregationCustomizer;
 import top.nextdoc4j.plugin.gateway.customizer.GatewaySwaggerConfigCustomizer;
