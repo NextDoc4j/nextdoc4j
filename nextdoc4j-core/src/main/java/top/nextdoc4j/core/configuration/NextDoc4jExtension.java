@@ -17,7 +17,6 @@
  */
 package top.nextdoc4j.core.configuration;
 
-import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import top.nextdoc4j.core.configuration.extension.NextDoc4jBrand;
 import top.nextdoc4j.core.configuration.extension.NextDoc4jMarkdown;
 
@@ -49,7 +48,6 @@ public class NextDoc4jExtension implements Serializable {
     /**
      * 品牌信息 - 定制 logo 和页脚信息
      */
-    @NestedConfigurationProperty
     private NextDoc4jBrand brand;
 
     public boolean isEnabled() {

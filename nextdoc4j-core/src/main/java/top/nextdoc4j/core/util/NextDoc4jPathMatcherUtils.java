@@ -17,77 +17,56 @@
  */
 package top.nextdoc4j.core.util;
 
-import org.springframework.util.AntPathMatcher;
 import top.nextdoc4j.core.constant.NextDoc4jFilterConstant;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
+
 /**
- * NextDoc4j 路径匹配工具类
- *
- * <p>使用 AntPathMatcher 实现路径匹配，完整支持：</p>
- * <ul>
- * <li>无 context-path 的直接访问：/doc.html</li>
- * <li>有 context-path 的访问：/app/doc.html、/api/v1/doc.html</li>
- * <li>多级 context-path：/company/project/api/doc.html</li>
- * <li>前缀路径：/nextdoc/**, /swagger-ui/**</li>
- * </ul>
+ * NextDoc4j 路径匹配工具类（纯 Java 实现，不依赖 Spring）。
  *
  * @author echo
  * @since 1.0.1
  */
-public class NextDoc4jPathMatcherUtils {
+public final class NextDoc4jPathMatcherUtils {
 
-    /**
-     * Ant 路径匹配器（单例）
-     */
-    private static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();
-
-    /**
-     * 精确匹配的 Ant 路径模式（类加载时初始化）
-     */
     private static final String[] EXACT_PATTERNS = NextDoc4jFilterConstant.BlockedPaths.getAntExactPatterns();
-
-    /**
-     * 前缀匹配的 Ant 路径模式（类加载时初始化）
-     */
     private static final String[] PREFIX_PATTERNS = NextDoc4jFilterConstant.BlockedPaths.getAntPrefixPatterns();
+    private static final Map<String, Pattern> PATTERN_CACHE = new ConcurrentHashMap<>();
 
-    /**
-     * 私有构造函数，防止实例化
-     */
     private NextDoc4jPathMatcherUtils() {
         throw new AssertionError("Utility class should not be instantiated");
     }
 
     /**
-     * 判断请求路径是否应该被拦截/过滤
-     *
-     * <p>使用 Ant 模式匹配，自动支持任意 context-path：</p>
-     * <ul>
-     * <li>/doc.html → 匹配</li>
-     * <li>/app/doc.html → 匹配</li>
-     * <li>/api/v1/doc.html → 匹配</li>
-     * <li>/nextdoc/config.json → 匹配</li>
-     * <li>/app/nextdoc/style.css → 匹配</li>
-     * </ul>
-     *
-     * @param requestUri 请求 URI
-     * @return true-应该被拦截/过滤，false-允许通过
+     * Ant 风格路径匹配。
+     */
+    public static boolean match(String pattern, String path) {
+        if (pattern == null || pattern.isEmpty() || path == null || path.isEmpty()) {
+            return false;
+        }
+        String normalizedPath = normalizePath(path);
+        Pattern regex = PATTERN_CACHE.computeIfAbsent(pattern, NextDoc4jPathMatcherUtils::toRegexPattern);
+        return regex.matcher(normalizedPath).matches();
+    }
+
+    /**
+     * 判断请求路径是否应该被拦截/过滤。
      */
     public static boolean shouldBlock(String requestUri) {
         if (requestUri == null || requestUri.isEmpty()) {
             return false;
         }
 
-        // 1. 精确路径匹配
         for (String pattern : EXACT_PATTERNS) {
-            if (PATH_MATCHER.match(pattern, requestUri)) {
+            if (match(pattern, requestUri)) {
                 return true;
             }
         }
 
-        // 2. 前缀路径匹配
         for (String pattern : PREFIX_PATTERNS) {
-            if (PATH_MATCHER.match(pattern, requestUri)) {
+            if (match(pattern, requestUri)) {
                 return true;
             }
         }
@@ -96,25 +75,14 @@ public class NextDoc4jPathMatcherUtils {
     }
 
     /**
-     * 判断请求路径是否需要认证
-     *
-     * @param requestUri  请求 URI
-     * @param authEnabled 是否启用认证
-     * @return true-需要认证，false-不需要认证
+     * 判断请求路径是否需要认证。
      */
     public static boolean isAuthenticationRequired(String requestUri, boolean authEnabled) {
-        if (!authEnabled) {
-            return false;
-        }
-        return shouldBlock(requestUri);
+        return authEnabled && shouldBlock(requestUri);
     }
 
     /**
-     * 判断路径是否为 NextDoc4j 资源路径
-     *
-     *
-     * @param requestUri 请求 URI
-     * @return true-是 NextDoc4j 资源路径
+     * 判断路径是否为 NextDoc4j 资源路径。
      */
     public static boolean isNextDoc4jResource(String requestUri) {
         if (requestUri == null || requestUri.isEmpty()) {
@@ -123,19 +91,47 @@ public class NextDoc4jPathMatcherUtils {
 
         String docHtmlPattern = NextDoc4jFilterConstant.BlockedPaths
             .toAntExactPattern(NextDoc4jFilterConstant.BlockedPaths.NEXT_DOC4J_HTML);
-
         String nextdocPattern = NextDoc4jFilterConstant.BlockedPaths
             .toAntPrefixPattern(NextDoc4jFilterConstant.BlockedPaths.NEXT_DOC4J_PREFIX);
 
-        return PATH_MATCHER.match(docHtmlPattern, requestUri) || PATH_MATCHER.match(nextdocPattern, requestUri);
+        return match(docHtmlPattern, requestUri) || match(nextdocPattern, requestUri);
     }
 
-    /**
-     * 获取 AntPathMatcher 实例
-     *
-     * @return AntPathMatcher 实例
-     */
-    public static AntPathMatcher getPathMatcher() {
-        return PATH_MATCHER;
+    private static String normalizePath(String path) {
+        String normalized = path.trim();
+        if (normalized.isEmpty()) {
+            return normalized;
+        }
+        if (!normalized.startsWith("/")) {
+            normalized = "/" + normalized;
+        }
+        return normalized.replaceAll("/{2,}", "/");
+    }
+
+    private static Pattern toRegexPattern(String antPattern) {
+        StringBuilder regex = new StringBuilder("^");
+        for (int i = 0; i < antPattern.length(); i++) {
+            char ch = antPattern.charAt(i);
+            if (ch == '*') {
+                boolean isDoubleStar = (i + 1 < antPattern.length()) && antPattern.charAt(i + 1) == '*';
+                if (isDoubleStar) {
+                    regex.append(".*");
+                    i++;
+                } else {
+                    regex.append("[^/]*");
+                }
+                continue;
+            }
+            if (ch == '?') {
+                regex.append("[^/]");
+                continue;
+            }
+            if ("\\.^$|()[]{}+".indexOf(ch) >= 0) {
+                regex.append('\\');
+            }
+            regex.append(ch);
+        }
+        regex.append('$');
+        return Pattern.compile(regex.toString());
     }
 }

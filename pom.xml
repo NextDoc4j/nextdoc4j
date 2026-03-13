@@ -1,122 +1,156 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <!--父类-->
-    <parent>
-        <groupId>top.nextdoc4j</groupId>
-        <artifactId>nextdoc4j-dependencies</artifactId>
-        <version>${revision}</version>
-        <relativePath>./nextdoc4j-dependencies</relativePath>
-    </parent>
-
-    <!--基础信息-->
+    <groupId>top.nextdoc4j</groupId>
     <artifactId>nextdoc4j</artifactId>
+    <version>${revision}</version>
     <packaging>pom</packaging>
     <name>nextdoc4j</name>
-    <description>
-        NextDoc4j 是一个专为 SpringDoc 和 OpenAPI 3 设计的现代化文档 UI 工具，旨在替代 Swagger UI，提供更美观、可定制性强、开发者体验更佳的
-        API 文档展示解决方案。
-        通过深度适配 SpringDoc，nextdoc4j 提供更加直观清晰的接口交互界面、增强的调试能力和便捷的开发工具，助力团队更高效地管理和测试
-        API。
-    </description>
-
-    <!--模块管理-->
-    <modules>
-        <module>nextdoc4j-bom</module>
-        <module>nextdoc4j-dependencies</module>
-        <module>nextdoc4j-core</module>
-        <module>nextdoc4j-ui</module>
-        <module>nextdoc4j-springboot3-starter</module>
-        <module>nextdoc4j-plugin</module>
-    </modules>
-
 
     <properties>
-        <!-- Maven 环境版本 -->
+        <revision>1.2.0-SNAPSHOT</revision>
         <java.version>17</java.version>
-        <resource.delimiter>@</resource.delimiter>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <maven.javadoc.failOnError>false</maven.javadoc.failOnError>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <spotless-maven-plugin.version>2.43.0</spotless-maven-plugin.version>
+        <flatten-maven-plugin.version>1.6.0</flatten-maven-plugin.version>
+        <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
+        <maven-javadoc-plugin.version>3.11.2</maven-javadoc-plugin.version>
+        <maven-gpg-plugin.version>3.1.0</maven-gpg-plugin.version>
+        <central-publishing-maven-plugin.version>0.8.0</central-publishing-maven-plugin.version>
     </properties>
 
+    <modules>
+        <module>nextdoc4j-bom</module>
+        <module>nextdoc4j-core</module>
+        <module>nextdoc4j-plugin</module>
+        <module>nextdoc4j-starter</module>
+        <module>nextdoc4j-ui</module>
+    </modules>
 
     <build>
-        <plugins>
-            <!--maven 指定jdk版本 -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
-                <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
-                    <encoding>UTF-8</encoding>
-                    <compilerArgument>-Xlint:unchecked</compilerArgument>
-                </configuration>
-            </plugin>
-            <!-- 代码格式化插件 -->
-            <plugin>
-                <groupId>com.diffplug.spotless</groupId>
-                <artifactId>spotless-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>apply</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <java>
-                        <removeUnusedImports/>
-                        <eclipse>
-                            <file>.style/p3c-codestyle.xml</file>
-                        </eclipse>
-                        <licenseHeader>
-                            <file>.style/license-header</file>
-                        </licenseHeader>
-                    </java>
-                </configuration>
-            </plugin>
-            <!-- 统一版本号插件 -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>flatten-maven-plugin</artifactId>
-                <configuration>
-                    <updatePomFile>true</updatePomFile>
-                    <flattenMode>oss</flattenMode>
-                    <pomElements>
-                        <parent>expand</parent>
-                        <properties>keep</properties>
-                    </pomElements>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>flatten</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>flatten</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>flatten-clean</id>
-                        <phase>clean</phase>
-                        <goals>
-                            <goal>clean</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.11.0</version>
+                    <configuration>
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
+                        <encoding>UTF-8</encoding>
+                        <compilerArgument>-Xlint:unchecked</compilerArgument>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>com.diffplug.spotless</groupId>
+                    <artifactId>spotless-maven-plugin</artifactId>
+                    <version>${spotless-maven-plugin.version}</version>
+                    <configuration>
+                        <java>
+                            <removeUnusedImports/>
+                            <eclipse>
+                                <file>.style/p3c-codestyle.xml</file>
+                            </eclipse>
+                            <licenseHeader>
+                                <file>.style/license-header</file>
+                            </licenseHeader>
+                        </java>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>flatten-maven-plugin</artifactId>
+                    <version>${flatten-maven-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>${maven-source-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>${maven-javadoc-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-gpg-plugin</artifactId>
+                    <version>${maven-gpg-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.sonatype.central</groupId>
+                    <artifactId>central-publishing-maven-plugin</artifactId>
+                    <version>${central-publishing-maven-plugin.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
     </build>
 
-    <!--开源和开发者信息-->
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <extensions>true</extensions>
+                        <inherited>false</inherited>
+                        <configuration>
+                            <publishingServerId>central</publishingServerId>
+                            <autoPublish>false</autoPublish>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
     <url>https://github.com/NextDoc4j/nextdoc4j</url>
     <licenses>
         <license>
@@ -143,5 +177,4 @@
         <developerConnection>scm:git:ssh://git@github.com/nextdoc4j/nextdoc4j.git</developerConnection>
         <url>https://github.com/NextDoc4j/nextdoc4j</url>
     </scm>
-
 </project>

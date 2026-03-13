@@ -1,0 +1,70 @@
+/*
+ * Copyright (c) 2025-present echo. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * This file is part of the NextDoc4j project.
+ */
+package top.nextdoc4j.springboot.configuration;
+
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.core.Ordered;
+import top.nextdoc4j.core.constant.NextDoc4jConstants;
+import top.nextdoc4j.core.constant.NextDoc4jFilterConstant;
+import top.nextdoc4j.springboot.filter.NextDoc4jProductionFilter;
+import top.nextdoc4j.springboot.filter.NextDoc4jResourceFilter;
+
+/**
+ * 过滤器自动配置
+ *
+ * @author echo
+ * @since 1.0.0
+ */
+
+public class NextDoc4jFilterConfiguration {
+
+    /**
+     * NextDoc4j 资源过滤器 - 当 enabled=false 时生效
+     *
+     * @return {@link FilterRegistrationBean }<{@link NextDoc4jResourceFilter }>
+     */
+    @Bean
+    @ConditionalOnProperty(prefix = NextDoc4jConstants.NEXTDOC4J, name = NextDoc4jConstants.ENABLED, havingValue = "false", matchIfMissing = true)
+    public FilterRegistrationBean<NextDoc4jResourceFilter> nextdoc4jResourceFilter() {
+        FilterRegistrationBean<NextDoc4jResourceFilter> bean = new FilterRegistrationBean<>();
+        bean.setFilter(new NextDoc4jResourceFilter());
+        bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
+        // 只过滤 NextDoc4j 相关资源
+        bean.addUrlPatterns(NextDoc4jFilterConstant.BlockedPaths.NEXT_DOC4J_HTML, NextDoc4jFilterConstant.BlockedPaths.NEXT_DOC4J_PREFIX + "*");
+        return bean;
+    }
+
+    /**
+     * 生产环境资源过滤器 - 当 production=true 时生效
+     *
+     * @return {@link FilterRegistrationBean }<{@link NextDoc4jProductionFilter }>
+     */
+    @Bean
+    @ConditionalOnProperty(prefix = NextDoc4jConstants.NEXTDOC4J, name = NextDoc4jConstants.PRODUCTION, havingValue = "true")
+    public FilterRegistrationBean<NextDoc4jProductionFilter> nextdoc4jProductionFilter() {
+        FilterRegistrationBean<NextDoc4jProductionFilter> bean = new FilterRegistrationBean<>();
+        bean.setFilter(new NextDoc4jProductionFilter());
+        bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
+        // 使用统一配置的URL路径
+        bean.addUrlPatterns(NextDoc4jFilterConstant.BlockedPaths.URL_PATTERNS);
+        return bean;
+    }
+
+}

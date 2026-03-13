@@ -1,45 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>top.nextdoc4j</groupId>
         <artifactId>nextdoc4j</artifactId>
         <version>${revision}</version>
     </parent>
+
     <artifactId>nextdoc4j-core</artifactId>
     <name>${project.artifactId}</name>
-    <description>
-        nextdoc4j 的核心模块
-    </description>
-
-    <dependencies>
-
-        <!--Jakarta EE 中用于处理 Web 请求和响应的核心 API-->
-        <dependency>
-            <groupId>jakarta.servlet</groupId>
-            <artifactId>jakarta.servlet-api</artifactId>
-        </dependency>
-
-        <!--springdoc common -->
-        <dependency>
-            <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-starter-common</artifactId>
-        </dependency>
-
-        <!--hutool 核心模块-->
-        <dependency>
-            <groupId>cn.hutool</groupId>
-            <artifactId>hutool-core</artifactId>
-        </dependency>
-
-        <!--springboot3.x 配置处理-->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-configuration-processor</artifactId>
-        </dependency>
-
-    </dependencies>
+    <description>nextdoc4j 核心中立模块（纯 Java 通用模型与工具）</description>
 
     <build>
         <resources>
@@ -59,5 +32,4 @@
             </resource>
         </resources>
     </build>
-
 </project>

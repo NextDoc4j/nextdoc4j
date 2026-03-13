@@ -17,124 +17,85 @@
  */
 package top.nextdoc4j.core.version;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
 /**
- * NextDoc4j 版本号提供器
- * <p>
- * 该类负责提供 NextDoc4j 的版本信息，支持以下几种获取方式：
- * <ul>
- * <li>从 classpath 下的 nextdoc4j-version.properties 文件读取</li>
- * <li>从 MANIFEST.MF 读取</li>
- * <li>返回默认版本号</li>
- * </ul>
- * </p>
+ * NextDoc4j 版本号提供器。
  *
  * @author echo
  * @since 1.1.6
  **/
 public final class NextDoc4jVersionProvider {
 
-    private static final Logger log = LoggerFactory.getLogger(NextDoc4jVersionProvider.class);
-
     private static final String VERSION_PROPERTIES_FILE = "nextdoc4j-version.properties";
-
     private static final String VERSION_PROPERTY_KEY = "nextdoc4j.version";
-
     private static final String DEFAULT_VERSION = "1.0.0";
 
-    private static String cachedVersion;
+    private static volatile String cachedVersion;
 
     private NextDoc4jVersionProvider() {
     }
 
     /**
-     * 获取 NextDoc4j 版本号
-     * <p>
-     * 版本号获取优先级：
-     * 1. 缓存中的版本号
-     * 2. 从 nextdoc4j-version.properties 文件读取
-     * 3. 从 MANIFEST.MF 读取
-     * 4. 返回默认版本号
-     * </p>
-     *
-     * @return 版本号字符串
+     * 获取 NextDoc4j 版本号。
      */
     public static String getVersion() {
         if (cachedVersion != null) {
             return cachedVersion;
         }
 
-        // 尝试从 classpath 下的 properties 文件读取
-        String version = readVersionFromProperties();
-        if (version != null) {
-            cachedVersion = version;
+        synchronized (NextDoc4jVersionProvider.class) {
+            if (cachedVersion != null) {
+                return cachedVersion;
+            }
+
+            String version = readVersionFromProperties();
+            if (version == null) {
+                version = readVersionFromManifest();
+            }
+            cachedVersion = version != null ? version : DEFAULT_VERSION;
             return cachedVersion;
         }
-
-        // 尝试从 MANIFEST.MF 读取
-        version = readVersionFromManifest();
-        if (version != null) {
-            cachedVersion = version;
-            return cachedVersion;
-        }
-
-        // 返回默认版本号
-        cachedVersion = DEFAULT_VERSION;
-        return cachedVersion;
     }
 
-    /**
-     * 从 properties 文件读取版本号
-     *
-     * @return 版本号，读取失败返回 null
-     */
     private static String readVersionFromProperties() {
-        Resource resource = new ClassPathResource(VERSION_PROPERTIES_FILE);
-        if (!resource.exists()) {
-            return null;
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        if (classLoader == null) {
+            classLoader = NextDoc4jVersionProvider.class.getClassLoader();
         }
 
-        Properties props = new Properties();
-        try (InputStream is = resource.getInputStream()) {
-            props.load(is);
-            String version = props.getProperty(VERSION_PROPERTY_KEY);
+        try (InputStream inputStream = classLoader.getResourceAsStream(VERSION_PROPERTIES_FILE)) {
+            if (inputStream == null) {
+                return null;
+            }
+
+            Properties properties = new Properties();
+            properties.load(inputStream);
+            String version = properties.getProperty(VERSION_PROPERTY_KEY);
             if (version != null && !version.trim().isEmpty()) {
                 return version.trim();
             }
-        } catch (IOException e) {
-            log.debug("Failed to read version properties file", e);
+        } catch (IOException ignored) {
+            return null;
         }
+
         return null;
     }
 
-    /**
-     * 从 MANIFEST.MF 读取版本号
-     *
-     * @return 版本号，读取失败返回 null
-     */
     private static String readVersionFromManifest() {
         try {
             String version = NextDoc4jVersionProvider.class.getPackage().getImplementationVersion();
             if (version != null && !version.trim().isEmpty()) {
                 return version.trim();
             }
-        } catch (Exception e) {
-            log.debug("Failed to read version from MANIFEST", e);
+        } catch (Exception ignored) {
+            return null;
         }
         return null;
     }
 
-    /**
-     * 清除缓存（主要用于测试）
-     */
     static void clearCache() {
         cachedVersion = null;
     }
