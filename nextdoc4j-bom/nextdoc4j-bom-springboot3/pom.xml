@@ -71,59 +71,59 @@
             <dependency>
                 <groupId>top.nextdoc4j</groupId>
                 <artifactId>nextdoc4j-core</artifactId>
-                <version>${revision}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>top.nextdoc4j</groupId>
                 <artifactId>nextdoc4j-ui</artifactId>
-                <version>${revision}</version>
+                <version>${project.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>top.nextdoc4j</groupId>
                 <artifactId>nextdoc4j-plugin-enum-core</artifactId>
-                <version>${revision}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>top.nextdoc4j</groupId>
                 <artifactId>nextdoc4j-plugin-enum-springboot3</artifactId>
-                <version>${revision}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>top.nextdoc4j</groupId>
                 <artifactId>nextdoc4j-plugin-gateway-core</artifactId>
-                <version>${revision}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>top.nextdoc4j</groupId>
                 <artifactId>nextdoc4j-plugin-gateway-springboot3</artifactId>
-                <version>${revision}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>top.nextdoc4j</groupId>
                 <artifactId>nextdoc4j-plugin-security-core</artifactId>
-                <version>${revision}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>top.nextdoc4j</groupId>
                 <artifactId>nextdoc4j-plugin-security-schemes-springboot3</artifactId>
-                <version>${revision}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>top.nextdoc4j</groupId>
                 <artifactId>nextdoc4j-plugin-security-satoken-springboot3</artifactId>
-                <version>${revision}</version>
+                <version>${project.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>top.nextdoc4j</groupId>
                 <artifactId>nextdoc4j-springboot3-starter</artifactId>
-                <version>${revision}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>top.nextdoc4j</groupId>
                 <artifactId>nextdoc4j-springboot3-gateway-starter</artifactId>
-                <version>${revision}</version>
+                <version>${project.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
