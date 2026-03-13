@@ -30,6 +30,7 @@ import top.nextdoc4j.enums.model.NextDoc4jEnumMetadata;
 import top.nextdoc4j.enums.resolver.DefaultEnumMetadataResolver;
 import top.nextdoc4j.enums.resolver.EnumMetadataResolver;
 
+import java.lang.reflect.Type;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -239,9 +240,33 @@ public class NextDoc4jEnumParameterHandler implements ParameterCustomizer, Model
      * @return 原始 Class
      */
     private Class<?> resolveRawClass(AnnotatedType type) {
+        if (type == null || type.getType() == null) {
+            return null;
+        }
+        Type sourceType = type.getType();
+        if (sourceType instanceof Class<?>) {
+            return (Class<?>)sourceType;
+        }
+        Class<?> rawClass = resolveRawClassFromJacksonType(sourceType);
+        if (rawClass != null) {
+            return rawClass;
+        }
         try {
-            return objectMapper.constructType(type.getType()).getRawClass();
+            return objectMapper.constructType(sourceType).getRawClass();
         } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * 兼容 springdoc/swagger 传入的 Jackson JavaType。
+     * Boot4 使用 tools.jackson，但 springdoc 仍可能传入 com.fasterxml JavaType。
+     */
+    private Class<?> resolveRawClassFromJacksonType(Type sourceType) {
+        try {
+            Object rawClass = sourceType.getClass().getMethod("getRawClass").invoke(sourceType);
+            return rawClass instanceof Class<?> ? (Class<?>)rawClass : null;
+        } catch (Exception ignored) {
             return null;
         }
     }
