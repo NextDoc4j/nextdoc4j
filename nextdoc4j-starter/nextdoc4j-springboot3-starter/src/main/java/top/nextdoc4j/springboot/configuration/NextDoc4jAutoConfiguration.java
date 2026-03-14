@@ -37,6 +37,7 @@ import top.nextdoc4j.core.constant.NextDoc4jConstants;
 import top.nextdoc4j.core.constant.NextDoc4jFilterConstant;
 import top.nextdoc4j.core.extension.NextDoc4jExtensionOpenApiCustomizer;
 import top.nextdoc4j.core.extension.NextDoc4jExtensionResolver;
+import top.nextdoc4j.springboot.configuration.properties.NextDoc4jPropertiesMetadata;
 import top.nextdoc4j.springboot.filter.NextDoc4jBasicAuthFilter;
 
 import java.util.concurrent.TimeUnit;
@@ -55,8 +56,8 @@ public class NextDoc4jAutoConfiguration {
      */
     @Bean
     @ConfigurationProperties(prefix = NextDoc4jConstants.NEXTDOC4J)
-    public NextDoc4jProperties getNextDoc4jProperties() {
-        return new NextDoc4jProperties();
+    public NextDoc4jPropertiesMetadata getNextDoc4jProperties() {
+        return new NextDoc4jPropertiesMetadata();
     }
 
     /**

@@ -13,6 +13,7 @@ import top.nextdoc4j.core.configuration.NextDoc4jProperties;
 import top.nextdoc4j.core.constant.NextDoc4jConstants;
 import top.nextdoc4j.core.extension.NextDoc4jExtensionOpenApiCustomizer;
 import top.nextdoc4j.core.extension.NextDoc4jExtensionResolver;
+import top.nextdoc4j.webflux.configuration.properties.NextDoc4jPropertiesMetadata;
 
 /**
  * NextDoc4j WebFlux 自动配置。
@@ -22,8 +23,8 @@ public class NextDoc4jWebFluxAutoConfiguration {
 
     @Bean
     @ConfigurationProperties(prefix = NextDoc4jConstants.NEXTDOC4J)
-    public NextDoc4jProperties getNextDoc4jProperties() {
-        return new NextDoc4jProperties();
+    public NextDoc4jPropertiesMetadata getNextDoc4jProperties() {
+        return new NextDoc4jPropertiesMetadata();
     }
 
     @Bean
