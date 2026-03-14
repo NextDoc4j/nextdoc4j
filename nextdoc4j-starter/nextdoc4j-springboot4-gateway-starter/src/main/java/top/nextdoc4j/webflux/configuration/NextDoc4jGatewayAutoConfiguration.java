@@ -53,7 +53,7 @@ import top.nextdoc4j.plugin.gateway.resolver.NextDoc4jGatewayServiceContextPathR
 @AutoConfiguration
 @EnableAsync
 @ConditionalOnClass({RouteDefinitionLocator.class, SwaggerUiConfigProperties.class})
-@ConditionalOnProperty(prefix = NextDoc4jConstants.GATEWAY, name = NextDoc4jConstants.ENABLED, havingValue = "true")
+@ConditionalOnProperty(prefix = NextDoc4jConstants.NEXTDOC4J, name = NextDoc4jConstants.ENABLED, havingValue = "true")
 public class NextDoc4jGatewayAutoConfiguration {
 
     /**

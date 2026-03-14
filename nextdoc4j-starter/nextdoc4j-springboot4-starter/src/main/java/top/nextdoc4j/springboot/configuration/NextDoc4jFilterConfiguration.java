@@ -46,8 +46,8 @@ public class NextDoc4jFilterConfiguration {
         FilterRegistrationBean<NextDoc4jResourceFilter> bean = new FilterRegistrationBean<>();
         bean.setFilter(new NextDoc4jResourceFilter());
         bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
-        // 只过滤 NextDoc4j 相关资源
-        bean.addUrlPatterns(NextDoc4jFilterConstant.BlockedPaths.NEXT_DOC4J_HTML, NextDoc4jFilterConstant.BlockedPaths.NEXT_DOC4J_PREFIX + "*");
+        // 过滤全部文档相关资源（含 springdoc 端点）
+        bean.addUrlPatterns(NextDoc4jFilterConstant.BlockedPaths.URL_PATTERNS);
         return bean;
     }
 

@@ -67,9 +67,7 @@ public class GatewaySwaggerConfigCustomizer {
      */
     @PostConstruct
     public void init() {
-        if (properties.isEnabled()) {
-            refreshUrlsAsync().subscribe();
-        }
+        refreshUrlsAsync().subscribe();
     }
 
     /**
@@ -78,9 +76,7 @@ public class GatewaySwaggerConfigCustomizer {
     @Async
     @EventListener(RefreshRoutesEvent.class)
     public void onRoutesRefresh(RefreshRoutesEvent event) {
-        if (properties.isEnabled()) {
-            refreshUrlsAsync().subscribe();
-        }
+        refreshUrlsAsync().subscribe();
     }
 
     /**
@@ -89,9 +85,7 @@ public class GatewaySwaggerConfigCustomizer {
     @Async
     @EventListener(HeartbeatEvent.class)
     public void onHeartbeat(HeartbeatEvent event) {
-        if (properties.isEnabled()) {
-            refreshUrlsAsync().subscribe();
-        }
+        refreshUrlsAsync().subscribe();
     }
 
     /**
