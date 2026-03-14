@@ -22,6 +22,7 @@ import top.nextdoc4j.core.configuration.extension.NextDoc4jMarkdown;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -43,12 +44,12 @@ public class NextDoc4jExtension implements Serializable {
     /**
      * markdown 文档信息
      */
-    private List<NextDoc4jMarkdown> markdown;
+    private List<NextDoc4jMarkdown> markdown = new ArrayList<>();
 
     /**
      * 品牌信息 - 定制 logo 和页脚信息
      */
-    private NextDoc4jBrand brand;
+    private NextDoc4jBrand brand = new NextDoc4jBrand();
 
     public boolean isEnabled() {
         return enabled;

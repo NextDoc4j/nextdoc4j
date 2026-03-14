@@ -51,12 +51,12 @@ public class NextDoc4jProperties implements Serializable {
     /**
      * 认证
      */
-    private NextDoc4jBasicAuth auth;
+    private NextDoc4jBasicAuth auth = new NextDoc4jBasicAuth();
 
     /**
      * 扩展属性
      */
-    private NextDoc4jExtension extension;
+    private NextDoc4jExtension extension = new NextDoc4jExtension();
 
     public boolean isEnabled() {
         return enabled;
