@@ -109,27 +109,44 @@ public final class NextDoc4jPathMatcherUtils {
     }
 
     private static Pattern toRegexPattern(String antPattern) {
+        String normalizedPattern = normalizePath(antPattern);
         StringBuilder regex = new StringBuilder("^");
-        for (int i = 0; i < antPattern.length(); i++) {
-            char ch = antPattern.charAt(i);
+        for (int i = 0; i < normalizedPattern.length();) {
+            // AntPathMatcher 语义："/**/" 可匹配零个或多个路径段（含 context-path 场景）
+            if (normalizedPattern.startsWith("/**/", i)) {
+                regex.append("(?:/.+)?/");
+                i += 4;
+                continue;
+            }
+            // 结尾 "/**" 允许当前路径段后续任意深度子路径，且可为空
+            if (normalizedPattern.startsWith("/**", i) && i + 3 == normalizedPattern.length()) {
+                regex.append("(?:/.*)?");
+                i += 3;
+                continue;
+            }
+
+            char ch = normalizedPattern.charAt(i);
             if (ch == '*') {
-                boolean isDoubleStar = (i + 1 < antPattern.length()) && antPattern.charAt(i + 1) == '*';
+                boolean isDoubleStar = (i + 1 < normalizedPattern.length()) && normalizedPattern.charAt(i + 1) == '*';
                 if (isDoubleStar) {
                     regex.append(".*");
-                    i++;
+                    i += 2;
                 } else {
                     regex.append("[^/]*");
+                    i++;
                 }
                 continue;
             }
             if (ch == '?') {
                 regex.append("[^/]");
+                i++;
                 continue;
             }
             if ("\\.^$|()[]{}+".indexOf(ch) >= 0) {
                 regex.append('\\');
             }
             regex.append(ch);
+            i++;
         }
         regex.append('$');
         return Pattern.compile(regex.toString());
