@@ -15,8 +15,9 @@
  *
  * This file is part of the NextDoc4j project.
  */
-package top.nextdoc4j.plugin.gateway.configuration;
+package top.nextdoc4j.webflux.configuration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.springdoc.core.properties.SwaggerUiConfigProperties;
 import org.springframework.beans.factory.ObjectProvider;
@@ -30,8 +31,9 @@ import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
 import org.springframework.cloud.gateway.route.RouteDefinitionLocator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableAsync;
-import tools.jackson.databind.ObjectMapper;
 import top.nextdoc4j.core.constant.NextDoc4jConstants;
+import top.nextdoc4j.plugin.gateway.configuration.GatewayDocProperties;
+import top.nextdoc4j.plugin.gateway.configuration.GatewayDocWebFluxConfigurer;
 import top.nextdoc4j.plugin.gateway.customizer.GatewayAggregationCustomizer;
 import top.nextdoc4j.plugin.gateway.customizer.GatewaySwaggerConfigCustomizer;
 import top.nextdoc4j.plugin.gateway.filter.GatewayDocResponseRewriteWebFilter;
@@ -43,7 +45,7 @@ import top.nextdoc4j.plugin.gateway.resolver.NextDoc4jGatewayRouteMetadataResolv
 import top.nextdoc4j.plugin.gateway.resolver.NextDoc4jGatewayServiceContextPathResolver;
 
 /**
- * Gateway 聚合文档自动配置
+ * Gateway 聚合文档自动配置。
  *
  * @author echo
  * @since 1.2.0
@@ -51,20 +53,20 @@ import top.nextdoc4j.plugin.gateway.resolver.NextDoc4jGatewayServiceContextPathR
 @AutoConfiguration
 @EnableAsync
 @ConditionalOnClass({RouteDefinitionLocator.class, SwaggerUiConfigProperties.class})
-@ConditionalOnProperty(prefix = NextDoc4jConstants.PLUGIN_GATEWAY, name = NextDoc4jConstants.ENABLED, havingValue = "true")
-public class GatewayDocAutoConfiguration {
+@ConditionalOnProperty(prefix = NextDoc4jConstants.GATEWAY, name = NextDoc4jConstants.ENABLED, havingValue = "true")
+public class NextDoc4jGatewayAutoConfiguration {
 
     /**
-     * Gateway 插件配置
+     * Gateway 配置。
      */
     @Bean
-    @ConfigurationProperties(prefix = NextDoc4jConstants.PLUGIN_GATEWAY)
+    @ConfigurationProperties(prefix = NextDoc4jConstants.GATEWAY)
     public GatewayDocProperties gatewayDocProperties() {
         return new GatewayDocProperties();
     }
 
     /**
-     * 默认的 OpenAPI Bean
+     * 默认 OpenAPI Bean。
      */
     @Bean
     @ConditionalOnMissingBean
@@ -73,7 +75,7 @@ public class GatewayDocAutoConfiguration {
     }
 
     /**
-     * 路由过滤器
+     * 路由过滤器。
      */
     @Bean
     @ConditionalOnMissingBean
@@ -82,7 +84,7 @@ public class GatewayDocAutoConfiguration {
     }
 
     /**
-     * 服务 context-path 自动发现解析器
+     * 服务 context-path 自动发现解析器。
      */
     @Bean
     @ConditionalOnMissingBean
@@ -93,7 +95,7 @@ public class GatewayDocAutoConfiguration {
     }
 
     /**
-     * 路由元数据解析器
+     * 路由元数据解析器。
      */
     @Bean
     @ConditionalOnMissingBean
@@ -103,7 +105,7 @@ public class GatewayDocAutoConfiguration {
     }
 
     /**
-     * Gateway 路由文档提供者
+     * Gateway 路由文档提供者。
      */
     @Bean
     @ConditionalOnMissingBean
@@ -115,7 +117,7 @@ public class GatewayDocAutoConfiguration {
     }
 
     /**
-     * Gateway 聚合扩展定制器
+     * Gateway 聚合扩展定制器。
      */
     @Bean
     @ConditionalOnMissingBean
@@ -124,7 +126,7 @@ public class GatewayDocAutoConfiguration {
     }
 
     /**
-     * Gateway Swagger 配置定制器
+     * Gateway Swagger 配置定制器。
      */
     @Bean
     @ConditionalOnMissingBean
@@ -135,7 +137,7 @@ public class GatewayDocAutoConfiguration {
     }
 
     /**
-     * Gateway WebFlux 配置
+     * Gateway WebFlux 配置。
      */
     @Bean
     @ConditionalOnMissingBean
@@ -144,7 +146,7 @@ public class GatewayDocAutoConfiguration {
     }
 
     /**
-     * 网关文档响应重写过滤器
+     * 网关文档响应重写过滤器。
      */
     @Bean
     @ConditionalOnMissingBean

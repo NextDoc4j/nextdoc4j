@@ -15,7 +15,7 @@
  *
  * This file is part of the NextDoc4j project.
  */
-package top.nextdoc4j.plugin.gateway.validation;
+package top.nextdoc4j.core.gateway.validation;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -56,4 +56,5 @@ public class GatewaySecuritySchemeValidationResult {
         return validExtensions;
     }
 }
+
 

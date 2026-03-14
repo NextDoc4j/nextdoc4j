@@ -24,7 +24,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import top.nextdoc4j.plugin.gateway.configuration.GatewayDocProperties;
-import top.nextdoc4j.plugin.gateway.enums.DocPathStrategy;
+import top.nextdoc4j.core.gateway.enums.DocPathStrategy;
 import top.nextdoc4j.plugin.gateway.filter.NextDoc4jGatewayRouteFilter;
 import top.nextdoc4j.plugin.gateway.model.ServiceConfig;
 import top.nextdoc4j.plugin.gateway.resolver.NextDoc4jGatewayRouteMetadataResolver;
@@ -205,3 +205,4 @@ public class GatewayRouteDocProvider {
     }
 
 }
+

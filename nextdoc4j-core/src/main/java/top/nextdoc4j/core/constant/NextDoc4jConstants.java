@@ -66,9 +66,9 @@ public final class NextDoc4jConstants {
     public static final String PLUGIN_SECURITY = PLUGIN + ".security";
 
     /**
-     * 插件 - 网关聚合插件
+     * 网关聚合
      */
-    public static final String PLUGIN_GATEWAY = PLUGIN + ".gateway";
+    public static final String GATEWAY = NEXTDOC4J + ".gateway";
 
     /**
      * 网关与微服务约定的 context-path 元数据 key

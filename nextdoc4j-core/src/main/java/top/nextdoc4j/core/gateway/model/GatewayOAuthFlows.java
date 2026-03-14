@@ -15,7 +15,7 @@
  *
  * This file is part of the NextDoc4j project.
  */
-package top.nextdoc4j.plugin.gateway.model;
+package top.nextdoc4j.core.gateway.model;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -83,3 +83,4 @@ public class GatewayOAuthFlows implements Serializable {
         this.authorizationCode = authorizationCode;
     }
 }
+

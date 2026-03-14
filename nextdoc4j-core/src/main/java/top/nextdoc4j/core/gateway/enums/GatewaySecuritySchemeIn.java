@@ -15,33 +15,29 @@
  *
  * This file is part of the NextDoc4j project.
  */
-package top.nextdoc4j.plugin.gateway.enums;
+package top.nextdoc4j.core.gateway.enums;
 
 /**
- * 网关路由显示名称解析策略枚举
+ * API Key 位置。
  *
  * @author echo
  * @since 1.2.0
  */
-public enum NameResolveStrategy {
+public enum GatewaySecuritySchemeIn {
 
     /**
-     * 使用路由 ID
+     * Header。
      */
-    ROUTE_ID,
+    HEADER,
 
     /**
-     * 使用 metadata.nextdoc4j.name
+     * Query。
      */
-    METADATA,
+    QUERY,
 
     /**
-     * 从 URI 提取服务名
+     * Cookie。
      */
-    URI,
-
-    /**
-     * 自动选择（优先级：METADATA > nameMappings > URI > ROUTE_ID）
-     */
-    AUTO
+    COOKIE
 }
+

@@ -44,13 +44,13 @@ import reactor.core.publisher.Mono;
 import top.nextdoc4j.plugin.gateway.configuration.GatewayDocProperties;
 import top.nextdoc4j.plugin.gateway.constant.GatewayMetadataConstants;
 import top.nextdoc4j.plugin.gateway.customizer.GatewaySwaggerConfigCustomizer;
-import top.nextdoc4j.plugin.gateway.model.GatewayOAuthFlow;
-import top.nextdoc4j.plugin.gateway.model.GatewayOAuthFlows;
-import top.nextdoc4j.plugin.gateway.model.GatewaySecurityScheme;
-import top.nextdoc4j.plugin.gateway.enums.GatewaySecuritySchemeIn;
-import top.nextdoc4j.plugin.gateway.enums.GatewaySecuritySchemeType;
-import top.nextdoc4j.plugin.gateway.validation.GatewaySecuritySchemeValidationResult;
-import top.nextdoc4j.plugin.gateway.validation.GatewaySecuritySchemeValidator;
+import top.nextdoc4j.core.gateway.model.GatewayOAuthFlow;
+import top.nextdoc4j.core.gateway.model.GatewayOAuthFlows;
+import top.nextdoc4j.core.gateway.model.GatewaySecurityScheme;
+import top.nextdoc4j.core.gateway.enums.GatewaySecuritySchemeIn;
+import top.nextdoc4j.core.gateway.enums.GatewaySecuritySchemeType;
+import top.nextdoc4j.core.gateway.validation.GatewaySecuritySchemeValidationResult;
+import top.nextdoc4j.core.gateway.validation.GatewaySecuritySchemeValidator;
 
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
@@ -376,3 +376,4 @@ public class GatewayDocResponseRewriteWebFilter implements WebFilter {
         return normalized.replaceAll(GatewayMetadataConstants.MULTIPLE_SLASH_PATTERN, "/");
     }
 }
+

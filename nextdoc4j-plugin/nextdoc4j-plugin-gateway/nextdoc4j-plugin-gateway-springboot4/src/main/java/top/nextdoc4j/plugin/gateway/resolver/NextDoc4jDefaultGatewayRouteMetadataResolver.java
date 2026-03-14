@@ -21,8 +21,8 @@ import org.springframework.cloud.gateway.route.RouteDefinition;
 import org.springframework.util.StringUtils;
 import top.nextdoc4j.plugin.gateway.configuration.GatewayDocProperties;
 import top.nextdoc4j.plugin.gateway.constant.GatewayMetadataConstants;
-import top.nextdoc4j.plugin.gateway.enums.DocPathStrategy;
-import top.nextdoc4j.plugin.gateway.enums.NameResolveStrategy;
+import top.nextdoc4j.core.gateway.enums.DocPathStrategy;
+import top.nextdoc4j.core.gateway.enums.NameResolveStrategy;
 
 import java.util.Map;
 
@@ -342,3 +342,4 @@ public class NextDoc4jDefaultGatewayRouteMetadataResolver implements NextDoc4jGa
         return appendPathSegments(normalizedDocPath, normalizedServiceContextPath);
     }
 }
+

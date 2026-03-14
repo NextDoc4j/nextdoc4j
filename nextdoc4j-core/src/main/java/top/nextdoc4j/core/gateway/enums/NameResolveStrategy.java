@@ -15,38 +15,34 @@
  *
  * This file is part of the NextDoc4j project.
  */
-package top.nextdoc4j.plugin.gateway.enums;
+package top.nextdoc4j.core.gateway.enums;
 
 /**
- * 网关安全方案类型。
+ * 网关路由显示名称解析策略枚举
  *
  * @author echo
  * @since 1.2.0
  */
-public enum GatewaySecuritySchemeType {
+public enum NameResolveStrategy {
 
     /**
-     * API Key 认证。
+     * 使用路由 ID
      */
-    API_KEY,
+    ROUTE_ID,
 
     /**
-     * HTTP 认证（例如 bearer/basic）。
+     * 使用 metadata.nextdoc4j.name
      */
-    HTTP,
+    METADATA,
 
     /**
-     * Mutual TLS 认证。
+     * 从 URI 提取服务名
      */
-    MUTUAL_TLS,
+    URI,
 
     /**
-     * OAuth2 认证。
+     * 自动选择（优先级：METADATA > nameMappings > URI > ROUTE_ID）
      */
-    OAUTH2,
-
-    /**
-     * OpenID Connect 认证。
-     */
-    OPEN_ID_CONNECT
+    AUTO
 }
+
