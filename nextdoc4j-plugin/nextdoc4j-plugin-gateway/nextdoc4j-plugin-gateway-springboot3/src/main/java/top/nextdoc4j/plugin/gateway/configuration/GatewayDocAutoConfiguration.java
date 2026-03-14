@@ -25,7 +25,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
 import org.springframework.cloud.gateway.route.RouteDefinitionLocator;
@@ -52,8 +52,16 @@ import top.nextdoc4j.plugin.gateway.resolver.NextDoc4jGatewayServiceContextPathR
 @EnableAsync
 @ConditionalOnClass({RouteDefinitionLocator.class, SwaggerUiConfigProperties.class})
 @ConditionalOnProperty(prefix = NextDoc4jConstants.PLUGIN_GATEWAY, name = NextDoc4jConstants.ENABLED, havingValue = "true")
-@EnableConfigurationProperties(GatewayDocProperties.class)
 public class GatewayDocAutoConfiguration {
+
+    /**
+     * Gateway 插件配置
+     */
+    @Bean
+    @ConfigurationProperties(prefix = NextDoc4jConstants.PLUGIN_GATEWAY)
+    public GatewayDocProperties gatewayDocProperties() {
+        return new GatewayDocProperties();
+    }
 
     /**
      * 默认的 OpenAPI Bean

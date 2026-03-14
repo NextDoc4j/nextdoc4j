@@ -18,8 +18,13 @@
 package top.nextdoc4j.plugin.gateway.filter;
 
 import io.swagger.v3.core.util.Json;
+import io.swagger.v3.oas.models.security.OAuthFlow;
+import io.swagger.v3.oas.models.security.OAuthFlows;
+import io.swagger.v3.oas.models.security.Scopes;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.reactivestreams.Publisher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -40,9 +45,19 @@ import tools.jackson.databind.node.ObjectNode;
 import top.nextdoc4j.plugin.gateway.configuration.GatewayDocProperties;
 import top.nextdoc4j.plugin.gateway.constant.GatewayMetadataConstants;
 import top.nextdoc4j.plugin.gateway.customizer.GatewaySwaggerConfigCustomizer;
+import top.nextdoc4j.plugin.gateway.model.GatewayOAuthFlow;
+import top.nextdoc4j.plugin.gateway.model.GatewayOAuthFlows;
+import top.nextdoc4j.plugin.gateway.model.GatewaySecurityScheme;
+import top.nextdoc4j.plugin.gateway.enums.GatewaySecuritySchemeIn;
+import top.nextdoc4j.plugin.gateway.enums.GatewaySecuritySchemeType;
+import top.nextdoc4j.plugin.gateway.validation.GatewaySecuritySchemeValidationResult;
+import top.nextdoc4j.plugin.gateway.validation.GatewaySecuritySchemeValidator;
 
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 网关文档响应重写过滤器
@@ -58,9 +73,12 @@ import java.util.Map;
  */
 public class GatewayDocResponseRewriteWebFilter implements WebFilter {
 
+    private static final Logger log = LoggerFactory.getLogger(GatewayDocResponseRewriteWebFilter.class);
+
     private final GatewayDocProperties properties;
     private final ObjectMapper objectMapper;
     private final ObjectProvider<GatewaySwaggerConfigCustomizer> swaggerConfigCustomizerProvider;
+    private final Set<String> warnedMessages = ConcurrentHashMap.newKeySet();
 
     /**
      * 创建文档重写过滤器。
@@ -181,7 +199,7 @@ public class GatewayDocResponseRewriteWebFilter implements WebFilter {
      * 合并全局安全定义到 OpenAPI components.securitySchemes。
      */
     private void mergeGlobalSecuritySchemes(ObjectNode root) {
-        Map<String, SecurityScheme> globalSchemes = properties.getSecurity().getGlobalSchemes();
+        Map<String, GatewaySecurityScheme> globalSchemes = properties.getSecurity().getGlobalSchemes();
         if (globalSchemes == null || globalSchemes.isEmpty()) {
             return;
         }
@@ -190,14 +208,36 @@ public class GatewayDocResponseRewriteWebFilter implements WebFilter {
         ObjectNode localSecuritySchemesNode = componentsNode.withObject("securitySchemes");
         ObjectNode mergedSecuritySchemesNode = objectMapper.createObjectNode();
 
-        globalSchemes.forEach((name, scheme) -> mergedSecuritySchemesNode.set(name, serializeSecurityScheme(scheme)));
+        int validGlobalSchemeCount = 0;
+        for (Map.Entry<String, GatewaySecurityScheme> entry : globalSchemes.entrySet()) {
+            SecurityScheme scheme = toSecurityScheme(entry.getKey(), entry.getValue());
+            if (scheme == null) {
+                continue;
+            }
+            JsonNode serializedNode = serializeSecurityScheme(entry.getKey(), scheme);
+            if (serializedNode == null) {
+                continue;
+            }
+            mergedSecuritySchemesNode.set(entry.getKey(), serializedNode);
+            validGlobalSchemeCount++;
+        }
+
         localSecuritySchemesNode.properties()
-                .forEach(entry -> mergedSecuritySchemesNode.set(entry.getKey(), entry.getValue()));
+            .forEach(entry -> mergedSecuritySchemesNode.set(entry.getKey(), entry.getValue()));
+
+        if (mergedSecuritySchemesNode.size() == 0) {
+            return;
+        }
+
         componentsNode.set("securitySchemes", mergedSecuritySchemesNode);
 
+        if (validGlobalSchemeCount == 0) {
+            return;
+        }
+
         JsonNode securityNode = root.get("security");
-        boolean needInjectGlobalSecurity = properties.getSecurity()
-                .isApplyGlobalRequirement() && (securityNode == null || !securityNode.isArray() || securityNode.isEmpty());
+        boolean needInjectGlobalSecurity = properties.getSecurity().isApplyGlobalRequirement()
+            && (securityNode == null || !securityNode.isArray() || securityNode.isEmpty());
         if (!needInjectGlobalSecurity) {
             return;
         }
@@ -205,24 +245,118 @@ public class GatewayDocResponseRewriteWebFilter implements WebFilter {
         ArrayNode globalSecurityArray = objectMapper.createArrayNode();
         ObjectNode securityRequirement = objectMapper.createObjectNode();
         mergedSecuritySchemesNode.propertyNames()
-                .forEach(name -> securityRequirement.set(name, objectMapper.createArrayNode()));
+            .forEach(name -> securityRequirement.set(name, objectMapper.createArrayNode()));
         globalSecurityArray.add(securityRequirement);
         root.set("security", globalSecurityArray);
     }
 
-    /**
-     * 优先使用 swagger-core 的 ObjectMapper 进行 SecurityScheme 序列化，保持与 springdoc 输出对齐。
-     */
-    private JsonNode serializeSecurityScheme(SecurityScheme scheme) {
-        if (scheme == null) {
-            return objectMapper.getNodeFactory().nullNode();
-        }
+    private JsonNode serializeSecurityScheme(String schemeName, SecurityScheme scheme) {
         try {
             String json = Json.mapper().writeValueAsString(scheme);
-            JsonNode node = objectMapper.readTree(json);
-            return node == null ? objectMapper.getNodeFactory().nullNode() : node;
+            return objectMapper.readTree(json);
         } catch (Exception ex) {
-            return objectMapper.valueToTree(scheme);
+            try {
+                warnOnce(schemeName, "serialize by swagger-core failed, fallback to local mapper: " + ex.getMessage());
+                return objectMapper.valueToTree(scheme);
+            } catch (Exception fallbackEx) {
+                warnOnce(schemeName, "serialize failed: " + fallbackEx.getMessage());
+                return null;
+            }
+        }
+    }
+
+    private SecurityScheme toSecurityScheme(String schemeName, GatewaySecurityScheme source) {
+        GatewaySecuritySchemeValidationResult validationResult = GatewaySecuritySchemeValidator.validate(source);
+        validationResult.getMessages().forEach(message -> warnOnce(schemeName, message));
+        if (!validationResult.isValid()) {
+            return null;
+        }
+
+        SecurityScheme target = new SecurityScheme();
+        target.setType(toSwaggerType(source.getType()));
+        target.setDescription(source.getDescription());
+        target.setName(source.getName());
+        target.setScheme(source.getScheme());
+        target.setBearerFormat(source.getBearerFormat());
+        target.setOpenIdConnectUrl(source.getOpenIdConnectUrl());
+
+        if (source.getIn() != null) {
+            target.setIn(toSwaggerIn(source.getIn()));
+        }
+
+        if (source.getFlows() != null) {
+            OAuthFlows flows = toSwaggerFlows(source.getFlows());
+            if (flows != null) {
+                target.setFlows(flows);
+            }
+        }
+
+        validationResult.getValidExtensions().forEach(target::addExtension);
+
+        return target;
+    }
+
+    private OAuthFlows toSwaggerFlows(GatewayOAuthFlows source) {
+        OAuthFlows target = new OAuthFlows();
+        boolean hasAnyFlow = false;
+
+        if (GatewaySecuritySchemeValidator.isImplicitFlowValid(source.getImplicit())) {
+            target.setImplicit(toSwaggerFlow(source.getImplicit()));
+            hasAnyFlow = true;
+        }
+        if (GatewaySecuritySchemeValidator.isTokenFlowValid(source.getPassword())) {
+            target.setPassword(toSwaggerFlow(source.getPassword()));
+            hasAnyFlow = true;
+        }
+        if (GatewaySecuritySchemeValidator.isTokenFlowValid(source.getClientCredentials())) {
+            target.setClientCredentials(toSwaggerFlow(source.getClientCredentials()));
+            hasAnyFlow = true;
+        }
+        if (GatewaySecuritySchemeValidator.isAuthorizationCodeFlowValid(source.getAuthorizationCode())) {
+            target.setAuthorizationCode(toSwaggerFlow(source.getAuthorizationCode()));
+            hasAnyFlow = true;
+        }
+
+        return hasAnyFlow ? target : null;
+    }
+
+    private OAuthFlow toSwaggerFlow(GatewayOAuthFlow source) {
+        OAuthFlow target = new OAuthFlow();
+        target.setAuthorizationUrl(source.getAuthorizationUrl());
+        target.setTokenUrl(source.getTokenUrl());
+        target.setRefreshUrl(source.getRefreshUrl());
+
+        Map<String, String> scopes = source.getScopes();
+        Scopes targetScopes = new Scopes();
+        if (scopes != null) {
+            targetScopes.putAll(new LinkedHashMap<>(scopes));
+        }
+        target.setScopes(targetScopes);
+        return target;
+    }
+
+    private SecurityScheme.Type toSwaggerType(GatewaySecuritySchemeType type) {
+        return switch (type) {
+            case API_KEY -> SecurityScheme.Type.APIKEY;
+            case HTTP -> SecurityScheme.Type.HTTP;
+            case MUTUAL_TLS -> SecurityScheme.Type.MUTUALTLS;
+            case OAUTH2 -> SecurityScheme.Type.OAUTH2;
+            case OPEN_ID_CONNECT -> SecurityScheme.Type.OPENIDCONNECT;
+        };
+    }
+
+    private SecurityScheme.In toSwaggerIn(GatewaySecuritySchemeIn in) {
+        return switch (in) {
+            case HEADER -> SecurityScheme.In.HEADER;
+            case QUERY -> SecurityScheme.In.QUERY;
+            case COOKIE -> SecurityScheme.In.COOKIE;
+        };
+    }
+
+    private void warnOnce(String schemeName, String message) {
+        String key = schemeName + "|" + message;
+        if (warnedMessages.add(key)) {
+            log.warn("Invalid gateway security scheme [{}]: {}", schemeName, message);
         }
     }
 

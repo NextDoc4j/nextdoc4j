@@ -17,15 +17,12 @@
  */
 package top.nextdoc4j.plugin.gateway.configuration;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.NestedConfigurationProperty;
-import top.nextdoc4j.core.constant.NextDoc4jConstants;
 import top.nextdoc4j.core.constant.NextDoc4jFilterConstant;
 import top.nextdoc4j.plugin.gateway.constant.GatewayMetadataConstants;
 import top.nextdoc4j.plugin.gateway.enums.DocPathStrategy;
 import top.nextdoc4j.plugin.gateway.enums.NameResolveStrategy;
+import top.nextdoc4j.plugin.gateway.model.GatewaySecurityScheme;
 import top.nextdoc4j.plugin.gateway.model.ServiceConfig;
-import io.swagger.v3.oas.models.security.SecurityScheme;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -36,12 +33,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Gateway 聚合文档配置属性
+ * Gateway 聚合文档配置属性（核心模型）。
+ *
+ * <p>该类保持中立，不引入 Spring 或 Swagger 相关依赖。</p>
  *
  * @author echo
  * @since 1.2.0
  */
-@ConfigurationProperties(prefix = NextDoc4jConstants.PLUGIN_GATEWAY)
 public class GatewayDocProperties implements Serializable {
 
     @Serial
@@ -95,13 +93,11 @@ public class GatewayDocProperties implements Serializable {
     /**
      * 网关全局认证配置
      */
-    @NestedConfigurationProperty
     private Security security = new Security();
 
     /**
      * context-path 自动发现配置
      */
-    @NestedConfigurationProperty
     private ContextPath contextPath = new ContextPath();
 
     public boolean isEnabled() {
@@ -201,20 +197,20 @@ public class GatewayDocProperties implements Serializable {
         private static final long serialVersionUID = 1L;
 
         /**
-         * 网关全局 SecurityScheme
+         * 网关全局 SecurityScheme 配置
          */
-        private Map<String, SecurityScheme> globalSchemes = new LinkedHashMap<>();
+        private Map<String, GatewaySecurityScheme> globalSchemes = new LinkedHashMap<>();
 
         /**
          * 当服务文档没有 security 字段时，是否自动注入全局安全要求
          */
         private boolean applyGlobalRequirement = true;
 
-        public Map<String, SecurityScheme> getGlobalSchemes() {
+        public Map<String, GatewaySecurityScheme> getGlobalSchemes() {
             return globalSchemes;
         }
 
-        public void setGlobalSchemes(Map<String, SecurityScheme> globalSchemes) {
+        public void setGlobalSchemes(Map<String, GatewaySecurityScheme> globalSchemes) {
             this.globalSchemes = globalSchemes;
         }
 
