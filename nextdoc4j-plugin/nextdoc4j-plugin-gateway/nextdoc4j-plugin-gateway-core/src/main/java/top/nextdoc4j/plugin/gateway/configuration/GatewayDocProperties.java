@@ -19,9 +19,9 @@ package top.nextdoc4j.plugin.gateway.configuration;
 
 import top.nextdoc4j.core.constant.NextDoc4jFilterConstant;
 import top.nextdoc4j.plugin.gateway.constant.GatewayMetadataConstants;
-import top.nextdoc4j.plugin.gateway.enums.DocPathStrategy;
-import top.nextdoc4j.plugin.gateway.enums.NameResolveStrategy;
-import top.nextdoc4j.plugin.gateway.model.GatewaySecurityScheme;
+import top.nextdoc4j.core.gateway.enums.DocPathStrategy;
+import top.nextdoc4j.core.gateway.enums.NameResolveStrategy;
+import top.nextdoc4j.core.gateway.model.GatewaySecurityScheme;
 import top.nextdoc4j.plugin.gateway.model.ServiceConfig;
 
 import java.io.Serial;
@@ -245,3 +245,4 @@ public class GatewayDocProperties implements Serializable {
         }
     }
 }
+

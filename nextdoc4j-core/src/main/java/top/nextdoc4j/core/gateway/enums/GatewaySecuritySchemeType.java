@@ -15,33 +15,39 @@
  *
  * This file is part of the NextDoc4j project.
  */
-package top.nextdoc4j.plugin.gateway.enums;
+package top.nextdoc4j.core.gateway.enums;
 
 /**
- * 网关路由文档路径解析策略枚举
+ * 网关安全方案类型。
  *
  * @author echo
  * @since 1.2.0
  */
-public enum DocPathStrategy {
+public enum GatewaySecuritySchemeType {
 
     /**
-     * 自动（优先级：metadata.nextdoc4j.doc-path > URI > routeId）
+     * API Key 认证。
      */
-    AUTO,
+    API_KEY,
 
     /**
-     * 仅使用 metadata.nextdoc4j.doc-path
+     * HTTP 认证（例如 bearer/basic）。
      */
-    METADATA,
+    HTTP,
 
     /**
-     * 从 Path 谓词提取
+     * Mutual TLS 认证。
      */
-    ROUTE_PREDICATE,
+    MUTUAL_TLS,
 
     /**
-     * 仅使用手动配置
+     * OAuth2 认证。
      */
-    MANUAL_ONLY
+    OAUTH2,
+
+    /**
+     * OpenID Connect 认证。
+     */
+    OPEN_ID_CONNECT
 }
+

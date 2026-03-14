@@ -15,11 +15,11 @@
  *
  * This file is part of the NextDoc4j project.
  */
-package top.nextdoc4j.plugin.gateway.validation;
+package top.nextdoc4j.core.gateway.validation;
 
-import top.nextdoc4j.plugin.gateway.model.GatewayOAuthFlow;
-import top.nextdoc4j.plugin.gateway.model.GatewayOAuthFlows;
-import top.nextdoc4j.plugin.gateway.model.GatewaySecurityScheme;
+import top.nextdoc4j.core.gateway.model.GatewayOAuthFlow;
+import top.nextdoc4j.core.gateway.model.GatewayOAuthFlows;
+import top.nextdoc4j.core.gateway.model.GatewaySecurityScheme;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -158,3 +158,4 @@ public final class GatewaySecuritySchemeValidator {
         return value != null && !value.trim().isEmpty();
     }
 }
+

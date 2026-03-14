@@ -15,28 +15,34 @@
  *
  * This file is part of the NextDoc4j project.
  */
-package top.nextdoc4j.plugin.gateway.enums;
+package top.nextdoc4j.core.gateway.enums;
 
 /**
- * API Key 位置。
+ * 网关路由文档路径解析策略枚举
  *
  * @author echo
  * @since 1.2.0
  */
-public enum GatewaySecuritySchemeIn {
+public enum DocPathStrategy {
 
     /**
-     * Header。
+     * 自动（优先级：metadata.nextdoc4j.doc-path > URI > routeId）
      */
-    HEADER,
+    AUTO,
 
     /**
-     * Query。
+     * 仅使用 metadata.nextdoc4j.doc-path
      */
-    QUERY,
+    METADATA,
 
     /**
-     * Cookie。
+     * 从 Path 谓词提取
      */
-    COOKIE
+    ROUTE_PREDICATE,
+
+    /**
+     * 仅使用手动配置
+     */
+    MANUAL_ONLY
 }
+

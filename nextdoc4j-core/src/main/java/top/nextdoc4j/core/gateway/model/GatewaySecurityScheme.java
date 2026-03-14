@@ -15,10 +15,10 @@
  *
  * This file is part of the NextDoc4j project.
  */
-package top.nextdoc4j.plugin.gateway.model;
+package top.nextdoc4j.core.gateway.model;
 
-import top.nextdoc4j.plugin.gateway.enums.GatewaySecuritySchemeIn;
-import top.nextdoc4j.plugin.gateway.enums.GatewaySecuritySchemeType;
+import top.nextdoc4j.core.gateway.enums.GatewaySecuritySchemeIn;
+import top.nextdoc4j.core.gateway.enums.GatewaySecuritySchemeType;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -155,3 +155,4 @@ public class GatewaySecurityScheme implements Serializable {
         this.extensions = extensions;
     }
 }
+
