@@ -93,10 +93,6 @@ public class GatewayDocResponseRewriteWebFilter implements WebFilter {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-        if (!properties.isEnabled()) {
-            return chain.filter(exchange);
-        }
-
         String path = exchange.getRequest().getURI().getPath();
         if (isSwaggerConfig(path)) {
             GatewaySwaggerConfigCustomizer customizer = swaggerConfigCustomizerProvider.getIfAvailable();
@@ -396,4 +392,3 @@ public class GatewayDocResponseRewriteWebFilter implements WebFilter {
         return normalized.replaceAll(GatewayMetadataConstants.MULTIPLE_SLASH_PATTERN, "/");
     }
 }
-

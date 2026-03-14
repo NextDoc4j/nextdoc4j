@@ -18,10 +18,10 @@
 package top.nextdoc4j.plugin.gateway.configuration;
 
 import top.nextdoc4j.core.constant.NextDoc4jFilterConstant;
-import top.nextdoc4j.plugin.gateway.constant.GatewayMetadataConstants;
 import top.nextdoc4j.core.gateway.enums.DocPathStrategy;
 import top.nextdoc4j.core.gateway.enums.NameResolveStrategy;
 import top.nextdoc4j.core.gateway.model.GatewaySecurityScheme;
+import top.nextdoc4j.plugin.gateway.constant.GatewayMetadataConstants;
 import top.nextdoc4j.plugin.gateway.model.ServiceConfig;
 
 import java.io.Serial;
@@ -44,11 +44,6 @@ public class GatewayDocProperties implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
-
-    /**
-     * 是否启用 Gateway 聚合文档
-     */
-    private boolean enabled = true;
 
     /**
      * 微服务文档路径后缀
@@ -99,14 +94,6 @@ public class GatewayDocProperties implements Serializable {
      * context-path 自动发现配置
      */
     private ContextPath contextPath = new ContextPath();
-
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
 
     public String getDocPath() {
         return docPath;
@@ -245,4 +232,3 @@ public class GatewayDocProperties implements Serializable {
         }
     }
 }
-

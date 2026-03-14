@@ -40,8 +40,8 @@ public class NextDoc4jResourceFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
         String uri = request.getRequestURI();
 
-        // 使用统一的路径匹配工具类，只过滤 NextDoc4j 资源（自动适配 context-path）
-        if (NextDoc4jPathMatcherUtils.isNextDoc4jResource(uri)) {
+        // 使用统一的路径匹配工具类，过滤全部文档端点（自动适配 context-path）
+        if (NextDoc4jPathMatcherUtils.shouldBlock(uri)) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "NextDoc4j is disabled");
             return;
         }
