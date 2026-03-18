@@ -18,7 +18,6 @@
 package top.nextdoc4j.webflux.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.v3.oas.models.OpenAPI;
 import org.springdoc.core.properties.SwaggerUiConfigProperties;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -63,15 +62,6 @@ public class NextDoc4jGatewayAutoConfiguration {
     @ConfigurationProperties(prefix = NextDoc4jConstants.GATEWAY)
     public GatewayDocProperties gatewayDocProperties() {
         return new GatewayDocProperties();
-    }
-
-    /**
-     * 默认 OpenAPI Bean。
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    public OpenAPI gatewayOpenApi() {
-        return new OpenAPI();
     }
 
     /**
