@@ -45,13 +45,23 @@ public class GatewayAggregationInfo implements Serializable {
      */
     private String docPath;
 
+    /**
+     * 是否启用微服务 swagger-config 访问
+     */
+    private boolean serviceSwaggerConfigEnabled = false;
+
     public GatewayAggregationInfo() {
         this.aggregation = true;
     }
 
     public GatewayAggregationInfo(String docPath) {
+        this(docPath, false);
+    }
+
+    public GatewayAggregationInfo(String docPath, boolean serviceSwaggerConfigEnabled) {
         this.aggregation = true;
         this.docPath = docPath;
+        this.serviceSwaggerConfigEnabled = serviceSwaggerConfigEnabled;
     }
 
     public boolean isAggregation() {
@@ -68,5 +78,13 @@ public class GatewayAggregationInfo implements Serializable {
 
     public void setDocPath(String docPath) {
         this.docPath = docPath;
+    }
+
+    public boolean isServiceSwaggerConfigEnabled() {
+        return serviceSwaggerConfigEnabled;
+    }
+
+    public void setServiceSwaggerConfigEnabled(boolean serviceSwaggerConfigEnabled) {
+        this.serviceSwaggerConfigEnabled = serviceSwaggerConfigEnabled;
     }
 }
