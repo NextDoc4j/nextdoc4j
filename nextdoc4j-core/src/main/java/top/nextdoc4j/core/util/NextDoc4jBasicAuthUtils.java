@@ -148,7 +148,7 @@ public final class NextDoc4jBasicAuthUtils {
               "success": %s,
               "message": "%s"
             }
-            """.formatted(success, escapeJsonString(message));
+            """.formatted(success, NextDoc4jResourcePureUtils.escapeJsonString(message));
     }
 
     /**
@@ -197,16 +197,4 @@ public final class NextDoc4jBasicAuthUtils {
         return value != null && !value.trim().isEmpty();
     }
 
-    private static String escapeJsonString(String str) {
-        if (str == null) {
-            return "";
-        }
-        return str.replace("\\", "\\\\")
-            .replace("\"", "\\\"")
-            .replace("\n", "\\n")
-            .replace("\r", "\\r")
-            .replace("\t", "\\t")
-            .replace("\b", "\\b")
-            .replace("\f", "\\f");
-    }
 }
