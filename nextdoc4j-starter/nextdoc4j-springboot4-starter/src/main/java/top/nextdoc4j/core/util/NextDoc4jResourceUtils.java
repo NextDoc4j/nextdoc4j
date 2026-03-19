@@ -25,7 +25,6 @@ import org.springframework.util.StringUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -40,17 +39,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * @since 1.0.0
  */
 public class NextDoc4jResourceUtils {
-
-    /**
-     * MIME类型映射表，用于根据文件扩展名确定内容类型
-     */
-    private static final Map<String, String> MIME_TYPE_MAPPING = Map
-        .of("svg", "image/svg+xml", "png", "image/png", "jpg", "image/jpeg", "jpeg", "image/jpeg", "gif", "image/gif", "webp", "image/webp", "ico", "image/x-icon");
-
-    /**
-     * 默认MIME类型，用于未知文件类型
-     */
-    private static final String DEFAULT_MIME_TYPE = "application/octet-stream";
 
     /**
      * Logo Base64编码缓存
@@ -125,13 +113,7 @@ public class NextDoc4jResourceUtils {
      * @return Data URL字符串
      */
     public static String convertToDataUrl(byte[] data, String filePath) {
-        if (data == null || data.length == 0) {
-            return null;
-        }
-
-        String mimeType = determineMimeType(filePath);
-        String base64Data = Base64.getEncoder().encodeToString(data);
-        return String.format("data:%s;base64,%s", mimeType, base64Data);
+        return NextDoc4jResourcePureUtils.convertToDataUrl(data, filePath);
     }
 
     /**
@@ -143,16 +125,7 @@ public class NextDoc4jResourceUtils {
      * @return 完整的Data URL格式字符串
      */
     public static String ensureDataUrlFormat(String logo) {
-        if (!StringUtils.hasText(logo)) {
-            return null;
-        }
-
-        if (logo.startsWith("data:")) {
-            return logo;
-        }
-
-        // 默认假设为PNG格式
-        return "data:image/png;base64," + logo;
+        return NextDoc4jResourcePureUtils.ensureDataUrlFormat(logo);
     }
 
     // ==================== 资源读取相关方法 ====================
@@ -249,16 +222,7 @@ public class NextDoc4jResourceUtils {
      * @return 对应的MIME类型字符串
      */
     public static String determineMimeType(String filePath) {
-        if (!StringUtils.hasText(filePath)) {
-            return DEFAULT_MIME_TYPE;
-        }
-
-        String extension = extractFileExtension(filePath);
-        if (extension == null) {
-            return DEFAULT_MIME_TYPE;
-        }
-
-        return MIME_TYPE_MAPPING.getOrDefault(extension.toLowerCase(), DEFAULT_MIME_TYPE);
+        return NextDoc4jResourcePureUtils.determineMimeType(filePath);
     }
 
     /**
@@ -268,12 +232,7 @@ public class NextDoc4jResourceUtils {
      * @return true表示是支持的图像格式
      */
     public static boolean isSupportedImageFormat(String filePath) {
-        if (!StringUtils.hasText(filePath)) {
-            return false;
-        }
-
-        String extension = extractFileExtension(filePath);
-        return extension != null && MIME_TYPE_MAPPING.containsKey(extension.toLowerCase());
+        return NextDoc4jResourcePureUtils.isSupportedImageFormat(filePath);
     }
 
     // ==================== 文件名处理相关方法 ====================
@@ -285,16 +244,7 @@ public class NextDoc4jResourceUtils {
      * @return 文件扩展名（不包含点号），如果没有扩展名返回null
      */
     public static String extractFileExtension(String filePath) {
-        if (!StringUtils.hasText(filePath)) {
-            return null;
-        }
-
-        int lastDotIndex = filePath.lastIndexOf('.');
-        if (lastDotIndex < 0 || lastDotIndex == filePath.length() - 1) {
-            return null;
-        }
-
-        return filePath.substring(lastDotIndex + 1);
+        return NextDoc4jResourcePureUtils.extractFileExtension(filePath);
     }
 
     /**
@@ -304,17 +254,7 @@ public class NextDoc4jResourceUtils {
      * @return 不带扩展名的文件名
      */
     public static String extractFileNameWithoutExtension(String filePath) {
-        if (!StringUtils.hasText(filePath)) {
-            return null;
-        }
-
-        // 提取文件名部分
-        int lastSlash = Math.max(filePath.lastIndexOf('/'), filePath.lastIndexOf('\\'));
-        String fileName = (lastSlash >= 0) ? filePath.substring(lastSlash + 1) : filePath;
-
-        // 去掉扩展名
-        int dotIndex = fileName.lastIndexOf('.');
-        return (dotIndex > 0) ? fileName.substring(0, dotIndex) : fileName;
+        return NextDoc4jResourcePureUtils.extractFileNameWithoutExtension(filePath);
     }
 
     /**
@@ -324,12 +264,7 @@ public class NextDoc4jResourceUtils {
      * @return 文件名
      */
     public static String extractFileName(String filePath) {
-        if (!StringUtils.hasText(filePath)) {
-            return null;
-        }
-
-        int lastSlash = Math.max(filePath.lastIndexOf('/'), filePath.lastIndexOf('\\'));
-        return (lastSlash >= 0) ? filePath.substring(lastSlash + 1) : filePath;
+        return NextDoc4jResourcePureUtils.extractFileName(filePath);
     }
 
     // ==================== 验证相关方法 ====================
@@ -361,15 +296,7 @@ public class NextDoc4jResourceUtils {
      * @return 转义后的字符串
      */
     public static String escapeHtml(String input) {
-        if (input == null) {
-            return "";
-        }
-
-        return input.replace("&", "&amp;")
-            .replace("<", "&lt;")
-            .replace(">", "&gt;")
-            .replace("\"", "&quot;")
-            .replace("'", "&#39;");
+        return NextDoc4jResourcePureUtils.escapeHtml(input);
     }
 
     /**
@@ -379,15 +306,7 @@ public class NextDoc4jResourceUtils {
      * @return 转义后的字符串
      */
     public static String escapeJsonString(String str) {
-        if (str == null) {
-            return "";
-        }
-
-        return str.replace("\\", "\\\\")
-            .replace("\"", "\\\"")
-            .replace("\n", "\\n")
-            .replace("\r", "\\r")
-            .replace("\t", "\\t");
+        return NextDoc4jResourcePureUtils.escapeJsonString(str);
     }
 
     // ==================== 缓存管理相关方法 ====================
