@@ -28,21 +28,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.web.filter.OncePerRequestFilter;
 import top.nextdoc4j.core.configuration.NextDoc4jExtension;
 import top.nextdoc4j.core.configuration.NextDoc4jProperties;
 import top.nextdoc4j.core.configuration.extension.NextDoc4jBasicAuth;
 import top.nextdoc4j.core.configuration.extension.NextDoc4jBrand;
-import top.nextdoc4j.core.util.NextDoc4jPathMatcherUtils;
+import top.nextdoc4j.core.util.NextDoc4jBasicAuthUtils;
 import top.nextdoc4j.core.util.NextDoc4jResourceUtils;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.Objects;
-import java.util.UUID;
 
 /**
  * NextDoc4j API文档基本认证过滤器
@@ -68,34 +64,9 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
     private static final Logger log = LoggerFactory.getLogger(NextDoc4jBasicAuthFilter.class);
 
     /**
-     * Session 中存储认证状态的键名
-     */
-    private static final String AUTH_SESSION_KEY = "nextdoc4j_authenticated";
-
-    /**
      * 会话超时时间（秒）- 30分钟
      */
     private static final int SESSION_TIMEOUT_SECONDS = 30 * 60;
-
-    /**
-     * Basic 认证头部前缀
-     */
-    private static final String BASIC_AUTH_PREFIX = "Basic ";
-
-    /**
-     * 注销操作参数值
-     */
-    private static final String LOGOUT_ACTION = "logout";
-
-    /**
-     * AJAX 请求标识头
-     */
-    private static final String AJAX_HEADER = "X-Requested-With";
-
-    /**
-     * AJAX 请求标识值
-     */
-    private static final String AJAX_HEADER_VALUE = "XMLHttpRequest";
 
     /**
      * 登录页面 HTML 文件路径
@@ -194,7 +165,7 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
 
         // 4. 尝试基本认证
         final String authHeader = request.getHeader("Authorization");
-        if (authHeader != null && authHeader.startsWith(BASIC_AUTH_PREFIX)) {
+        if (authHeader != null && authHeader.startsWith(NextDoc4jBasicAuthUtils.BASIC_AUTH_PREFIX)) {
 
             if (validateBasicAuthentication(authHeader)) {
                 // 认证成功
@@ -218,19 +189,12 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
      * 如果启用了认证但未配置密码，则自动生成一个UUID作为默认密码
      */
     private void initializeDefaultPassword() {
-
-        if (basicAuth.getPassword() == null || basicAuth.getPassword().trim().isEmpty()) {
-            final String generatedPassword = UUID.randomUUID().toString().replace("-", "");
-            basicAuth.setPassword(generatedPassword);
-
-            log.info("╔══════════════════════════════════════════════════════════════════════════════════════╗");
-            log.info("║                          NextDoc4j 基本认证已启用                                        ║");
-            log.info("║                                                                                      ║");
-            log.info("║  未配置密码，已自动生成默认密码，请妥善保管：                                                  ║");
-            log.info("║  密码: {}                                           ║", generatedPassword);
-            log.info("║                                                                                      ║");
-            log.info("║  建议：请在配置文件中设置自定义密码以确保安全性                                                 ║");
-            log.info("╚══════════════════════════════════════════════════════════════════════════════════════╝");
+        final String generatedPassword = NextDoc4jBasicAuthUtils.initializeDefaultPassword(basicAuth);
+        if (generatedPassword != null) {
+            String banner = NextDoc4jBasicAuthUtils.buildGeneratedPasswordBanner(generatedPassword);
+            if (banner != null) {
+                log.info("\n{}", banner);
+            }
         }
     }
 
@@ -241,7 +205,7 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
      * @return true 表示需要认证，false 表示不需要认证
      */
     private boolean isAuthenticationRequired(String uri) {
-        return NextDoc4jPathMatcherUtils.isAuthenticationRequired(uri, basicAuth.isEnabled());
+        return NextDoc4jBasicAuthUtils.isAuthenticationRequired(uri, basicAuth.isEnabled());
     }
 
     /**
@@ -252,7 +216,7 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
      * @return true 表示是注销请求
      */
     private boolean isLogoutRequest(String method, HttpServletRequest request) {
-        return HttpMethod.GET.name().equalsIgnoreCase(method) && LOGOUT_ACTION.equals(request.getParameter("action"));
+        return NextDoc4jBasicAuthUtils.isLogoutRequest(method, request.getParameter("action"));
     }
 
     /**
@@ -263,7 +227,7 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
      */
     private boolean isSessionAuthenticated(HttpServletRequest request) {
         final HttpSession session = request.getSession(false);
-        return session != null && Boolean.TRUE.equals(session.getAttribute(AUTH_SESSION_KEY));
+        return session != null && Boolean.TRUE.equals(session.getAttribute(NextDoc4jBasicAuthUtils.AUTH_SESSION_KEY));
     }
 
     /**
@@ -273,23 +237,7 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
      * @return true 表示认证成功
      */
     private boolean validateBasicAuthentication(String authHeader) {
-        try {
-            // 解码Base64认证信息
-            final String base64Credentials = authHeader.substring(BASIC_AUTH_PREFIX.length());
-            final String credentials = new String(Base64.getDecoder()
-                .decode(base64Credentials), StandardCharsets.UTF_8);
-
-            // 提取密码（格式：username:password，这里只验证密码）
-            final int colonIndex = credentials.indexOf(':');
-            final String password = (colonIndex != -1) ? credentials.substring(colonIndex + 1) : credentials;
-
-            // 验证密码
-            return basicAuth.getPassword().equals(password);
-
-        } catch (Exception e) {
-            log.debug("Failed to validate basic authentication", e);
-            return false;
-        }
+        return NextDoc4jBasicAuthUtils.validateBasicAuthentication(authHeader, basicAuth.getPassword());
     }
 
     /**
@@ -299,7 +247,7 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
      */
     private void createAuthenticatedSession(HttpServletRequest request) {
         final HttpSession session = request.getSession(true);
-        session.setAttribute(AUTH_SESSION_KEY, true);
+        session.setAttribute(NextDoc4jBasicAuthUtils.AUTH_SESSION_KEY, true);
         session.setMaxInactiveInterval(SESSION_TIMEOUT_SECONDS);
     }
 
@@ -317,7 +265,7 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
             sendJsonResponse(response, HttpServletResponse.SC_OK, true, "认证成功");
         } else {
             // 浏览器请求重定向到原始URL，避免显示JSON内容
-            final String redirectUrl = buildRedirectUrl(request);
+            final String redirectUrl = NextDoc4jBasicAuthUtils.buildRedirectUrl(request.getRequestURI());
             response.sendRedirect(redirectUrl);
         }
     }
@@ -393,38 +341,12 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
      * @return true 表示是 AJAX 请求
      */
     private boolean isAjaxRequest(HttpServletRequest request) {
-        final String xRequestedWith = request.getHeader(AJAX_HEADER);
+        final String xRequestedWith = request.getHeader(NextDoc4jBasicAuthUtils.AJAX_HEADER);
         final String accept = request.getHeader(HttpHeaders.ACCEPT);
-
-        // 1. 标准AJAX请求标识
-        if (AJAX_HEADER_VALUE.equals(xRequestedWith)) {
-            return true;
-        }
-
-        // 2. 明确请求JSON格式
-        if (accept != null && accept.contains(MediaType.APPLICATION_JSON_VALUE) && !accept
-            .contains(MediaType.TEXT_HTML_VALUE)) {
-            return true;
-        }
-
-        // 3. 检测Fetch API请求（更复杂的启发式判断）
-        return isFetchApiRequest(request, accept);
-    }
-
-    /**
-     * 检测是否为Fetch API请求
-     *
-     * @param request HTTP 请求对象
-     * @param accept  Accept 头部值
-     * @return true表示疑似Fetch API请求
-     */
-    private boolean isFetchApiRequest(HttpServletRequest request, String accept) {
         final String userAgent = request.getHeader(HttpHeaders.USER_AGENT);
         final String referer = request.getHeader(HttpHeaders.REFERER);
-
-        // Fetch API通常使用 */* 作为Accept头，且有Referer
-        return accept != null && accept.contains("*/*") && userAgent != null && userAgent
-            .contains("Chrome") && referer != null && referer.contains(request.getServerName());
+        return NextDoc4jBasicAuthUtils.isAjaxRequest(xRequestedWith, accept, userAgent, referer, request
+            .getServerName());
     }
 
     /**
@@ -444,25 +366,9 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
         response.setStatus(statusCode);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8");
 
-        // 使用工具类进行 JSON 转义
-        final String jsonResponse = """
-            {
-              "success": %s,
-              "message": "%s"
-            }
-            """.formatted(success, NextDoc4jResourceUtils.escapeJsonString(message));
+        final String jsonResponse = NextDoc4jBasicAuthUtils.buildJsonResponse(success, message);
 
         response.getWriter().write(jsonResponse);
-    }
-
-    /**
-     * 构建重定向 URL
-     *
-     * @param request HTTP请 求对象
-     * @return 重定向 URL
-     */
-    private String buildRedirectUrl(HttpServletRequest request) {
-        return request.getRequestURI() + "?t=" + System.currentTimeMillis();
     }
 
     /**
@@ -531,7 +437,7 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
             }
 
             // 检查模板是否包含替换标记
-            if (!isTemplateWithPlaceholders(htmlTemplate)) {
+            if (!NextDoc4jBasicAuthUtils.isTemplateWithPlaceholders(htmlTemplate)) {
                 return htmlTemplate;
             }
 
@@ -546,21 +452,10 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
     /**
      * 检查模板是否包含需要替换的占位符
      */
-    private boolean isTemplateWithPlaceholders(String template) {
-        // 检查是否包含任何一个占位符标记
-        return template.contains("LOGO_SRC_PLACEHOLDER") || template.contains("LOGO_CLASS_PLACEHOLDER") || template
-            .contains("TITLE_CLASS_PLACEHOLDER") || template.contains("TITLE_PLACEHOLDER") || template
-                .contains("<!-- LOGO_PLACEHOLDER_START -->") || template
-                    .contains("<!-- LOGO_PLACEHOLDER_END -->") || template.contains("${title}");
-    }
-
-    /**
-     * 处理包含占位符的模板
-     */
     private String processTemplateWithPlaceholders(String htmlTemplate) {
         // 初始化默认值
         String logo = "";
-        String title = "NextDoc4j - API文档认证";
+        String title = NextDoc4jBasicAuthUtils.DEFAULT_LOGIN_TITLE;
 
         // 从配置中获取品牌信息
         if (nextDoc4JExtension != null && nextDoc4JExtension.isEnabled()) {
@@ -577,7 +472,7 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
         }
 
         // 如果brand中没有title,尝试从OpenAPI获取
-        if (title.equals("NextDoc4j - API文档认证") && openAPI != null && openAPI.getInfo() != null) {
+        if (title.equals(NextDoc4jBasicAuthUtils.DEFAULT_LOGIN_TITLE) && openAPI != null && openAPI.getInfo() != null) {
             String apiTitle = openAPI.getInfo().getTitle();
             if (StrUtil.isNotBlank(apiTitle)) {
                 title = apiTitle;
@@ -590,51 +485,21 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
             logo = NextDoc4jResourceUtils.ensureDataUrlFormat(logo);
 
             // 替换 logo 相关占位符
-            htmlTemplate = replacePlaceholder(htmlTemplate, "LOGO_SRC_PLACEHOLDER", logo);
-            htmlTemplate = replacePlaceholder(htmlTemplate, "LOGO_CLASS_PLACEHOLDER", StrUtil.isBlank(title)
+            htmlTemplate = NextDoc4jBasicAuthUtils.replacePlaceholder(htmlTemplate, "LOGO_SRC_PLACEHOLDER", logo);
+            htmlTemplate = NextDoc4jBasicAuthUtils.replacePlaceholder(htmlTemplate, "LOGO_CLASS_PLACEHOLDER", StrUtil.isBlank(title)
                 ? "logo-only"
                 : "");
-            htmlTemplate = replacePlaceholder(htmlTemplate, "TITLE_CLASS_PLACEHOLDER", "with-logo");
+            htmlTemplate = NextDoc4jBasicAuthUtils.replacePlaceholder(htmlTemplate, "TITLE_CLASS_PLACEHOLDER", "with-logo");
         } else {
             // 没有logo时,移除整个logo容器
-            htmlTemplate = removeLogoContainer(htmlTemplate);
-            htmlTemplate = replacePlaceholder(htmlTemplate, "TITLE_CLASS_PLACEHOLDER", "");
+            htmlTemplate = NextDoc4jBasicAuthUtils.removeLogoContainer(htmlTemplate);
+            htmlTemplate = NextDoc4jBasicAuthUtils.replacePlaceholder(htmlTemplate, "TITLE_CLASS_PLACEHOLDER", "");
         }
 
         // 使用工具类进行 HTML 转义并替换标题
-        htmlTemplate = replacePlaceholder(htmlTemplate, "TITLE_PLACEHOLDER", NextDoc4jResourceUtils.escapeHtml(title));
-        htmlTemplate = replacePlaceholder(htmlTemplate, "${title}", NextDoc4jResourceUtils.escapeHtml(title));
+        htmlTemplate = NextDoc4jBasicAuthUtils.replacePlaceholder(htmlTemplate, "TITLE_PLACEHOLDER", NextDoc4jResourceUtils.escapeHtml(title));
+        htmlTemplate = NextDoc4jBasicAuthUtils.replacePlaceholder(htmlTemplate, "${title}", NextDoc4jResourceUtils.escapeHtml(title));
 
         return htmlTemplate;
     }
-
-    /**
-     * 安全替换占位符，只有占位符存在时才替换
-     */
-    private String replacePlaceholder(String template, String placeholder, String value) {
-        if (template.contains(placeholder)) {
-            return template.replace(placeholder, value);
-        }
-        return template;
-    }
-
-    /**
-     * 移除 Logo 容器标记
-     */
-    private String removeLogoContainer(String htmlTemplate) {
-        // 检查是否存在 Logo 容器标记
-        String startMarker = "<!-- LOGO_PLACEHOLDER_START -->";
-        String endMarker = "<!-- LOGO_PLACEHOLDER_END -->";
-
-        int startIndex = htmlTemplate.indexOf(startMarker);
-        int endIndex = htmlTemplate.indexOf(endMarker);
-
-        if (startIndex != -1 && endIndex != -1 && endIndex > startIndex) {
-            // 移除整个logo容器，包括结束标记
-            endIndex = endIndex + endMarker.length();
-            return htmlTemplate.substring(0, startIndex) + htmlTemplate.substring(endIndex);
-        }
-        return htmlTemplate;
-    }
-
 }
