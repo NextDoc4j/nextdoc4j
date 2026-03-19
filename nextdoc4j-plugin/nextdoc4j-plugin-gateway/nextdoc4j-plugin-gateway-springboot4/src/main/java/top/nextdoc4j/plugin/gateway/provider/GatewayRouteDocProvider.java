@@ -26,9 +26,11 @@ import reactor.core.publisher.Flux;
 import top.nextdoc4j.plugin.gateway.configuration.GatewayDocProperties;
 import top.nextdoc4j.core.gateway.enums.DocPathStrategy;
 import top.nextdoc4j.plugin.gateway.filter.NextDoc4jGatewayRouteFilter;
+import top.nextdoc4j.plugin.gateway.model.GatewayDocRouteEntry;
 import top.nextdoc4j.plugin.gateway.model.ServiceConfig;
 import top.nextdoc4j.plugin.gateway.resolver.NextDoc4jGatewayRouteMetadataResolver;
 
+import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 
@@ -75,6 +77,15 @@ public class GatewayRouteDocProvider {
      * @return Swagger URL 流
      */
     public Flux<AbstractSwaggerUiConfigProperties.SwaggerUrl> getAutoDiscoveredUrls() {
+        return getAutoDiscoveredDocEntries().map(this::convertToSwaggerUrl);
+    }
+
+    /**
+     * 获取自动发现的服务文档条目（响应式）
+     *
+     * @return 文档条目流
+     */
+    public Flux<GatewayDocRouteEntry> getAutoDiscoveredDocEntries() {
         if (!properties.isAutoDiscovery()) {
             return Flux.empty();
         }
@@ -85,7 +96,7 @@ public class GatewayRouteDocProvider {
 
         return routeDefinitionLocator.getRouteDefinitions()
             .filter(route -> routeFilter != null ? routeFilter.test(route, properties) : isValidRoute(route))
-            .map(this::convertToSwaggerUrl);
+            .map(this::convertToDocRouteEntry);
     }
 
     /**
@@ -94,6 +105,17 @@ public class GatewayRouteDocProvider {
      * @return Swagger URL 列表
      */
     public List<AbstractSwaggerUiConfigProperties.SwaggerUrl> getManualConfiguredUrls() {
+        return getManualConfiguredDocEntries().stream()
+            .map(this::convertToSwaggerUrl)
+            .toList();
+    }
+
+    /**
+     * 获取手动配置的服务文档条目
+     *
+     * @return 文档条目列表
+     */
+    public List<GatewayDocRouteEntry> getManualConfiguredDocEntries() {
         List<ServiceConfig> services = properties.getServices();
         if (CollectionUtils.isEmpty(services)) {
             return Collections.emptyList();
@@ -101,7 +123,7 @@ public class GatewayRouteDocProvider {
 
         return services.stream()
             .filter(this::isValidServiceConfig)
-            .map(this::convertServiceConfigToSwaggerUrl)
+            .map(this::convertServiceConfigToDocEntry)
             .toList();
     }
 
@@ -115,11 +137,8 @@ public class GatewayRouteDocProvider {
     /**
      * 将手动配置转换为 SwaggerUrl
      */
-    private AbstractSwaggerUiConfigProperties.SwaggerUrl convertServiceConfigToSwaggerUrl(ServiceConfig config) {
-        AbstractSwaggerUiConfigProperties.SwaggerUrl swaggerUrl = new AbstractSwaggerUiConfigProperties.SwaggerUrl();
-        swaggerUrl.setName(config.getName());
-        swaggerUrl.setUrl(config.getUrl());
-        return swaggerUrl;
+    private GatewayDocRouteEntry convertServiceConfigToDocEntry(ServiceConfig config) {
+        return new GatewayDocRouteEntry(config.getName(), config.getUrl(), config.getServiceId());
     }
 
     /**
@@ -152,7 +171,7 @@ public class GatewayRouteDocProvider {
     /**
      * 将路由定义转换为 SwaggerUrl
      */
-    private AbstractSwaggerUiConfigProperties.SwaggerUrl convertToSwaggerUrl(RouteDefinition route) {
+    private GatewayDocRouteEntry convertToDocRouteEntry(RouteDefinition route) {
         String displayName;
         String docUrl;
 
@@ -166,10 +185,42 @@ public class GatewayRouteDocProvider {
             docUrl = extractContextPath(route) + properties.getDocPath();
         }
 
+        String serviceId = extractServiceId(route);
+        return new GatewayDocRouteEntry(displayName, docUrl, serviceId);
+    }
+
+    /**
+     * 文档条目转换为 SwaggerUrl
+     */
+    private AbstractSwaggerUiConfigProperties.SwaggerUrl convertToSwaggerUrl(GatewayDocRouteEntry entry) {
         AbstractSwaggerUiConfigProperties.SwaggerUrl swaggerUrl = new AbstractSwaggerUiConfigProperties.SwaggerUrl();
-        swaggerUrl.setName(displayName);
-        swaggerUrl.setUrl(docUrl);
+        swaggerUrl.setName(entry.getName());
+        swaggerUrl.setUrl(entry.getUrl());
         return swaggerUrl;
+    }
+
+    /**
+     * 从路由定义提取服务 ID（仅识别 lb://）
+     */
+    private String extractServiceId(RouteDefinition route) {
+        if (route == null) {
+            return null;
+        }
+        URI uri = route.getUri();
+        if (uri == null || !StringUtils.hasText(uri.getScheme())) {
+            return null;
+        }
+
+        if ("lb".equalsIgnoreCase(uri.getScheme())) {
+            if (StringUtils.hasText(uri.getHost())) {
+                return uri.getHost();
+            }
+            String ssp = uri.getSchemeSpecificPart();
+            if (StringUtils.hasText(ssp) && ssp.startsWith("//")) {
+                return ssp.substring(2);
+            }
+        }
+        return null;
     }
 
     /**
@@ -205,4 +256,3 @@ public class GatewayRouteDocProvider {
     }
 
 }
-

@@ -205,9 +205,9 @@ public class GatewayDocProperties implements Serializable {
         private Map<String, GatewaySecurityScheme> globalSchemes = new LinkedHashMap<>();
 
         /**
-         * 当服务文档没有 security 字段时，是否自动注入全局安全要求
+         * 接口免鉴权规则（按 serviceId + Ant 路径匹配）
          */
-        private boolean applyGlobalRequirement = true;
+        private List<AnonymousRule> anonymous = new ArrayList<>();
 
         public Map<String, GatewaySecurityScheme> getGlobalSchemes() {
             return globalSchemes;
@@ -217,12 +217,47 @@ public class GatewayDocProperties implements Serializable {
             this.globalSchemes = globalSchemes;
         }
 
-        public boolean isApplyGlobalRequirement() {
-            return applyGlobalRequirement;
+        public List<AnonymousRule> getAnonymous() {
+            return anonymous;
         }
 
-        public void setApplyGlobalRequirement(boolean applyGlobalRequirement) {
-            this.applyGlobalRequirement = applyGlobalRequirement;
+        public void setAnonymous(List<AnonymousRule> anonymous) {
+            this.anonymous = anonymous;
+        }
+    }
+
+    /**
+     * 接口免鉴权规则
+     */
+    public static class AnonymousRule implements Serializable {
+
+        @Serial
+        private static final long serialVersionUID = 1L;
+
+        /**
+         * 服务 ID（注册中心中的 serviceId）
+         */
+        private String serviceId;
+
+        /**
+         * 免鉴权路径（Ant 风格）
+         */
+        private List<String> paths = new ArrayList<>();
+
+        public String getServiceId() {
+            return serviceId;
+        }
+
+        public void setServiceId(String serviceId) {
+            this.serviceId = serviceId;
+        }
+
+        public List<String> getPaths() {
+            return paths;
+        }
+
+        public void setPaths(List<String> paths) {
+            this.paths = paths;
         }
     }
 

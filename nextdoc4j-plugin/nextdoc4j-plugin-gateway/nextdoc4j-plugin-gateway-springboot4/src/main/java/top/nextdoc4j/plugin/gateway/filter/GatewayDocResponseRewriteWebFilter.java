@@ -52,9 +52,14 @@ import top.nextdoc4j.core.gateway.enums.GatewaySecuritySchemeIn;
 import top.nextdoc4j.core.gateway.enums.GatewaySecuritySchemeType;
 import top.nextdoc4j.core.gateway.validation.GatewaySecuritySchemeValidationResult;
 import top.nextdoc4j.core.gateway.validation.GatewaySecuritySchemeValidator;
+import top.nextdoc4j.core.util.NextDoc4jPathMatcherUtils;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -187,24 +192,25 @@ public class GatewayDocResponseRewriteWebFilter implements WebFilter {
      * 改写 OpenAPI 文档（不影响 swagger-config）。
      */
     private void rewriteApiDocs(String path, ObjectNode root) {
-        mergeGlobalSecuritySchemes(root);
+        List<String> globalRequirementSchemes = mergeGlobalSecuritySchemes(root);
+        rewriteOperationSecurity(path, root, globalRequirementSchemes);
         rewriteServers(path, root);
     }
 
     /**
      * 合并全局安全定义到 OpenAPI components.securitySchemes。
      */
-    private void mergeGlobalSecuritySchemes(ObjectNode root) {
+    private List<String> mergeGlobalSecuritySchemes(ObjectNode root) {
         Map<String, GatewaySecurityScheme> globalSchemes = properties.getSecurity().getGlobalSchemes();
         if (globalSchemes == null || globalSchemes.isEmpty()) {
-            return;
+            return Collections.emptyList();
         }
 
         ObjectNode componentsNode = root.withObject("components");
         ObjectNode localSecuritySchemesNode = componentsNode.withObject("securitySchemes");
         ObjectNode mergedSecuritySchemesNode = objectMapper.createObjectNode();
+        List<String> validGlobalSchemeNames = new ArrayList<>();
 
-        int validGlobalSchemeCount = 0;
         for (Map.Entry<String, GatewaySecurityScheme> entry : globalSchemes.entrySet()) {
             SecurityScheme scheme = toSecurityScheme(entry.getKey(), entry.getValue());
             if (scheme == null) {
@@ -215,35 +221,30 @@ public class GatewayDocResponseRewriteWebFilter implements WebFilter {
                 continue;
             }
             mergedSecuritySchemesNode.set(entry.getKey(), serializedNode);
-            validGlobalSchemeCount++;
+            validGlobalSchemeNames.add(entry.getKey());
         }
 
         localSecuritySchemesNode.properties()
             .forEach(entry -> mergedSecuritySchemesNode.set(entry.getKey(), entry.getValue()));
 
         if (mergedSecuritySchemesNode.size() == 0) {
-            return;
+            return Collections.emptyList();
         }
 
         componentsNode.set("securitySchemes", mergedSecuritySchemesNode);
 
-        if (validGlobalSchemeCount == 0) {
-            return;
+        if (validGlobalSchemeNames.isEmpty()) {
+            return Collections.emptyList();
         }
 
         JsonNode securityNode = root.get("security");
-        boolean needInjectGlobalSecurity = properties.getSecurity().isApplyGlobalRequirement()
-            && (securityNode == null || !securityNode.isArray() || securityNode.isEmpty());
+        boolean needInjectGlobalSecurity = securityNode == null || !securityNode.isArray() || securityNode.isEmpty();
         if (!needInjectGlobalSecurity) {
-            return;
+            return validGlobalSchemeNames;
         }
 
-        ArrayNode globalSecurityArray = objectMapper.createArrayNode();
-        ObjectNode securityRequirement = objectMapper.createObjectNode();
-        mergedSecuritySchemesNode.propertyNames()
-            .forEach(name -> securityRequirement.set(name, objectMapper.createArrayNode()));
-        globalSecurityArray.add(securityRequirement);
-        root.set("security", globalSecurityArray);
+        root.set("security", createSecurityRequirement(validGlobalSchemeNames));
+        return validGlobalSchemeNames;
     }
 
     private JsonNode serializeSecurityScheme(String schemeName, SecurityScheme scheme) {
@@ -354,6 +355,133 @@ public class GatewayDocResponseRewriteWebFilter implements WebFilter {
         if (warnedMessages.add(key)) {
             log.warn("Invalid gateway security scheme [{}]: {}", schemeName, message);
         }
+    }
+
+    /**
+     * 将默认鉴权规则写入每个接口，并根据 anonymous 规则对命中接口清空 security。
+     */
+    private void rewriteOperationSecurity(String requestPath, ObjectNode root, List<String> globalRequirementSchemes) {
+        if (globalRequirementSchemes == null || globalRequirementSchemes.isEmpty()) {
+            return;
+        }
+
+        JsonNode pathsNode = root.get("paths");
+        if (!(pathsNode instanceof ObjectNode pathsObjectNode)) {
+            return;
+        }
+
+        String serviceId = resolveServiceId(requestPath);
+        List<String> anonymousPaths = resolveAnonymousPaths(serviceId);
+        ArrayNode defaultSecurityRequirement = createSecurityRequirement(globalRequirementSchemes);
+
+        pathsObjectNode.properties().forEach(pathEntry -> {
+            String apiPath = pathEntry.getKey();
+            JsonNode pathItemNode = pathEntry.getValue();
+            if (!(pathItemNode instanceof ObjectNode pathItemObjectNode)) {
+                return;
+            }
+
+            boolean anonymous = isAnonymousPath(apiPath, anonymousPaths);
+            pathItemObjectNode.properties().forEach(methodEntry -> {
+                String method = methodEntry.getKey();
+                if (!isHttpMethod(method)) {
+                    return;
+                }
+
+                JsonNode operationNode = methodEntry.getValue();
+                if (!(operationNode instanceof ObjectNode operationObjectNode)) {
+                    return;
+                }
+
+                if (anonymous) {
+                    operationObjectNode.set("security", objectMapper.createArrayNode());
+                    return;
+                }
+
+                JsonNode existingSecurity = operationObjectNode.get("security");
+                if (existingSecurity == null || !existingSecurity.isArray() || existingSecurity.isEmpty()) {
+                    operationObjectNode.set("security", defaultSecurityRequirement.deepCopy());
+                }
+            });
+        });
+    }
+
+    private String resolveServiceId(String requestPath) {
+        GatewaySwaggerConfigCustomizer customizer = swaggerConfigCustomizerProvider.getIfAvailable();
+        if (customizer == null) {
+            return null;
+        }
+        return customizer.resolveServiceIdByDocPath(requestPath);
+    }
+
+    private List<String> resolveAnonymousPaths(String serviceId) {
+        if (!StringUtils.hasText(serviceId)) {
+            return Collections.emptyList();
+        }
+
+        List<GatewayDocProperties.AnonymousRule> anonymousRules = properties.getSecurity().getAnonymous();
+        if (anonymousRules == null || anonymousRules.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        Set<String> paths = new LinkedHashSet<>();
+        for (GatewayDocProperties.AnonymousRule rule : anonymousRules) {
+            if (rule == null || !StringUtils.hasText(rule.getServiceId())
+                || !serviceId.equalsIgnoreCase(rule.getServiceId())) {
+                continue;
+            }
+            List<String> rulePaths = rule.getPaths();
+            if (rulePaths == null || rulePaths.isEmpty()) {
+                continue;
+            }
+            for (String path : rulePaths) {
+                if (StringUtils.hasText(path)) {
+                    paths.add(path.trim());
+                }
+            }
+        }
+        return new ArrayList<>(paths);
+    }
+
+    private boolean isAnonymousPath(String apiPath, List<String> anonymousPaths) {
+        if (!StringUtils.hasText(apiPath) || anonymousPaths == null || anonymousPaths.isEmpty()) {
+            return false;
+        }
+        for (String pattern : anonymousPaths) {
+            if (NextDoc4jPathMatcherUtils.match(pattern, apiPath)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isHttpMethod(String method) {
+        if (!StringUtils.hasText(method)) {
+            return false;
+        }
+        return "delete".equalsIgnoreCase(method)
+            || "get".equalsIgnoreCase(method)
+            || "head".equalsIgnoreCase(method)
+            || "options".equalsIgnoreCase(method)
+            || "patch".equalsIgnoreCase(method)
+            || "post".equalsIgnoreCase(method)
+            || "put".equalsIgnoreCase(method)
+            || "trace".equalsIgnoreCase(method);
+    }
+
+    private ArrayNode createSecurityRequirement(List<String> schemeNames) {
+        ArrayNode securityArray = objectMapper.createArrayNode();
+        ObjectNode securityRequirement = objectMapper.createObjectNode();
+        for (String schemeName : schemeNames) {
+            if (!StringUtils.hasText(schemeName)) {
+                continue;
+            }
+            securityRequirement.set(schemeName, objectMapper.createArrayNode());
+        }
+        if (securityRequirement.size() > 0) {
+            securityArray.add(securityRequirement);
+        }
+        return securityArray;
     }
 
     /**
