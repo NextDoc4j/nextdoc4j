@@ -121,9 +121,8 @@ public class NextDoc4jGatewayAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public GatewaySwaggerConfigCustomizer gatewaySwaggerConfigCustomizer(SwaggerUiConfigProperties swaggerUiConfigProperties,
-                                                                         GatewayRouteDocProvider routeDocProvider,
-                                                                         GatewayDocProperties properties) {
-        return new GatewaySwaggerConfigCustomizer(swaggerUiConfigProperties, routeDocProvider, properties);
+                                                                         GatewayRouteDocProvider routeDocProvider) {
+        return new GatewaySwaggerConfigCustomizer(swaggerUiConfigProperties, routeDocProvider);
     }
 
     /**

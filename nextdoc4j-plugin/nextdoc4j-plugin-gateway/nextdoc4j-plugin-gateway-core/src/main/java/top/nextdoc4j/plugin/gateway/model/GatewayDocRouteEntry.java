@@ -21,53 +21,38 @@ import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * 手动配置的服务信息
+ * Gateway 文档路由条目
  *
  * @author echo
  * @since 1.2.0
  */
-public class ServiceConfig implements Serializable {
+public class GatewayDocRouteEntry implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
     /**
-     * 服务名称（显示名称）
+     * 显示名称
      */
     private String name;
 
     /**
-     * 文档 URL（可以是相对路径或绝对路径）
-     * <p>
-     * 示例：
-     * - /external-service/v3/api-docs（相对路径，通过网关转发）
-     * - http://external-api.com/v3/api-docs（绝对路径，直接访问）
-     * </p>
+     * 文档地址（如 /user/v3/api-docs）
      */
     private String url;
 
     /**
-     * 服务分组（可选）
-     */
-    private String group;
-
-    /**
-     * 服务 ID（可选，用于与注册中心 serviceId 对齐）
+     * 服务 ID（可选）
      */
     private String serviceId;
 
-    public ServiceConfig() {
+    public GatewayDocRouteEntry() {
     }
 
-    public ServiceConfig(String name, String url) {
+    public GatewayDocRouteEntry(String name, String url, String serviceId) {
         this.name = name;
         this.url = url;
-    }
-
-    public ServiceConfig(String name, String url, String group) {
-        this.name = name;
-        this.url = url;
-        this.group = group;
+        this.serviceId = serviceId;
     }
 
     public String getName() {
@@ -84,14 +69,6 @@ public class ServiceConfig implements Serializable {
 
     public void setUrl(String url) {
         this.url = url;
-    }
-
-    public String getGroup() {
-        return group;
-    }
-
-    public void setGroup(String group) {
-        this.group = group;
     }
 
     public String getServiceId() {

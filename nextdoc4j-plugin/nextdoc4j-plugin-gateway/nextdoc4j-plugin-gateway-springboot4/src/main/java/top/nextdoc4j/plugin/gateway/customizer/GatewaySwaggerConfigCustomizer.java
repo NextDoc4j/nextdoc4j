@@ -26,12 +26,16 @@ import org.springframework.cloud.client.discovery.event.HeartbeatEvent;
 import org.springframework.cloud.gateway.event.RefreshRoutesEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import top.nextdoc4j.plugin.gateway.configuration.GatewayDocProperties;
+import top.nextdoc4j.plugin.gateway.model.GatewayDocRouteEntry;
 import top.nextdoc4j.plugin.gateway.provider.GatewayRouteDocProvider;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -52,14 +56,12 @@ public class GatewaySwaggerConfigCustomizer {
 
     private final SwaggerUiConfigProperties swaggerUiConfigProperties;
     private final GatewayRouteDocProvider routeDocProvider;
-    private final GatewayDocProperties properties;
+    private volatile List<GatewayDocRouteEntry> routeEntries = Collections.emptyList();
 
     public GatewaySwaggerConfigCustomizer(SwaggerUiConfigProperties swaggerUiConfigProperties,
-                                          GatewayRouteDocProvider routeDocProvider,
-                                          GatewayDocProperties properties) {
+                                          GatewayRouteDocProvider routeDocProvider) {
         this.swaggerUiConfigProperties = swaggerUiConfigProperties;
         this.routeDocProvider = routeDocProvider;
-        this.properties = properties;
     }
 
     /**
@@ -92,7 +94,7 @@ public class GatewaySwaggerConfigCustomizer {
      * 非阻塞刷新 URL 列表
      */
     public Mono<Void> refreshUrlsAsync() {
-        return routeDocProvider.getAutoDiscoveredUrls()
+        return routeDocProvider.getAutoDiscoveredDocEntries()
             .subscribeOn(Schedulers.boundedElastic())
             .collectList()
             .doOnNext(this::applyUrls)
@@ -113,14 +115,70 @@ public class GatewaySwaggerConfigCustomizer {
     /**
      * 合并自动发现与手动配置 URL，并在数据变化时更新 springdoc 配置。
      */
-    private synchronized void applyUrls(List<AbstractSwaggerUiConfigProperties.SwaggerUrl> autoUrls) {
-        Set<AbstractSwaggerUiConfigProperties.SwaggerUrl> urls = new LinkedHashSet<>(autoUrls);
-        List<AbstractSwaggerUiConfigProperties.SwaggerUrl> manualUrls = routeDocProvider.getManualConfiguredUrls();
-        urls.addAll(manualUrls);
+    private synchronized void applyUrls(List<GatewayDocRouteEntry> autoEntries) {
+        List<GatewayDocRouteEntry> allEntries = new ArrayList<>();
+        allEntries.addAll(autoEntries);
+        allEntries.addAll(routeDocProvider.getManualConfiguredDocEntries());
+
+        Set<String> identitySet = new LinkedHashSet<>();
+        List<GatewayDocRouteEntry> mergedEntries = new ArrayList<>();
+        Set<AbstractSwaggerUiConfigProperties.SwaggerUrl> urls = new LinkedHashSet<>();
+        for (GatewayDocRouteEntry entry : allEntries) {
+            if (!StringUtils.hasText(entry.getName()) || !StringUtils.hasText(entry.getUrl())) {
+                continue;
+            }
+            String identity = entry.getName() + "|" + entry.getUrl();
+            if (!identitySet.add(identity)) {
+                continue;
+            }
+            mergedEntries.add(entry);
+
+            AbstractSwaggerUiConfigProperties.SwaggerUrl swaggerUrl = new AbstractSwaggerUiConfigProperties.SwaggerUrl();
+            swaggerUrl.setName(entry.getName());
+            swaggerUrl.setUrl(entry.getUrl());
+            urls.add(swaggerUrl);
+        }
+
+        routeEntries = Collections.unmodifiableList(new ArrayList<>(mergedEntries));
         if (isSameUrls(swaggerUiConfigProperties.getUrls(), urls)) {
             return;
         }
         swaggerUiConfigProperties.setUrls(urls);
+    }
+
+    /**
+     * 按文档请求路径解析 serviceId。
+     *
+     * @param requestPath 网关文档请求路径
+     * @return serviceId，若无法匹配返回 null
+     */
+    public String resolveServiceIdByDocPath(String requestPath) {
+        if (!StringUtils.hasText(requestPath)) {
+            return null;
+        }
+        String normalizedRequestPath = normalizePath(requestPath);
+        for (GatewayDocRouteEntry entry : routeEntries) {
+            if (!StringUtils.hasText(entry.getServiceId()) || !StringUtils.hasText(entry.getUrl())) {
+                continue;
+            }
+            String normalizedDocPath = normalizePath(entry.getUrl());
+            if (normalizedRequestPath.equals(normalizedDocPath)
+                || normalizedRequestPath.startsWith(normalizedDocPath + "/")) {
+                return entry.getServiceId();
+            }
+        }
+        return null;
+    }
+
+    private String normalizePath(String path) {
+        String normalized = path.trim();
+        if (!normalized.startsWith("/")) {
+            normalized = "/" + normalized;
+        }
+        if (normalized.endsWith("/") && normalized.length() > 1) {
+            normalized = normalized.substring(0, normalized.length() - 1);
+        }
+        return normalized.replaceAll("/{2,}", "/");
     }
 
     /**
