@@ -56,6 +56,14 @@ public class GatewayDocProperties implements Serializable {
     private boolean autoDiscovery = true;
 
     /**
+     * 是否启用微服务 swagger-config 访问
+     * <p>
+     * 默认 false，避免前端在 API-only 场景下强依赖 /v3/api-docs/swagger-config
+     * </p>
+     */
+    private boolean serviceSwaggerConfigEnabled = false;
+
+    /**
      * 排除的路由 ID 列表（支持通配符 *）
      */
     private List<String> excludeRoutes = new ArrayList<>();
@@ -133,6 +141,14 @@ public class GatewayDocProperties implements Serializable {
 
     public void setAutoDiscovery(boolean autoDiscovery) {
         this.autoDiscovery = autoDiscovery;
+    }
+
+    public boolean isServiceSwaggerConfigEnabled() {
+        return serviceSwaggerConfigEnabled;
+    }
+
+    public void setServiceSwaggerConfigEnabled(boolean serviceSwaggerConfigEnabled) {
+        this.serviceSwaggerConfigEnabled = serviceSwaggerConfigEnabled;
     }
 
     public Map<String, String> getNameMappings() {

@@ -43,7 +43,10 @@ public class GatewayAggregationCustomizer implements GlobalOpenApiCustomizer {
 
     @Override
     public void customise(OpenAPI openApi) {
-        GatewayAggregationInfo aggregationInfo = new GatewayAggregationInfo(properties.getDocPath());
+        GatewayAggregationInfo aggregationInfo = new GatewayAggregationInfo(
+            properties.getDocPath(),
+            properties.isServiceSwaggerConfigEnabled()
+        );
         openApi.addExtension(NextDoc4jOpenApiExtensionConstants.X_NEXTDOC4J_AGGREGATION, aggregationInfo);
     }
 }
