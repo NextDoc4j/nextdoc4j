@@ -18,7 +18,9 @@
 package top.nextdoc4j.security.core.autoconfigure;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import top.nextdoc4j.core.constant.NextDoc4jConstants;
@@ -37,9 +39,17 @@ import java.util.List;
  */
 @AutoConfiguration
 @ConditionalOnProperty(prefix = NextDoc4jConstants.PLUGIN_SECURITY, name = NextDoc4jConstants.ENABLED, havingValue = "true")
-@EnableConfigurationProperties({NextDoc4jSecurityProperties.class, NextDoc4jSpringDocProperties.class})
+@EnableConfigurationProperties(NextDoc4jSpringDocProperties.class)
 public class NextDoc4jSecurityAutoConfiguration {
 
+    /**
+     * 安全插件配置属性绑定。
+     */
+    @Bean
+    @ConfigurationProperties(prefix = NextDoc4jConstants.PLUGIN_SECURITY)
+    public NextDoc4jSecurityProperties nextDoc4jSecurityProperties() {
+        return new NextDoc4jSecurityProperties();
+    }
     /**
      * 全局 OpenAPI 安全定制器
      *
