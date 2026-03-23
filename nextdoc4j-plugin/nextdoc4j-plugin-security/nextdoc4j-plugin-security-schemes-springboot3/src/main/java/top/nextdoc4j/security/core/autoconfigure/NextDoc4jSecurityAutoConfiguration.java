@@ -18,6 +18,7 @@
 package top.nextdoc4j.security.core.autoconfigure;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -45,6 +46,7 @@ public class NextDoc4jSecurityAutoConfiguration {
      * 安全插件配置属性绑定。
      */
     @Bean
+    @ConditionalOnMissingBean(NextDoc4jSecurityProperties.class)
     @ConfigurationProperties(prefix = NextDoc4jConstants.PLUGIN_SECURITY)
     public NextDoc4jSecurityProperties nextDoc4jSecurityProperties() {
         return new NextDoc4jSecurityProperties();
