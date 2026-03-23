@@ -51,6 +51,7 @@ public class NextDoc4jSaTokenAutoConfiguration {
      * 安全插件配置属性绑定。
      */
     @Bean
+    @ConditionalOnMissingBean(NextDoc4jSecurityProperties.class)
     @ConfigurationProperties(prefix = NextDoc4jConstants.PLUGIN_SECURITY)
     public NextDoc4jSecurityProperties nextDoc4jSecurityProperties() {
         return new NextDoc4jSecurityProperties();
