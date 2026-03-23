@@ -19,10 +19,13 @@ package top.nextdoc4j.security.satoken.autoconfigure;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
 import top.nextdoc4j.core.constant.NextDoc4jConstants;
+import top.nextdoc4j.security.core.autoconfigure.NextDoc4jSecurityProperties;
 import top.nextdoc4j.security.core.enhancer.NextDoc4jPathExcluder;
 import top.nextdoc4j.security.core.enhancer.NextDoc4jSecurityMetadataResolver;
 import top.nextdoc4j.security.satoken.excluder.NextDoc4JSaTokenExcluderNextDoc4j;
@@ -43,6 +46,15 @@ import top.nextdoc4j.security.satoken.resolver.NextDoc4jSaTokenAnnotationResolve
     "cn.dev33.satoken.annotation.SaIgnore"})
 @ConditionalOnProperty(prefix = NextDoc4jConstants.PLUGIN_SECURITY, name = NextDoc4jConstants.ENABLED, havingValue = "true")
 public class NextDoc4jSaTokenAutoConfiguration {
+
+    /**
+     * 安全插件配置属性绑定。
+     */
+    @Bean
+    @ConfigurationProperties(prefix = NextDoc4jConstants.PLUGIN_SECURITY)
+    public NextDoc4jSecurityProperties nextDoc4jSecurityProperties() {
+        return new NextDoc4jSecurityProperties();
+    }
 
     /**
      * Sa-Token 注解解析器

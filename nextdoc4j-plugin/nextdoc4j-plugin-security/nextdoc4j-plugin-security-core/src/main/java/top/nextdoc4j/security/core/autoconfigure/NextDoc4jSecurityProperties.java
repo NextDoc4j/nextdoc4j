@@ -17,20 +17,18 @@
  */
 package top.nextdoc4j.security.core.autoconfigure;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import top.nextdoc4j.core.constant.NextDoc4jConstants;
-
 /**
- * 安全插件配置属性
+ * 安全插件配置属性。
+ *
+ * <p>由各适配模块通过 {@code @Bean + @ConfigurationProperties} 方式绑定。</p>
  *
  * @author echo
- * @since 1.1.3
+ * @since 1.2.0
  */
-@ConfigurationProperties(prefix = NextDoc4jConstants.PLUGIN_SECURITY)
 public class NextDoc4jSecurityProperties {
 
     /**
-     * 是否启用认证展示插件
+     * 是否启用安全认证插件。
      */
     private boolean enabled = true;
 
