@@ -237,13 +237,6 @@ public class GatewayDocResponseRewriteWebFilter implements WebFilter {
             return Collections.emptyList();
         }
 
-        JsonNode securityNode = root.get("security");
-        boolean needInjectGlobalSecurity = securityNode == null || !securityNode.isArray() || securityNode.isEmpty();
-        if (!needInjectGlobalSecurity) {
-            return validGlobalSchemeNames;
-        }
-
-        root.set("security", createSecurityRequirement(validGlobalSchemeNames));
         return validGlobalSchemeNames;
     }
 
@@ -358,13 +351,9 @@ public class GatewayDocResponseRewriteWebFilter implements WebFilter {
     }
 
     /**
-     * 将默认鉴权规则写入每个接口，并根据 anonymous 规则对命中接口清空 security。
+     * 将默认鉴权规则写入每个接口，并根据 anonymous 规则对命中接口移除 security 字段。
      */
     private void rewriteOperationSecurity(String requestPath, ObjectNode root, List<String> globalRequirementSchemes) {
-        if (globalRequirementSchemes == null || globalRequirementSchemes.isEmpty()) {
-            return;
-        }
-
         JsonNode pathsNode = root.get("paths");
         if (!(pathsNode instanceof ObjectNode pathsObjectNode)) {
             return;
@@ -372,7 +361,11 @@ public class GatewayDocResponseRewriteWebFilter implements WebFilter {
 
         String serviceId = resolveServiceId(requestPath);
         List<String> anonymousPaths = resolveAnonymousPaths(serviceId);
-        ArrayNode defaultSecurityRequirement = createSecurityRequirement(globalRequirementSchemes);
+        ArrayNode defaultSecurityRequirement = resolveDefaultSecurityRequirement(root, globalRequirementSchemes);
+        boolean hasDefaultSecurityRequirement = defaultSecurityRequirement != null && !defaultSecurityRequirement.isEmpty();
+        if (!hasDefaultSecurityRequirement && anonymousPaths.isEmpty()) {
+            return;
+        }
 
         pathsObjectNode.properties().forEach(pathEntry -> {
             String apiPath = pathEntry.getKey();
@@ -394,16 +387,34 @@ public class GatewayDocResponseRewriteWebFilter implements WebFilter {
                 }
 
                 if (anonymous) {
-                    operationObjectNode.set("security", objectMapper.createArrayNode());
+                    operationObjectNode.remove("security");
                     return;
                 }
 
-                JsonNode existingSecurity = operationObjectNode.get("security");
-                if (existingSecurity == null || !existingSecurity.isArray() || existingSecurity.isEmpty()) {
-                    operationObjectNode.set("security", defaultSecurityRequirement.deepCopy());
+                if (hasDefaultSecurityRequirement) {
+                    JsonNode existingSecurity = operationObjectNode.get("security");
+                    if (existingSecurity == null || !existingSecurity.isArray() || existingSecurity.isEmpty()) {
+                        operationObjectNode.set("security", defaultSecurityRequirement.deepCopy());
+                    }
                 }
             });
         });
+
+        if (hasDefaultSecurityRequirement) {
+            root.remove("security");
+        }
+    }
+
+    private ArrayNode resolveDefaultSecurityRequirement(ObjectNode root, List<String> globalRequirementSchemes) {
+        if (globalRequirementSchemes != null && !globalRequirementSchemes.isEmpty()) {
+            return createSecurityRequirement(globalRequirementSchemes);
+        }
+
+        JsonNode rootSecurity = root.get("security");
+        if (rootSecurity instanceof ArrayNode rootSecurityArray && !rootSecurityArray.isEmpty()) {
+            return rootSecurityArray.deepCopy();
+        }
+        return null;
     }
 
     private String resolveServiceId(String requestPath) {

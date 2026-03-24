@@ -15,7 +15,7 @@
  *
  * This file is part of the NextDoc4j project.
  */
-package top.nextdoc4j.security.core.customizer;
+package top.nextdoc4j.security.schemes.customizer;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.Operation;

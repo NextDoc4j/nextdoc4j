@@ -15,7 +15,7 @@
  *
  * This file is part of the NextDoc4j project.
  */
-package top.nextdoc4j.security.core.autoconfigure;
+package top.nextdoc4j.security.schemes.autoconfigure;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -24,8 +24,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import top.nextdoc4j.core.constant.NextDoc4jConstants;
-import top.nextdoc4j.security.core.customizer.NextDoc4jSecurityCustomizer;
-import top.nextdoc4j.security.core.customizer.NextDoc4jSecurityMetadataCustomizer;
+import top.nextdoc4j.security.core.autoconfigure.NextDoc4jSecurityProperties;
+import top.nextdoc4j.security.schemes.customizer.NextDoc4jSecurityCustomizer;
+import top.nextdoc4j.security.schemes.customizer.NextDoc4jSecurityMetadataCustomizer;
 import top.nextdoc4j.security.core.enhancer.NextDoc4jPathExcluder;
 import top.nextdoc4j.security.core.enhancer.NextDoc4jSecurityMetadataResolver;
 
