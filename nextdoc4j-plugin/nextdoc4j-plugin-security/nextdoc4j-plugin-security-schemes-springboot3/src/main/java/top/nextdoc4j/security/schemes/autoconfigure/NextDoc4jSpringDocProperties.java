@@ -15,7 +15,7 @@
  *
  * This file is part of the NextDoc4j project.
  */
-package top.nextdoc4j.security.core.autoconfigure;
+package top.nextdoc4j.security.schemes.autoconfigure;
 
 import io.swagger.v3.oas.models.Components;
 import org.springframework.boot.context.properties.ConfigurationProperties;
