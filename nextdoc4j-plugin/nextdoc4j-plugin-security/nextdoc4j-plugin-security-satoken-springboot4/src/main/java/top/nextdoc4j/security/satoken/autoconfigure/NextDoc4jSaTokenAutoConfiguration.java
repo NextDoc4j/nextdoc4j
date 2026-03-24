@@ -28,8 +28,11 @@ import top.nextdoc4j.core.constant.NextDoc4jConstants;
 import top.nextdoc4j.security.core.autoconfigure.NextDoc4jSecurityProperties;
 import top.nextdoc4j.security.core.enhancer.NextDoc4jPathExcluder;
 import top.nextdoc4j.security.core.enhancer.NextDoc4jSecurityMetadataResolver;
+import top.nextdoc4j.security.satoken.customizer.NextDoc4jSaTokenSecurityMetadataCustomizer;
 import top.nextdoc4j.security.satoken.excluder.NextDoc4JSaTokenExcluderNextDoc4j;
 import top.nextdoc4j.security.satoken.resolver.NextDoc4jSaTokenAnnotationResolver;
+
+import java.util.List;
 
 /**
  * Sa-Token 安全插件自动配置
@@ -80,5 +83,18 @@ public class NextDoc4jSaTokenAutoConfiguration {
     @Order(100)
     public NextDoc4jPathExcluder saTokenPathExcluder() {
         return new NextDoc4JSaTokenExcluderNextDoc4j();
+    }
+
+    /**
+     * Sa-Token 安全元数据操作定制器。
+     *
+     * @param resolvers 安全元数据解析器
+     * @return 操作定制器
+     */
+    @Bean
+    @ConditionalOnMissingBean(name = "securityMetadataOperationCustomizer")
+    public NextDoc4jSaTokenSecurityMetadataCustomizer securityMetadataOperationCustomizer(
+        List<NextDoc4jSecurityMetadataResolver> resolvers) {
+        return new NextDoc4jSaTokenSecurityMetadataCustomizer(resolvers);
     }
 }

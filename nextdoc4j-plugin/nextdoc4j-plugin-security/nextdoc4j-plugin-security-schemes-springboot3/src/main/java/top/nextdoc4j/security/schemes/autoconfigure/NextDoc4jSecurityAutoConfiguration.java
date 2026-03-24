@@ -77,6 +77,7 @@ public class NextDoc4jSecurityAutoConfiguration {
      * @return 操作定制器
      */
     @Bean
+    @ConditionalOnMissingBean(name = "securityMetadataOperationCustomizer")
     public NextDoc4jSecurityMetadataCustomizer securityMetadataOperationCustomizer(List<NextDoc4jSecurityMetadataResolver> resolvers) {
         return new NextDoc4jSecurityMetadataCustomizer(resolvers);
     }
