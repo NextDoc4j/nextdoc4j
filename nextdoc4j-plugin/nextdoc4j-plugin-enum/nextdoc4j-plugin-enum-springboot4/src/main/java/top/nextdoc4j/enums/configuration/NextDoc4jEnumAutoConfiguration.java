@@ -44,11 +44,9 @@ public class NextDoc4jEnumAutoConfiguration {
      * <p>
      * 该 Bean 会自动被 SpringDoc 扫描并应用到 API 文档生成过程中
      * 同时处理参数和模型字段中的枚举类型
-     * </p>
      * <p>
      * 支持多个解析器，按照注入顺序依次尝试，第一个支持的解析器生效
      * 如果没有自定义解析器支持，会自动降级到内置的默认解析器
-     * </p>
      *
      * @param resolvers    所有的枚举元数据解析器（可以为空）
      * @param objectMapper ObjectMapper 实例

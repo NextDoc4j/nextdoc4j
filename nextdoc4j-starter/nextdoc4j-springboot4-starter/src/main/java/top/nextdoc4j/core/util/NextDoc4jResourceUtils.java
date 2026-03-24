@@ -33,7 +33,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * <p>
  * 提供统一的资源加载、Logo处理、MIME类型识别等功能
  * 支持缓存机制以提高性能
- * </p>
  *
  * @author echo
  * @since 1.0.0
@@ -66,7 +65,6 @@ public class NextDoc4jResourceUtils {
      * <p>
      * 支持的图像格式：PNG、JPG、JPEG、GIF、SVG、WebP、ICO
      * 转换后的格式：data:[mimeType];base64,[base64Data]
-     * </p>
      *
      * @param logoPath       Logo文件路径，支持classpath:、file:等Spring资源路径格式
      * @param resourceLoader Spring资源加载器
@@ -134,7 +132,6 @@ public class NextDoc4jResourceUtils {
      * 读取资源文件内容（文本格式）
      * <p>
      * 使用UTF-8编码读取文本文件内容，支持缓存机制
-     * </p>
      *
      * @param location       资源位置
      * @param resourceLoader Spring资源加载器
@@ -174,7 +171,6 @@ public class NextDoc4jResourceUtils {
      * 读取资源文件内容（文本格式）
      * <p>
      * 使用UTF-8编码读取文本文件内容，自动关闭输入流
-     * </p>
      *
      * @param resource Spring资源对象
      * @return 文件内容字符串
@@ -194,7 +190,6 @@ public class NextDoc4jResourceUtils {
      * 读取资源文件内容（字节格式）
      * <p>
      * 用于读取二进制文件（如图片），自动关闭输入流
-     * </p>
      *
      * @param resource Spring资源对象
      * @return 文件内容字节数组
@@ -216,7 +211,6 @@ public class NextDoc4jResourceUtils {
      * 根据文件扩展名确定MIME类型
      * <p>
      * 支持常见的图像格式MIME类型识别，对于未知类型返回通用二进制类型
-     * </p>
      *
      * @param filePath 文件路径
      * @return 对应的MIME类型字符串
@@ -315,7 +309,6 @@ public class NextDoc4jResourceUtils {
      * 清除所有缓存
      * <p>
      * 用于释放内存或在配置更新时清除旧的缓存数据
-     * </p>
      */
     public static void clearAllCaches() {
         LOGO_CACHE.clear();

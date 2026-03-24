@@ -27,24 +27,19 @@ import java.util.Map;
  * <p>
  * 定义了从 RouteDefinition.metadata 中提取文档信息的标准 key 名称，
  * 支持 nextdoc4j 和 springdoc 两种配置方式
- * </p>
- * <p>
- * YAML 配置示例（扁平结构，推荐）：
+ * <p>YAML 配置示例（扁平结构，推荐）：</p>
  * <pre>
  * metadata:
  * nextdoc4j.name: 文件服务
  * nextdoc4j.doc-path: /file/v3/api-docs
  * </pre>
- * </p>
- * <p>
- * YAML 配置示例（嵌套结构）：
+ * <p>YAML 配置示例（嵌套结构）：</p>
  * <pre>
  * metadata:
  * nextdoc4j:
  * name: 文件服务
  * doc-path: /file/v3/api-docs
  * </pre>
- * </p>
  *
  * @author echo
  * @since 1.2.0

@@ -26,7 +26,6 @@ import java.util.List;
  * <p>
  * 提供扩展点，允许项目自定义枚举解析逻辑
  * 支持选择性重写，只需实现 supports() 和需要自定义的方法即可
- * </p>
  *
  * @author echo
  * @since 1.1.3
@@ -45,7 +44,6 @@ public interface EnumMetadataResolver {
      * 获取枚举接口类型
      * <p>
      * 用于泛型提取，必须重写以支持自定义枚举接口
-     * </p>
      *
      * @return 枚举接口类型，返回 null 表示使用默认的 EnumValue.class
      */
@@ -75,7 +73,6 @@ public interface EnumMetadataResolver {
      * 解析枚举类，返回 value 类型（用于 schema.type）
      * <p>
      * 返回值应该是 OpenAPI 标准类型：string / integer / number / long
-     * </p>
      *
      * @param enumClass 枚举类
      * @return 值类型字符串，返回 null 表示使用默认实现
@@ -88,7 +85,6 @@ public interface EnumMetadataResolver {
      * 解析枚举类，返回 format（用于 schema.format）
      * <p>
      * 返回值应该是 OpenAPI 标准格式：int32 / int64 / double 或 null
-     * </p>
      *
      * @param enumClass 枚举类
      * @return format 字符串，返回 null 表示使用默认实现

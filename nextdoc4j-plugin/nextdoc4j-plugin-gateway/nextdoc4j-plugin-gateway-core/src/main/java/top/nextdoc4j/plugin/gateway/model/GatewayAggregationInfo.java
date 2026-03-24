@@ -25,7 +25,6 @@ import java.io.Serializable;
  * <p>
  * 用于在 /v3/api-docs 响应中添加 x-nextdoc4j-aggregation 扩展字段，
  * 供前端判断是否为聚合网关模式
- * </p>
  *
  * @author echo
  * @since 1.2.0

@@ -38,7 +38,7 @@ public class NextDoc4jFilterConfiguration {
     /**
      * NextDoc4j 资源过滤器 - 当 enabled=false 时生效
      *
-     * @return {@link FilterRegistrationBean }<{@link NextDoc4jResourceFilter }>
+     * @return {@code FilterRegistrationBean<NextDoc4jResourceFilter>}
      */
     @Bean
     @ConditionalOnProperty(prefix = NextDoc4jConstants.NEXTDOC4J, name = NextDoc4jConstants.ENABLED, havingValue = "false", matchIfMissing = true)
@@ -54,7 +54,7 @@ public class NextDoc4jFilterConfiguration {
     /**
      * 生产环境资源过滤器 - 当 production=true 时生效
      *
-     * @return {@link FilterRegistrationBean }<{@link NextDoc4jProductionFilter }>
+     * @return {@code FilterRegistrationBean<NextDoc4jProductionFilter>}
      */
     @Bean
     @ConditionalOnProperty(prefix = NextDoc4jConstants.NEXTDOC4J, name = NextDoc4jConstants.PRODUCTION, havingValue = "true")

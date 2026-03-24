@@ -67,7 +67,6 @@ public class NextDoc4jEnumUtils {
      * 从泛型接口中提取值类型
      * <p>
      * 例如：EnumValue&lt;String&gt; → String.class
-     * </p>
      *
      * @param enumClass     枚举类
      * @param interfaceType 泛型接口类型（如 EnumValue.class）

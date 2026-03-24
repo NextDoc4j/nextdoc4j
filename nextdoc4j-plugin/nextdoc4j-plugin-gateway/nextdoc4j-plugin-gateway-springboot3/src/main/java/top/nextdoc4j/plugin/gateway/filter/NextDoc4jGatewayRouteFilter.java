@@ -24,7 +24,6 @@ import top.nextdoc4j.plugin.gateway.configuration.GatewayDocProperties;
  * NextDoc4j 网关路由过滤器接口
  * <p>
  * 用于判断 Gateway 路由是否应该被包含在文档聚合中
- * </p>
  *
  * @author echo
  * @since 1.2.0

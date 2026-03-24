@@ -39,7 +39,6 @@ import java.util.List;
  * <p>
  * 自动配置 Sa-Token 注解解析器，实现 NextDoc4jSecurityMetadataResolver 接口，
  * 由 core 模块统一管理并应用到 OpenAPI 文档生成过程中
- * </p>
  *
  * @author echo
  * @since 1.1.3
@@ -64,7 +63,6 @@ public class NextDoc4jSaTokenAutoConfiguration {
      * Sa-Token 注解解析器
      * <p>
      * 实现 NextDoc4jSecurityMetadataResolver 接口，由 core 模块统一调用
-     * </p>
      *
      * @return 注解解析器实例
      */

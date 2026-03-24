@@ -42,7 +42,6 @@ public class ServiceConfig implements Serializable {
      * 示例：
      * - /external-service/v3/api-docs（相对路径，通过网关转发）
      * - http://external-api.com/v3/api-docs（绝对路径，直接访问）
-     * </p>
      */
     private String url;
 

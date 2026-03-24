@@ -59,7 +59,6 @@ public class GatewayDocProperties implements Serializable {
      * 是否启用微服务 swagger-config 访问
      * <p>
      * 默认 false，避免前端在 API-only 场景下强依赖 /v3/api-docs/swagger-config
-     * </p>
      */
     private boolean serviceSwaggerConfigEnabled = false;
 

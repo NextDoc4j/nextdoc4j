@@ -45,7 +45,6 @@ import java.util.Map;
  * </ul>
  * <p>
  * 支持通过注入多个 {@link EnumMetadataResolver} 来扩展枚举解析逻辑
- * </p>
  *
  * @author echo
  * @since 1.1.3
