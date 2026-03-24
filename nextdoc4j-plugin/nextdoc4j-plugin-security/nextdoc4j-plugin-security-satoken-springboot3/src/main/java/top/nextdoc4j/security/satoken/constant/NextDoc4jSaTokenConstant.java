@@ -23,7 +23,6 @@ import cn.dev33.satoken.annotation.*;
  * Sa-Token 注解常量类
  * <p>
  * 存储 Sa-Token 注解类的引用，用于反射解析注解信息
- * </p>
  *
  * @author echo
  * @since 1.1.3

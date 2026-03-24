@@ -28,7 +28,6 @@ import java.util.concurrent.TimeUnit;
  * Gateway 文档 WebFlux 配置
  * <p>
  * 配置静态资源处理，使 /doc.html 和 /nextdoc/** 能够正确访问
- * </p>
  *
  * @author echo
  * @since 1.2.0

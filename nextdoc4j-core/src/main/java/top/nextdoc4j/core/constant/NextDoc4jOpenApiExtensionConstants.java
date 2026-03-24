@@ -44,7 +44,6 @@ public final class NextDoc4jOpenApiExtensionConstants {
      * 枚举扩展
      * <p>
      * x-nextdoc4j-enum
-     * </p>
      */
     public static final String X_NEXTDOC4J_ENUM = X_NEXTDOC4J + "-enum";
 
@@ -52,7 +51,6 @@ public final class NextDoc4jOpenApiExtensionConstants {
      * 权限码展示扩展
      * <p>
      * x-nextdoc4j-security
-     * </p>
      */
     public static final String X_NEXTDOC4J_SECURITY = X_NEXTDOC4J + "-security";
 

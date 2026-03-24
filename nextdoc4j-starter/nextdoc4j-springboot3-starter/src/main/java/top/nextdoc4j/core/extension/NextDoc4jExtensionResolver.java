@@ -48,12 +48,10 @@ import java.util.*;
  * <li>解析Markdown文档配置，支持通配符模式</li>
  * <li>处理资源文件的加载和编码转换</li>
  * </ul>
- * </p>
  * <p>
  * <strong>注意：</strong>该类只在 {@code nextdoc4j.extension.enabled=true} 时才会被注入到 Spring 容器，
  * 用于处理品牌定制和 Markdown 文档等扩展功能。基础版本信息由
  * {@link top.nextdoc4j.core.extension.NextDoc4jExtensionOpenApiCustomizer} 直接提供。
- * </p>
  *
  * <p>
  * <strong>支持的功能特性：</strong>
@@ -64,7 +62,6 @@ import java.util.*;
  * <li>自动文件名排序和命名</li>
  * <li>异常处理</li>
  * </ul>
- * </p>
  *
  * @author echo
  * @since 1.0.0
@@ -124,7 +121,6 @@ public class NextDoc4jExtensionResolver {
      * <p>
      * 这是该类的主入口方法，负责协调各个子模块的数据构建过程。
      * 只包含品牌和 Markdown 配置，不包含基础版本信息。
-     * </p>
      *
      * @param extension 扩展配置对象，可以为null
      * @return 扩展配置数据Map，包含 brand、markdown 等字段
@@ -164,7 +160,6 @@ public class NextDoc4jExtensionResolver {
      * <li>标题 - 支持自定义或从OpenAPI配置中获取</li>
      * <li>页脚文本 - 显示在页面底部的版权或其他信息</li>
      * </ul>
-     * </p>
      *
      * @param brand 品牌配置对象，可以为null
      * @return 品牌数据Map，包含logo、title、footerText等字段
@@ -208,7 +203,6 @@ public class NextDoc4jExtensionResolver {
      * 1. 品牌配置中的自定义标题
      * 2. OpenAPI文档中的标题
      * 3. 返回null（不设置标题）
-     * </p>
      *
      * @param customTitle 自定义标题
      * @return 解析后的标题，可能为null
@@ -241,7 +235,6 @@ public class NextDoc4jExtensionResolver {
      * <li>单文件模式 - 直接指定文件路径</li>
      * <li>通配符模式 - 使用Ant风格模式匹配多个文件</li>
      * </ul>
-     * </p>
      *
      * @param markdownList Markdown配置列表，可以为null或空
      * @return Markdown文档数据列表，每个元素包含group、filename、content等字段
@@ -277,7 +270,6 @@ public class NextDoc4jExtensionResolver {
      * 解析通配符模式的 Markdown 路径
      * <p>
      * 使用Spring的ResourcePatternResolver来解析Ant风格的路径模式
-     * </p>
      *
      * @param template 模版配置，包含通配符路径和默认属性
      * @return 解析得到的Markdown文档数据列表，按文件名排序
@@ -367,7 +359,6 @@ public class NextDoc4jExtensionResolver {
      * 解析单个 Markdown 文件
      * <p>
      * 处理单个指定路径的Markdown文件，不涉及模式匹配
-     * </p>
      *
      * @param markdown Markdown配置对象
      * @return 单个Markdown文档数据Map，如果解析失败返回null
@@ -451,7 +442,6 @@ public class NextDoc4jExtensionResolver {
      * <li>* - 匹配任意数量的字符</li>
      * <li>? - 匹配单个字符</li>
      * </ul>
-     * </p>
      *
      * @param location 文件路径
      * @return 如果包含通配符返回true，否则返回false
@@ -468,7 +458,6 @@ public class NextDoc4jExtensionResolver {
      * 清除所有缓存
      * <p>
      * 委托给工具类处理
-     * </p>
      */
     public void clearCache() {
         NextDoc4jResourceUtils.clearAllCaches();

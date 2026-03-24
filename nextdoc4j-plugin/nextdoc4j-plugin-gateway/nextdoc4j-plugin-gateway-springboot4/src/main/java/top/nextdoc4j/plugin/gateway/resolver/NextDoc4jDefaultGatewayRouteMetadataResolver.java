@@ -316,7 +316,6 @@ public class NextDoc4jDefaultGatewayRouteMetadataResolver implements NextDoc4jGa
      * 示例：
      * /file/v3/api-docs + /bdca -> /file/bdca/v3/api-docs
      * /v3/api-docs + /bdca -> /bdca/v3/api-docs
-     * </p>
      */
     private String mergeContextPathIntoDocPath(String docPath, String serviceContextPath) {
         if (!StringUtils.hasText(docPath)) {

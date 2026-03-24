@@ -39,7 +39,6 @@ import java.util.List;
  * <p>
  * 从 RouteDefinitionLocator 中自动发现网关配置的路由，
  * 转换为 SwaggerUrl 供 SpringDoc 使用
- * </p>
  *
  * @author echo
  * @since 1.2.0

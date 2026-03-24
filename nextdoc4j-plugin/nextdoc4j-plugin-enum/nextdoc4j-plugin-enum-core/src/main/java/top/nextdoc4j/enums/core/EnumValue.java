@@ -27,7 +27,6 @@ import java.util.Objects;
  * 这样可以兼容两种枚举定义方式：
  * 1. 只有 value 的枚举（使用 name() 作为描述）
  * 2. 同时有 value 和 description 的枚举
- * </p>
  *
  * @param <T> value 类型
  * @author echo
@@ -39,7 +38,6 @@ public interface EnumValue<T extends Serializable> {
      * 枚举值
      * <p>
      * 必须实现，用于序列化和反序列化
-     * </p>
      *
      * @return 枚举值
      */
@@ -49,7 +47,6 @@ public interface EnumValue<T extends Serializable> {
      * 枚举描述
      * <p>
      * 默认实现返回枚举常量名称，子类可以覆盖此方法提供自定义描述
-     * </p>
      *
      * @return 枚举描述
      */

@@ -45,7 +45,6 @@ import java.util.Set;
  * <p>
  * 自动将从网关路由发现的服务注入到 SwaggerUiConfigProperties 的 urls 中，
  * 使 /v3/api-docs/swagger-config 接口返回所有微服务的文档地址
- * </p>
  *
  * @author echo
  * @since 1.2.0

@@ -26,7 +26,6 @@ import java.net.URI;
  * NextDoc4j 网关路由元数据解析器接口
  * <p>
  * 用于从路由定义中提取文档路径和显示名称
- * </p>
  *
  * @author echo
  * @since 1.2.0

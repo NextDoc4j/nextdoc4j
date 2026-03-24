@@ -71,7 +71,6 @@ public class NextDoc4jSecurityAutoConfiguration {
      * <p>
      * 收集所有 NextDoc4jSecurityMetadataResolver 实现，解析权限和角色信息，
      * 并添加到 OpenAPI 操作的扩展字段中
-     * </p>
      *
      * @param resolvers 安全元数据解析器列表
      * @return 操作定制器
