@@ -11,7 +11,7 @@
     <name>nextdoc4j</name>
 
     <properties>
-        <revision>1.2.0-SNAPSHOT</revision>
+        <revision>1.2.0</revision>
         <java.version>17</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
