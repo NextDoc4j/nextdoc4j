@@ -96,7 +96,17 @@
             </dependency>
             <dependency>
                 <groupId>top.nextdoc4j</groupId>
-                <artifactId>nextdoc4j-plugin-gateway-springboot3</artifactId>
+                <artifactId>nextdoc4j-plugin-gateway-springboot3-common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>top.nextdoc4j</groupId>
+                <artifactId>nextdoc4j-plugin-gateway-springboot3-webflux</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>top.nextdoc4j</groupId>
+                <artifactId>nextdoc4j-plugin-gateway-springboot3-webmvc</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -122,7 +132,12 @@
             </dependency>
             <dependency>
                 <groupId>top.nextdoc4j</groupId>
-                <artifactId>nextdoc4j-springboot3-gateway-starter</artifactId>
+                <artifactId>nextdoc4j-springboot3-gateway-webflux-starter</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>top.nextdoc4j</groupId>
+                <artifactId>nextdoc4j-springboot3-gateway-webmvc-starter</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

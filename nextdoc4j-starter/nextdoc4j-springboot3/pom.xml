@@ -6,17 +6,19 @@
 
     <parent>
         <groupId>top.nextdoc4j</groupId>
-        <artifactId>nextdoc4j</artifactId>
+        <artifactId>nextdoc4j-starter</artifactId>
         <version>${revision}</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>nextdoc4j-starter</artifactId>
+    <artifactId>nextdoc4j-springboot3</artifactId>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
-    <description>nextdoc4j Starter 聚合模块</description>
+    <description>nextdoc4j Spring Boot 3 Starter 聚合模块</description>
 
     <modules>
-        <module>nextdoc4j-springboot3</module>
-        <module>nextdoc4j-springboot4</module>
+        <module>nextdoc4j-springboot3-starter</module>
+        <module>nextdoc4j-springboot3-gateway-webflux-starter</module>
+        <module>nextdoc4j-springboot3-gateway-webmvc-starter</module>
     </modules>
 </project>
