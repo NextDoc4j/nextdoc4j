@@ -12,8 +12,9 @@
     </parent>
 
     <artifactId>nextdoc4j-plugin-gateway-springboot4</artifactId>
+    <packaging>pom</packaging>
     <name>${project.artifactId}</name>
-    <description>nextdoc4j 网关插件 Spring Boot 4 适配模块</description>
+    <description>nextdoc4j 网关插件 Spring Boot 4 适配聚合模块</description>
 
     <dependencyManagement>
         <dependencies>
@@ -27,22 +28,9 @@
         </dependencies>
     </dependencyManagement>
 
-    <dependencies>
-        <dependency>
-            <groupId>top.nextdoc4j</groupId>
-            <artifactId>nextdoc4j-plugin-gateway-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-gateway-server-webflux</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-starter-webflux-ui</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>tools.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-        </dependency>
-    </dependencies>
+    <modules>
+        <module>nextdoc4j-plugin-gateway-springboot4-common</module>
+        <module>nextdoc4j-plugin-gateway-springboot4-webflux</module>
+        <module>nextdoc4j-plugin-gateway-springboot4-webmvc</module>
+    </modules>
 </project>
