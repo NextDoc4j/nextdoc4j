@@ -32,8 +32,9 @@
         <module>nextdoc4j-bom</module>
         <module>nextdoc4j-core</module>
         <module>nextdoc4j-plugin</module>
-        <module>nextdoc4j-starter</module>
         <module>nextdoc4j-ui</module>
+        <module>nextdoc4j-common</module>
+        <module>nextdoc4j-starter</module>
     </modules>
 
     <build>

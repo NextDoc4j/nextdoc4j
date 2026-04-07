@@ -23,8 +23,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
 import top.nextdoc4j.core.constant.NextDoc4jConstants;
 import top.nextdoc4j.core.constant.NextDoc4jFilterConstant;
-import top.nextdoc4j.springboot.filter.NextDoc4jProductionFilter;
-import top.nextdoc4j.springboot.filter.NextDoc4jResourceFilter;
+import top.nextdoc4j.springboot.common.filter.NextDoc4jProductionFilter;
+import top.nextdoc4j.springboot.common.filter.NextDoc4jResourceFilter;
 
 /**
  * 过滤器自动配置

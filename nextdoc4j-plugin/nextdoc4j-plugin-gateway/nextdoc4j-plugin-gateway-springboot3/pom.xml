@@ -12,9 +12,9 @@
     </parent>
 
     <artifactId>nextdoc4j-plugin-gateway-springboot3</artifactId>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
     <name>${project.artifactId}</name>
-    <description>nextdoc4j 网关插件 Spring Boot 3 适配聚合模块</description>
+    <description>nextdoc4j 网关插件 Spring Boot 3 模块</description>
 
     <dependencyManagement>
         <dependencies>
@@ -28,9 +28,26 @@
         </dependencies>
     </dependencyManagement>
 
-    <modules>
-        <module>nextdoc4j-plugin-gateway-springboot3-common</module>
-        <module>nextdoc4j-plugin-gateway-springboot3-webflux</module>
-        <module>nextdoc4j-plugin-gateway-springboot3-webmvc</module>
-    </modules>
+    <dependencies>
+        <dependency>
+            <groupId>top.nextdoc4j</groupId>
+            <artifactId>nextdoc4j-plugin-gateway-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-gateway-server</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-commons</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-core</artifactId>
+        </dependency>
+    </dependencies>
 </project>

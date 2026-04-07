@@ -26,21 +26,17 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.http.CacheControl;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import top.nextdoc4j.core.configuration.NextDoc4jProperties;
 import top.nextdoc4j.core.constant.NextDoc4jConstants;
 import top.nextdoc4j.core.constant.NextDoc4jFilterConstant;
-import top.nextdoc4j.core.extension.NextDoc4jExtensionOpenApiCustomizer;
-import top.nextdoc4j.core.extension.NextDoc4jExtensionResolver;
+import top.nextdoc4j.springboot.common.configuration.NextDoc4jWebMvcResourceConfigurer;
+import top.nextdoc4j.springboot.common.core.extension.NextDoc4jExtensionOpenApiCustomizer;
+import top.nextdoc4j.springboot.common.core.extension.NextDoc4jExtensionResolver;
 import top.nextdoc4j.springboot.configuration.properties.NextDoc4jPropertiesMetadata;
-import top.nextdoc4j.springboot.filter.NextDoc4jBasicAuthFilter;
-
-import java.util.concurrent.TimeUnit;
+import top.nextdoc4j.springboot.common.filter.NextDoc4jBasicAuthFilter;
 
 /**
  * 自动配置
@@ -64,17 +60,8 @@ public class NextDoc4jAutoConfiguration {
      * NextDoc4j web mvc配置器
      */
     @Bean
-    public WebMvcConfigurer nextdoc4jWebMvcConfigurer() {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addResourceHandlers(ResourceHandlerRegistry registry) {
-                registry.addResourceHandler(NextDoc4jFilterConstant.BlockedPaths.NEXT_DOC4J_HTML)
-                    .addResourceLocations("classpath:/META-INF/resources/");
-                registry.addResourceHandler(NextDoc4jFilterConstant.BlockedPaths.NEXT_DOC4J_PREFIX + "**")
-                    .addResourceLocations("classpath:/META-INF/resources/nextdoc/")
-                    .setCacheControl(CacheControl.maxAge(5, TimeUnit.HOURS).cachePublic());
-            }
-        };
+    public NextDoc4jWebMvcResourceConfigurer nextdoc4jWebMvcConfigurer() {
+        return new NextDoc4jWebMvcResourceConfigurer();
     }
 
     /**
