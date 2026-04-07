@@ -1,3 +1,3 @@
-top.nextdoc4j.springboot.configuration.NextDoc4jAutoConfiguration
-top.nextdoc4j.springboot.configuration.NextDoc4jFilterConfiguration
+top.nextdoc4j.gateway.webmvc.configuration.NextDoc4jWebMvcAutoConfiguration
+top.nextdoc4j.gateway.webmvc.configuration.NextDoc4jWebMvcFilterConfiguration
 top.nextdoc4j.gateway.webmvc.configuration.NextDoc4jGatewayWebMvcAutoConfiguration
