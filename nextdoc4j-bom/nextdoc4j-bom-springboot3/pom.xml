@@ -78,6 +78,11 @@
                 <artifactId>nextdoc4j-ui</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>top.nextdoc4j</groupId>
+                <artifactId>nextdoc4j-common-springboot3</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>top.nextdoc4j</groupId>
@@ -96,17 +101,7 @@
             </dependency>
             <dependency>
                 <groupId>top.nextdoc4j</groupId>
-                <artifactId>nextdoc4j-plugin-gateway-springboot3-common</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>top.nextdoc4j</groupId>
-                <artifactId>nextdoc4j-plugin-gateway-springboot3-webflux</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>top.nextdoc4j</groupId>
-                <artifactId>nextdoc4j-plugin-gateway-springboot3-webmvc</artifactId>
+                <artifactId>nextdoc4j-plugin-gateway-springboot3</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
