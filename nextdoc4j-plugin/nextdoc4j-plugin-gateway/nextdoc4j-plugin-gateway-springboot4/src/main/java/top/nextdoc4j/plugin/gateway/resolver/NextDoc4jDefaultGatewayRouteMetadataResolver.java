@@ -17,12 +17,12 @@
  */
 package top.nextdoc4j.plugin.gateway.resolver;
 
-import org.springframework.cloud.gateway.route.RouteDefinition;
 import org.springframework.util.StringUtils;
-import top.nextdoc4j.plugin.gateway.configuration.GatewayDocProperties;
-import top.nextdoc4j.plugin.gateway.constant.GatewayMetadataConstants;
 import top.nextdoc4j.core.gateway.enums.DocPathStrategy;
 import top.nextdoc4j.core.gateway.enums.NameResolveStrategy;
+import top.nextdoc4j.plugin.gateway.configuration.GatewayDocProperties;
+import top.nextdoc4j.plugin.gateway.constant.GatewayMetadataConstants;
+import top.nextdoc4j.plugin.gateway.model.GatewayRouteDefinition;
 
 import java.util.Map;
 
@@ -48,7 +48,7 @@ public class NextDoc4jDefaultGatewayRouteMetadataResolver implements NextDoc4jGa
     }
 
     @Override
-    public String extractDocPath(RouteDefinition route) {
+    public String extractDocPath(GatewayRouteDefinition route) {
         DocPathStrategy strategy = properties.getDocPathStrategy();
 
         return switch (strategy) {
@@ -60,7 +60,7 @@ public class NextDoc4jDefaultGatewayRouteMetadataResolver implements NextDoc4jGa
     }
 
     @Override
-    public String resolveDisplayName(RouteDefinition route) {
+    public String resolveDisplayName(GatewayRouteDefinition route) {
         String routeId = route.getId();
         NameResolveStrategy strategy = properties.getNameResolveStrategy();
 
@@ -80,7 +80,7 @@ public class NextDoc4jDefaultGatewayRouteMetadataResolver implements NextDoc4jGa
     /**
      * 自动模式提取文档路径
      */
-    private String extractAuto(RouteDefinition route) {
+    private String extractAuto(GatewayRouteDefinition route) {
         Map<String, Object> metadata = route.getMetadata();
         String serviceContextPath = resolveServiceContextPath(route);
 
@@ -115,7 +115,7 @@ public class NextDoc4jDefaultGatewayRouteMetadataResolver implements NextDoc4jGa
     /**
      * 从 metadata 提取文档路径
      */
-    private String extractFromMetadata(RouteDefinition route) {
+    private String extractFromMetadata(GatewayRouteDefinition route) {
         Map<String, Object> metadata = route.getMetadata();
         String serviceContextPath = resolveServiceContextPath(route);
 
@@ -135,7 +135,7 @@ public class NextDoc4jDefaultGatewayRouteMetadataResolver implements NextDoc4jGa
     /**
      * 从 Path 谓词提取文档路径
      */
-    private String extractFromPathPredicate(RouteDefinition route) {
+    private String extractFromPathPredicate(GatewayRouteDefinition route) {
         String serviceContextPath = resolveServiceContextPath(route);
         return route.getPredicates()
             .stream()
@@ -158,7 +158,7 @@ public class NextDoc4jDefaultGatewayRouteMetadataResolver implements NextDoc4jGa
     /**
      * 自动模式解析显示名称
      */
-    private String resolveAuto(RouteDefinition route) {
+    private String resolveAuto(GatewayRouteDefinition route) {
         String routeId = route.getId();
         Map<String, Object> metadata = route.getMetadata();
 
@@ -193,7 +193,7 @@ public class NextDoc4jDefaultGatewayRouteMetadataResolver implements NextDoc4jGa
     /**
      * 从 metadata 解析显示名称
      */
-    private String resolveFromMetadata(RouteDefinition route) {
+    private String resolveFromMetadata(GatewayRouteDefinition route) {
         Map<String, Object> metadata = route.getMetadata();
 
         String name = getNextDoc4jName(metadata);
@@ -212,7 +212,7 @@ public class NextDoc4jDefaultGatewayRouteMetadataResolver implements NextDoc4jGa
     /**
      * 从 URI 解析显示名称
      */
-    private String resolveFromUri(RouteDefinition route) {
+    private String resolveFromUri(GatewayRouteDefinition route) {
         String serviceName = extractServiceNameFromUri(route);
         if (StringUtils.hasText(serviceName)) {
             return formatDisplayName(serviceName);
@@ -284,7 +284,7 @@ public class NextDoc4jDefaultGatewayRouteMetadataResolver implements NextDoc4jGa
         return value != null ? value.toString() : null;
     }
 
-    private String resolveServiceContextPath(RouteDefinition route) {
+    private String resolveServiceContextPath(GatewayRouteDefinition route) {
         if (serviceContextPathResolver == null) {
             return "";
         }
@@ -341,4 +341,3 @@ public class NextDoc4jDefaultGatewayRouteMetadataResolver implements NextDoc4jGa
         return appendPathSegments(normalizedDocPath, normalizedServiceContextPath);
     }
 }
-

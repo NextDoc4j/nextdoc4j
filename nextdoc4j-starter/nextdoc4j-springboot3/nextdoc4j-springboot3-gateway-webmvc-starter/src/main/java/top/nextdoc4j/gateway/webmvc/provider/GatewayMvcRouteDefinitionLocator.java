@@ -17,15 +17,14 @@
  */
 package top.nextdoc4j.gateway.webmvc.provider;
 
-import org.springframework.cloud.gateway.handler.predicate.PredicateDefinition;
-import org.springframework.cloud.gateway.route.RouteDefinition;
-import org.springframework.cloud.gateway.route.RouteDefinitionLocator;
 import org.springframework.cloud.gateway.server.mvc.config.GatewayMvcProperties;
 import org.springframework.cloud.gateway.server.mvc.config.PredicateProperties;
 import org.springframework.cloud.gateway.server.mvc.config.RouteProperties;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import reactor.core.publisher.Flux;
+import top.nextdoc4j.plugin.gateway.model.GatewayPredicateDefinition;
+import top.nextdoc4j.plugin.gateway.model.GatewayRouteDefinition;
+import top.nextdoc4j.plugin.gateway.provider.NextDoc4jGatewayRouteDefinitionLocator;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -41,7 +40,7 @@ import java.util.UUID;
  * @author echo
  * @since 1.2.0
  */
-public class GatewayMvcRouteDefinitionLocator implements RouteDefinitionLocator {
+public class GatewayMvcRouteDefinitionLocator implements NextDoc4jGatewayRouteDefinitionLocator {
 
     private static final URI DEFAULT_ROUTE_URI = URI.create("lb://unknown-service");
 
@@ -52,11 +51,11 @@ public class GatewayMvcRouteDefinitionLocator implements RouteDefinitionLocator 
     }
 
     @Override
-    public Flux<RouteDefinition> getRouteDefinitions() {
-        List<RouteDefinition> routeDefinitions = new ArrayList<>();
+    public List<GatewayRouteDefinition> getRouteDefinitions() {
+        List<GatewayRouteDefinition> routeDefinitions = new ArrayList<>();
 
         if (gatewayMvcProperties == null) {
-            return Flux.fromIterable(routeDefinitions);
+            return routeDefinitions;
         }
 
         List<RouteProperties> routes = gatewayMvcProperties.getRoutes();
@@ -69,11 +68,11 @@ public class GatewayMvcRouteDefinitionLocator implements RouteDefinitionLocator 
             routesMap.values().stream().map(this::convert).forEach(routeDefinitions::add);
         }
 
-        return Flux.fromIterable(routeDefinitions);
+        return routeDefinitions;
     }
 
-    private RouteDefinition convert(RouteProperties routeProperties) {
-        RouteDefinition routeDefinition = new RouteDefinition();
+    private GatewayRouteDefinition convert(RouteProperties routeProperties) {
+        GatewayRouteDefinition routeDefinition = new GatewayRouteDefinition();
         routeDefinition.setId(resolveRouteId(routeProperties));
         routeDefinition.setUri(routeProperties != null && routeProperties.getUri() != null
             ? routeProperties.getUri()
@@ -84,26 +83,28 @@ public class GatewayMvcRouteDefinitionLocator implements RouteDefinitionLocator 
             : Collections.emptyMap();
         routeDefinition.setMetadata(metadata);
 
-        List<PredicateDefinition> predicates = convertPredicates(routeProperties != null ? routeProperties.getPredicates() : null);
+        List<GatewayPredicateDefinition> predicates = convertPredicates(routeProperties != null ? routeProperties.getPredicates() : null);
         routeDefinition.setPredicates(predicates);
         return routeDefinition;
     }
 
-    private List<PredicateDefinition> convertPredicates(List<PredicateProperties> predicatePropertiesList) {
+    private List<GatewayPredicateDefinition> convertPredicates(List<PredicateProperties> predicatePropertiesList) {
         if (CollectionUtils.isEmpty(predicatePropertiesList)) {
             return Collections.emptyList();
         }
 
-        List<PredicateDefinition> predicateDefinitions = new ArrayList<>();
+        List<GatewayPredicateDefinition> predicateDefinitions = new ArrayList<>();
         for (PredicateProperties predicateProperties : predicatePropertiesList) {
             if (predicateProperties == null || !StringUtils.hasText(predicateProperties.getName())) {
                 continue;
             }
-            PredicateDefinition predicateDefinition = new PredicateDefinition();
+            GatewayPredicateDefinition predicateDefinition = new GatewayPredicateDefinition();
             predicateDefinition.setName(predicateProperties.getName());
-            predicateDefinition.setArgs(predicateProperties.getArgs() != null
-                ? new LinkedHashMap<>(predicateProperties.getArgs())
-                : new LinkedHashMap<>());
+            Map<String, String> args = new LinkedHashMap<>();
+            if (predicateProperties.getArgs() != null) {
+                predicateProperties.getArgs().forEach((key, value) -> args.put(key, value == null ? null : value.toString()));
+            }
+            predicateDefinition.setArgs(args);
             predicateDefinitions.add(predicateDefinition);
         }
         return predicateDefinitions;

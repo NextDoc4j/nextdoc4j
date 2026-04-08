@@ -29,7 +29,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
-import org.springframework.cloud.gateway.route.RouteDefinitionLocator;
 import org.springframework.cloud.gateway.server.mvc.config.GatewayMvcProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
@@ -45,6 +44,7 @@ import top.nextdoc4j.plugin.gateway.filter.NextDoc4jDefaultGatewayRouteFilter;
 import top.nextdoc4j.plugin.gateway.filter.NextDoc4jGatewayRouteFilter;
 import top.nextdoc4j.gateway.webmvc.provider.GatewayMvcRouteDefinitionLocator;
 import top.nextdoc4j.plugin.gateway.provider.GatewayRouteDocProvider;
+import top.nextdoc4j.plugin.gateway.provider.NextDoc4jGatewayRouteDefinitionLocator;
 import top.nextdoc4j.plugin.gateway.resolver.NextDoc4jDefaultGatewayRouteMetadataResolver;
 import top.nextdoc4j.plugin.gateway.resolver.NextDoc4jGatewayRouteMetadataResolver;
 import top.nextdoc4j.plugin.gateway.resolver.NextDoc4jGatewayServiceContextPathResolver;
@@ -90,16 +90,16 @@ public class NextDoc4jGatewayWebMvcAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(RouteDefinitionLocator.class)
+    @ConditionalOnMissingBean(NextDoc4jGatewayRouteDefinitionLocator.class)
     @ConditionalOnBean(GatewayMvcProperties.class)
-    public RouteDefinitionLocator gatewayMvcRouteDefinitionLocator(GatewayMvcProperties gatewayMvcProperties) {
+    public NextDoc4jGatewayRouteDefinitionLocator gatewayMvcRouteDefinitionLocator(GatewayMvcProperties gatewayMvcProperties) {
         return new GatewayMvcRouteDefinitionLocator(gatewayMvcProperties);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnBean(RouteDefinitionLocator.class)
-    public GatewayRouteDocProvider gatewayRouteDocProvider(RouteDefinitionLocator routeDefinitionLocator,
+    @ConditionalOnBean(NextDoc4jGatewayRouteDefinitionLocator.class)
+    public GatewayRouteDocProvider gatewayRouteDocProvider(NextDoc4jGatewayRouteDefinitionLocator routeDefinitionLocator,
                                                            GatewayDocProperties properties,
                                                            NextDoc4jGatewayRouteFilter routeFilter,
                                                            NextDoc4jGatewayRouteMetadataResolver metadataResolver) {

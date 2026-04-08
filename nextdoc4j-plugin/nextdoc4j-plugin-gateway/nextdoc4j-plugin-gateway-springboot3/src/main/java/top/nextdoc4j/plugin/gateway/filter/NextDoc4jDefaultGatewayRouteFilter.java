@@ -17,9 +17,9 @@
  */
 package top.nextdoc4j.plugin.gateway.filter;
 
-import org.springframework.cloud.gateway.route.RouteDefinition;
 import org.springframework.util.AntPathMatcher;
 import top.nextdoc4j.plugin.gateway.configuration.GatewayDocProperties;
+import top.nextdoc4j.plugin.gateway.model.GatewayRouteDefinition;
 
 import java.util.List;
 
@@ -34,7 +34,7 @@ public class NextDoc4jDefaultGatewayRouteFilter implements NextDoc4jGatewayRoute
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     @Override
-    public boolean test(RouteDefinition route, GatewayDocProperties properties) {
+    public boolean test(GatewayRouteDefinition route, GatewayDocProperties properties) {
         String routeId = route.getId();
 
         // 1. 检查排除列表（支持通配符）
