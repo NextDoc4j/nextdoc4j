@@ -21,10 +21,10 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
-import org.springframework.cloud.gateway.route.RouteDefinition;
 import org.springframework.util.StringUtils;
 import top.nextdoc4j.plugin.gateway.configuration.GatewayDocProperties;
 import top.nextdoc4j.plugin.gateway.constant.GatewayMetadataConstants;
+import top.nextdoc4j.plugin.gateway.model.GatewayRouteDefinition;
 
 import java.net.URI;
 import java.time.Duration;
@@ -65,7 +65,7 @@ public class NextDoc4jGatewayServiceContextPathResolver {
      * @param route 网关路由
      * @return context-path（如 /bdca），若不存在返回空字符串
      */
-    public String resolveContextPath(RouteDefinition route) {
+    public String resolveContextPath(GatewayRouteDefinition route) {
         if (route == null) {
             return "";
         }
@@ -120,7 +120,7 @@ public class NextDoc4jGatewayServiceContextPathResolver {
      * @param route 网关路由
      * @return 服务 ID
      */
-    public String extractServiceId(RouteDefinition route) {
+    public String extractServiceId(GatewayRouteDefinition route) {
         if (route == null) {
             return null;
         }

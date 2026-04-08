@@ -18,26 +18,26 @@
 package top.nextdoc4j.plugin.gateway.provider;
 
 import org.springdoc.core.properties.AbstractSwaggerUiConfigProperties;
-import org.springframework.cloud.gateway.route.RouteDefinition;
-import org.springframework.cloud.gateway.route.RouteDefinitionLocator;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
-import top.nextdoc4j.plugin.gateway.configuration.GatewayDocProperties;
 import top.nextdoc4j.core.gateway.enums.DocPathStrategy;
+import top.nextdoc4j.plugin.gateway.configuration.GatewayDocProperties;
 import top.nextdoc4j.plugin.gateway.filter.NextDoc4jGatewayRouteFilter;
 import top.nextdoc4j.plugin.gateway.model.GatewayDocRouteEntry;
+import top.nextdoc4j.plugin.gateway.model.GatewayRouteDefinition;
 import top.nextdoc4j.plugin.gateway.model.ServiceConfig;
 import top.nextdoc4j.plugin.gateway.resolver.NextDoc4jGatewayRouteMetadataResolver;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 /**
  * Gateway 路由文档提供者
  * <p>
- * 从 RouteDefinitionLocator 中自动发现网关配置的路由，
+ * 从中立路由定位器中自动发现网关配置的路由，
  * 转换为 SwaggerUrl 供 SpringDoc 使用
  *
  * @author echo
@@ -45,7 +45,7 @@ import java.util.List;
  */
 public class GatewayRouteDocProvider {
 
-    private final RouteDefinitionLocator routeDefinitionLocator;
+    private final NextDoc4jGatewayRouteDefinitionLocator routeDefinitionLocator;
     private final GatewayDocProperties properties;
     private final NextDoc4jGatewayRouteFilter routeFilter;
     private final NextDoc4jGatewayRouteMetadataResolver metadataResolver;
@@ -53,14 +53,14 @@ public class GatewayRouteDocProvider {
     /**
      * 构造提供者（兼容旧版本，无自定义过滤器和元数据解析器）。
      */
-    public GatewayRouteDocProvider(RouteDefinitionLocator routeDefinitionLocator, GatewayDocProperties properties) {
+    public GatewayRouteDocProvider(NextDoc4jGatewayRouteDefinitionLocator routeDefinitionLocator, GatewayDocProperties properties) {
         this(routeDefinitionLocator, properties, null, null);
     }
 
     /**
      * 构造提供者。
      */
-    public GatewayRouteDocProvider(RouteDefinitionLocator routeDefinitionLocator,
+    public GatewayRouteDocProvider(NextDoc4jGatewayRouteDefinitionLocator routeDefinitionLocator,
                                    GatewayDocProperties properties,
                                    NextDoc4jGatewayRouteFilter routeFilter,
                                    NextDoc4jGatewayRouteMetadataResolver metadataResolver) {
@@ -93,7 +93,7 @@ public class GatewayRouteDocProvider {
             return Flux.empty();
         }
 
-        return routeDefinitionLocator.getRouteDefinitions()
+        return Flux.defer(() -> Flux.fromIterable(getRouteDefinitions()))
             .filter(route -> routeFilter != null ? routeFilter.test(route, properties) : isValidRoute(route))
             .map(this::convertToDocRouteEntry);
     }
@@ -143,7 +143,7 @@ public class GatewayRouteDocProvider {
     /**
      * 判断路由是否有效（兼容旧版本）
      */
-    private boolean isValidRoute(RouteDefinition route) {
+    private boolean isValidRoute(GatewayRouteDefinition route) {
         String routeId = route.getId();
 
         if (properties.getExcludeRoutes().contains(routeId)) {
@@ -170,7 +170,7 @@ public class GatewayRouteDocProvider {
     /**
      * 将路由定义转换为 SwaggerUrl
      */
-    private GatewayDocRouteEntry convertToDocRouteEntry(RouteDefinition route) {
+    private GatewayDocRouteEntry convertToDocRouteEntry(GatewayRouteDefinition route) {
         String displayName;
         String docUrl;
 
@@ -201,7 +201,7 @@ public class GatewayRouteDocProvider {
     /**
      * 从路由定义提取服务 ID（仅识别 lb://）
      */
-    private String extractServiceId(RouteDefinition route) {
+    private String extractServiceId(GatewayRouteDefinition route) {
         if (route == null) {
             return null;
         }
@@ -225,7 +225,7 @@ public class GatewayRouteDocProvider {
     /**
      * 从路由定义中提取上下文路径（兼容旧版本）
      */
-    private String extractContextPath(RouteDefinition route) {
+    private String extractContextPath(GatewayRouteDefinition route) {
         return route.getPredicates()
             .stream()
             .filter(p -> "Path".equalsIgnoreCase(p.getName()))
@@ -252,6 +252,17 @@ public class GatewayRouteDocProvider {
             name = Character.toUpperCase(name.charAt(0)) + name.substring(1);
         }
         return name;
+    }
+
+    private List<GatewayRouteDefinition> getRouteDefinitions() {
+        if (routeDefinitionLocator == null) {
+            return Collections.emptyList();
+        }
+        List<GatewayRouteDefinition> routes = routeDefinitionLocator.getRouteDefinitions();
+        if (routes == null || routes.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return new ArrayList<>(routes);
     }
 
 }

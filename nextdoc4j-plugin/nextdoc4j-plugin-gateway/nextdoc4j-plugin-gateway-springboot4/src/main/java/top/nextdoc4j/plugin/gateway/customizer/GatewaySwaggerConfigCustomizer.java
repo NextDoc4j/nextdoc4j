@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory;
 import org.springdoc.core.properties.AbstractSwaggerUiConfigProperties;
 import org.springdoc.core.properties.SwaggerUiConfigProperties;
 import org.springframework.cloud.client.discovery.event.HeartbeatEvent;
-import org.springframework.cloud.gateway.event.RefreshRoutesEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.util.StringUtils;
@@ -52,6 +51,7 @@ import java.util.Set;
 public class GatewaySwaggerConfigCustomizer {
 
     private static final Logger log = LoggerFactory.getLogger(GatewaySwaggerConfigCustomizer.class);
+    private static final String REFRESH_ROUTES_EVENT_CLASS_NAME = "org.springframework.cloud.gateway.event.RefreshRoutesEvent";
 
     private final SwaggerUiConfigProperties swaggerUiConfigProperties;
     private final GatewayRouteDocProvider routeDocProvider;
@@ -75,8 +75,11 @@ public class GatewaySwaggerConfigCustomizer {
      * 路由刷新事件触发后，异步刷新 Swagger URL。
      */
     @Async
-    @EventListener(RefreshRoutesEvent.class)
-    public void onRoutesRefresh(RefreshRoutesEvent event) {
+    @EventListener
+    public void onRoutesRefresh(Object event) {
+        if (event == null || !REFRESH_ROUTES_EVENT_CLASS_NAME.equals(event.getClass().getName())) {
+            return;
+        }
         refreshUrlsAsync().subscribe();
     }
 

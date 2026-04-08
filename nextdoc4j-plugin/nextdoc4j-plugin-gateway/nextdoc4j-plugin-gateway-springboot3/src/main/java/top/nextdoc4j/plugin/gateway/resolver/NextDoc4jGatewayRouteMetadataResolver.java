@@ -17,8 +17,8 @@
  */
 package top.nextdoc4j.plugin.gateway.resolver;
 
-import org.springframework.cloud.gateway.route.RouteDefinition;
 import top.nextdoc4j.plugin.gateway.configuration.GatewayDocProperties;
+import top.nextdoc4j.plugin.gateway.model.GatewayRouteDefinition;
 
 import java.net.URI;
 
@@ -38,7 +38,7 @@ public interface NextDoc4jGatewayRouteMetadataResolver {
      * @param route 路由定义
      * @return 文档路径（如 /user/v3/api-docs）
      */
-    String extractDocPath(RouteDefinition route);
+    String extractDocPath(GatewayRouteDefinition route);
 
     /**
      * 从路由定义中解析显示名称
@@ -46,7 +46,7 @@ public interface NextDoc4jGatewayRouteMetadataResolver {
      * @param route 路由定义
      * @return 显示名称
      */
-    String resolveDisplayName(RouteDefinition route);
+    String resolveDisplayName(GatewayRouteDefinition route);
 
     /**
      * 从 URI 提取服务名
@@ -54,16 +54,19 @@ public interface NextDoc4jGatewayRouteMetadataResolver {
      * @param route 路由定义
      * @return 服务名（如 user-service）
      */
-    default String extractServiceNameFromUri(RouteDefinition route) {
+    default String extractServiceNameFromUri(GatewayRouteDefinition route) {
         URI uri = route.getUri();
         if (uri == null) {
             return null;
         }
 
+        if (uri.getHost() != null && !uri.getHost().isEmpty()) {
+            return uri.getHost();
+        }
+
         String schemeSpecificPart = uri.getSchemeSpecificPart();
-        // lb://USER-SERVICE → USER-SERVICE
-        if (schemeSpecificPart != null && schemeSpecificPart.startsWith("lb://")) {
-            return schemeSpecificPart.substring(5);
+        if (schemeSpecificPart != null && schemeSpecificPart.startsWith("//")) {
+            return schemeSpecificPart.substring(2);
         }
         return null;
     }

@@ -31,6 +31,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableAsync;
 import tools.jackson.databind.ObjectMapper;
 import top.nextdoc4j.core.constant.NextDoc4jConstants;
+import top.nextdoc4j.gateway.webflux.provider.SpringCloudRouteDefinitionLocatorAdapter;
 import top.nextdoc4j.plugin.gateway.configuration.GatewayDocProperties;
 import top.nextdoc4j.plugin.gateway.customizer.GatewayAggregationCustomizer;
 import top.nextdoc4j.plugin.gateway.customizer.GatewaySwaggerConfigCustomizer;
@@ -38,6 +39,7 @@ import top.nextdoc4j.gateway.webflux.filter.GatewayDocResponseRewriteWebFilter;
 import top.nextdoc4j.plugin.gateway.filter.NextDoc4jDefaultGatewayRouteFilter;
 import top.nextdoc4j.plugin.gateway.filter.NextDoc4jGatewayRouteFilter;
 import top.nextdoc4j.plugin.gateway.provider.GatewayRouteDocProvider;
+import top.nextdoc4j.plugin.gateway.provider.NextDoc4jGatewayRouteDefinitionLocator;
 import top.nextdoc4j.plugin.gateway.resolver.NextDoc4jDefaultGatewayRouteMetadataResolver;
 import top.nextdoc4j.plugin.gateway.resolver.NextDoc4jGatewayRouteMetadataResolver;
 import top.nextdoc4j.plugin.gateway.resolver.NextDoc4jGatewayServiceContextPathResolver;
@@ -98,7 +100,16 @@ public class NextDoc4jGatewayAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public GatewayRouteDocProvider gatewayRouteDocProvider(RouteDefinitionLocator routeDefinitionLocator,
+    public NextDoc4jGatewayRouteDefinitionLocator gatewayRouteDefinitionLocator(RouteDefinitionLocator routeDefinitionLocator) {
+        return new SpringCloudRouteDefinitionLocatorAdapter(routeDefinitionLocator);
+    }
+
+    /**
+     * Gateway 路由文档提供者。
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public GatewayRouteDocProvider gatewayRouteDocProvider(NextDoc4jGatewayRouteDefinitionLocator routeDefinitionLocator,
                                                            GatewayDocProperties properties,
                                                            NextDoc4jGatewayRouteFilter routeFilter,
                                                            NextDoc4jGatewayRouteMetadataResolver metadataResolver) {

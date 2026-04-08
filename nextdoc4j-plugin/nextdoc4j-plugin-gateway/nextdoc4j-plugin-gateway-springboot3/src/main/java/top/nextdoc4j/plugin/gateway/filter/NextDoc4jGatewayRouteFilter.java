@@ -17,8 +17,8 @@
  */
 package top.nextdoc4j.plugin.gateway.filter;
 
-import org.springframework.cloud.gateway.route.RouteDefinition;
 import top.nextdoc4j.plugin.gateway.configuration.GatewayDocProperties;
+import top.nextdoc4j.plugin.gateway.model.GatewayRouteDefinition;
 
 /**
  * NextDoc4j 网关路由过滤器接口
@@ -38,7 +38,7 @@ public interface NextDoc4jGatewayRouteFilter {
      * @param properties 配置属性
      * @return true-包含，false-排除
      */
-    boolean test(RouteDefinition route, GatewayDocProperties properties);
+    boolean test(GatewayRouteDefinition route, GatewayDocProperties properties);
 
     /**
      * 组合过滤器（AND 逻辑）
