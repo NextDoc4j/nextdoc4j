@@ -1,0 +1,1 @@
+import{a2 as r,a3 as o}from"./bootstrap-D09a5TaP.js";import{R as s,q as c,ah as i}from"../jse/index-index-CMLRw2Av.js";const t={prefix:Math.floor(Math.random()*1e4),current:0},u=Symbol("elIdInjection"),d=()=>c()?s(u,t):t,p=n=>{const e=d(),a=r();return o(()=>i(n)||`${a.value}-id-${e.prefix}-${e.current++}`)};export{d as a,p as u};
