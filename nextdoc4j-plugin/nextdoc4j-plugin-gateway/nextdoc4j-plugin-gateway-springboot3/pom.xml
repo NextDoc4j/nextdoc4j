@@ -12,8 +12,9 @@
     </parent>
 
     <artifactId>nextdoc4j-plugin-gateway-springboot3</artifactId>
+    <packaging>jar</packaging>
     <name>${project.artifactId}</name>
-    <description>nextdoc4j 网关插件 Spring Boot 3 适配模块</description>
+    <description>nextdoc4j 网关插件 Spring Boot 3 模块</description>
 
     <dependencyManagement>
         <dependencies>
@@ -34,15 +35,15 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-gateway</artifactId>
+            <artifactId>spring-cloud-commons</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-starter-webflux-ui</artifactId>
+            <artifactId>springdoc-openapi-starter-common</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-core</artifactId>
         </dependency>
     </dependencies>
 </project>
