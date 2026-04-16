@@ -1,3 +1,63 @@
+## v1.3.0 (2026-04-16)
+
+### 新增功能
+* **后端（网关聚合运行时）**
+  * 新增 Spring Cloud Gateway WebMvc 聚合文档支持，提供独立的 `gateway-webmvc-starter`、路由定位器、响应重写过滤器与自动配置桥接，使 Servlet / WebMvc 网关也可完成文档自动发现、聚合与安全方案注入
+  * 为 WebFlux / WebMvc 网关统一引入中立路由模型与定位器接口，新增 `nextdoc4j-plugin-gateway-core`、`NextDoc4jGatewayRouteDefinitionLocator`、`GatewayRouteDefinition` / `GatewayPredicateDefinition`，支持跨运行时复用路由发现与元数据解析逻辑
+
+* **后端（Starter 与模块体系）**
+  * 新增 `nextdoc4j-common` 聚合模块，并将基础认证、扩展解析、资源处理等通用能力下沉到 `nextdoc4j-common-springboot3/4`
+  * 按 Spring Boot 3/4 与运行时类型拆分 Starter，补齐常规 Starter、Gateway WebFlux Starter、Gateway WebMvc Starter，便于按需接入
+
+* **前端（接口详情工作台）**
+  * 新增完整的接口详情工作台：参数视图、模式视图、请求/响应 JSON 示例、多示例切换，以及 `oneOf` / `allOf` / `anyOf` 组合类型展示与交互
+  * 新增请求/响应 TS 代码示例面板，以及请求参数、响应参数的 TS 实体代码生成能力
+
+* **前端（在线调试与导出）**
+  * 新增高级在线调试能力，支持 Path / Query / Header / Cookie / Body 联动编辑、请求缓存、`Content-Type` 切换、`form-data` / file 上传、复制 BaseURL / Path，以及二进制、图片 / Base64 响应处理
+  * 新增文档导出中心，支持全局参数管理、自定义导出范围、聚合服务导出，以及 Markdown / HTML / OpenAPI JSON / Docx / PDF 多格式导出
+
+* **前端（聚合文档与检索）**
+  * 新增实体模型 JSON 示例展示，并增强实体详情页的结构展示
+  * 增强微服务聚合文档与全局搜索能力，支持聚合服务展示、路径高亮和更完整的搜索索引
+
+### 功能优化
+* **后端**
+  * 重构 Spring Boot 3/4 版本层父 POM 与模块层级，统一公共依赖声明并梳理 Starter 边界，降低不同运行时之间的耦合与重复维护成本
+  * 优化网关自动发现链路：统一自动配置与手动配置的文档入口模型，增强 `metadata`、Path Predicate、URI 与服务 `context-path` 的组合解析能力，服务名、文档路径与 `serviceId` 提取更稳定
+  * 优化自动配置装配边界，WebFlux / WebMvc 按运行时独立生效，网关聚合、基础认证、资源过滤和扩展配置的 Bean 组合更清晰
+
+* **前端**
+  * 接口详情页整体重构，参数区域、自适应布局、折叠交互、Schema 切换和调试联动体验明显增强
+  * 优化 JSON Viewer 与大响应渲染性能，增加分块渲染与滚动位置保留，长文档和大 JSON 的可用性更好
+  * 持续增强文档导出页，补齐权限 / 鉴权信息、响应示例、排序规则和预览性能，导出预览加入虚拟滚动
+  * 持续优化在线调试体验，请求参数表、代码格式、响应处理逻辑、缓存恢复和调试区交互更稳定
+  * 菜单、侧边栏、全局搜索和路由生成逻辑做了多轮性能与交互优化，搜索匹配和文档定位更自然
+  * 工程侧补充系统暗黑模式跟随、首页版本号从后端 `x-nextdoc4j.version` 读取、统一 OpenAPI 与在线调试超时，并移除了前端定时检查更新 / ws 相关配置
+
+### BUG 修复
+* **后端**
+  * 修复 Spring Cloud Gateway MVC 场景下原先仅覆盖 WebFlux 的能力缺口，补齐 Servlet / WebMvc 网关场景下的路由读取、文档聚合与响应改写链路
+  * 修复不同网关实现与 Spring Boot 3/4 Starter 中通用类分散、装配边界混杂的问题，避免错误模块被引入或重复维护
+  * 修复路由元数据解析的兼容性边界，增强 `routesMap`、空路由 / 空谓词、嵌套 `nextdoc4j` metadata、缺省 URI 与服务名回退等场景下的兜底处理
+
+* **前端**
+  * 修复在线调试 URL 解析里 `pathAndSearch` 可能为空的问题，以及 `form-data` 文件上传展示、悬浮提示和内容类型处理异常
+  * 修复接口详情页切换标签时的展开闪动、状态重置、嵌套参数必填识别错误、空 JSON 结构展示异常
+  * 修复 Schema 解析边界问题，包括数组 `items` 的 `$ref` 解析、枚举值为 `0` 被过滤、多内容类型响应渲染异常等
+  * 修复聚合模式下错误命中展示、聚合在线测试适配、全局认证折叠样式、图标响应式解析和重复主题配置问题
+  * 修复偏好设置中的水印开关不生效，并同步优化相关文案来源和显示逻辑
+
+### 依赖更新
+* **后端**
+  * **Spring Boot 3 升级**：3.5.11 -> 3.5.13
+  * **Spring Cloud（Spring Boot 3）升级**：2025.0.0 -> 2025.0.2
+  * **Spring Boot 4 升级**：4.0.3 -> 4.0.5
+  * **Springdoc 升级**：2.8.16 -> 2.8.17（Spring Boot 3）
+  * **Springdoc（Spring Boot 4）升级**：3.0.2 -> 3.0.3
+  * **Swagger 升级**：2.2.45 -> 2.2.47
+  * **Sa-Token 升级**：1.44.0 -> 1.45.0（Spring Boot 3）
+
 ## v1.2.0 (2026-03-24)
 
 ### 新增功能
