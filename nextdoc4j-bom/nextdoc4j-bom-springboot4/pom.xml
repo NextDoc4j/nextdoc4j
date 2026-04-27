@@ -17,7 +17,7 @@
     <description>nextdoc4j Spring Boot 4 版本管理 BOM</description>
 
     <properties>
-        <spring-boot.version>4.0.5</spring-boot.version>
+        <spring-boot.version>4.0.6</spring-boot.version>
         <spring-cloud.version>2025.1.1</spring-cloud.version>
         <springdoc.version>3.0.3</springdoc.version>
         <hutool.version>5.8.44</hutool.version>
