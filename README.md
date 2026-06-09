@@ -139,6 +139,10 @@ nextdoc4j.enabled=true
 - [Spring Boot](https://spring.io/projects/spring-boot) - 强大的 Java 应用框架
 - [OpenAPI](https://swagger.io/specification/) - API 文档标准规范
 
+## 🌐 社区
+
+本项目已在 [LINUX DO](https://linux.do) 社区发布，欢迎加入讨论。
+
 ---
 
 **NextDoc4j** - 让 API 文档焕然一新！  如果这个项目对你有帮助，请给它一个 ⭐️
