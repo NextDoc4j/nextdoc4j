@@ -1,3 +1,30 @@
+## v1.3.2 (2026-06-29)
+
+### 功能优化
+* **文档**
+  * README 增加 LINUX DO 社区入口，并同步更新首页、接口详情和在线调试界面截图。
+
+### BUG 修复
+* **构建**
+  * 修复多模块引入内部 BOM 和核心依赖时直接使用 revision 变量导致的版本解析问题，统一改为引用父项目版本，提升发布构建稳定性。
+
+### 依赖更新
+* **后端**
+  * **Spring Boot 3 升级**：3.5.14 -> 3.5.15
+  * **Spring Cloud（Spring Boot 3）升级**：2025.0.2 -> 2025.0.3
+  * **Spring Boot 4 升级**：4.0.6 -> 4.1.0
+  * **Spring Cloud（Spring Boot 4）升级**：2025.1.1 -> 2025.1.2
+  * **Hutool 升级**：5.8.44 -> 5.8.46
+  * **Swagger Core 升级**：2.2.47 -> 2.2.51
+
+* **构建**
+  * **Spotless Maven Plugin 升级**：2.43.0 -> 3.7.0
+  * **Flatten Maven Plugin 升级**：1.6.0 -> 1.7.3
+  * **Maven Source Plugin 升级**：3.3.1 -> 3.4.0
+  * **Maven Javadoc Plugin 升级**：3.11.2 -> 3.12.0
+  * **Maven GPG Plugin 升级**：3.1.0 -> 3.2.8
+  * **Central Publishing Maven Plugin 升级**：0.8.0 -> 0.11.0
+
 ## v1.3.1 (2026-04-27)
 
 ### 新增功能
