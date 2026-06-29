@@ -19,7 +19,7 @@
         <dependency>
             <groupId>top.nextdoc4j</groupId>
             <artifactId>nextdoc4j-core</artifactId>
-            <version>${revision}</version>
+            <version>${project.parent.version}</version>
         </dependency>
     </dependencies>
 </project>
