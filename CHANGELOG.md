@@ -10,7 +10,7 @@
 
 ### 依赖更新
 * **后端**
-  * **Spring Boot 3 升级**：3.5.14 -> 3.5.15
+  * **Spring Boot 3 升级**：3.5.14 -> 3.5.16
   * **Spring Cloud（Spring Boot 3）升级**：2025.0.2 -> 2025.0.3
   * **Spring Boot 4 升级**：4.0.6 -> 4.1.0
   * **Spring Cloud（Spring Boot 4）升级**：2025.1.1 -> 2025.1.2
