@@ -24,10 +24,6 @@
             <artifactId>nextdoc4j-ui</artifactId>
         </dependency>
         <dependency>
-            <groupId>cn.hutool</groupId>
-            <artifactId>hutool-core</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-common</artifactId>
             <scope>provided</scope>

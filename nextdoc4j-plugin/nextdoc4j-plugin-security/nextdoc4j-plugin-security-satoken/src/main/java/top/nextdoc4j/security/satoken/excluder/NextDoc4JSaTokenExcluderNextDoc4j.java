@@ -17,11 +17,11 @@
  */
 package top.nextdoc4j.security.satoken.excluder;
 
-import cn.hutool.extra.spring.SpringUtil;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import top.nextdoc4j.security.core.enhancer.NextDoc4jPathExcluder;
-import org.springframework.web.method.HandlerMethod;
 import top.nextdoc4j.security.satoken.constant.NextDoc4jSaTokenConstant;
 
 import java.util.HashSet;
@@ -36,15 +36,20 @@ import java.util.Set;
  */
 public class NextDoc4JSaTokenExcluderNextDoc4j implements NextDoc4jPathExcluder {
 
+    private final ObjectProvider<RequestMappingHandlerMapping> handlerMappingProvider;
+
+    /**
+     * @param handlerMappingProvider MVC 映射（可能不存在，软失败返回空集合）
+     */
+    public NextDoc4JSaTokenExcluderNextDoc4j(ObjectProvider<RequestMappingHandlerMapping> handlerMappingProvider) {
+        this.handlerMappingProvider = handlerMappingProvider;
+    }
+
     @Override
     public Set<String> getExcludedPaths() {
         Set<String> paths = new HashSet<>();
-        RequestMappingHandlerMapping handlerMapping;
-        try {
-            handlerMapping = SpringUtil.getBean(RequestMappingHandlerMapping.class);
-        } catch (Exception ignored) {
-            return paths;
-        }
+        RequestMappingHandlerMapping handlerMapping = handlerMappingProvider == null ? null
+            : handlerMappingProvider.getIfAvailable();
         if (handlerMapping == null) {
             return paths;
         }

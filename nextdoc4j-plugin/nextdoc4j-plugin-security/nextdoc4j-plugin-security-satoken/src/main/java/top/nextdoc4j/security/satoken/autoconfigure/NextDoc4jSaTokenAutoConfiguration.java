@@ -17,6 +17,7 @@
  */
 package top.nextdoc4j.security.satoken.autoconfigure;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -24,6 +25,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import top.nextdoc4j.core.constant.NextDoc4jConstants;
 import top.nextdoc4j.security.core.autoconfigure.NextDoc4jSecurityProperties;
 import top.nextdoc4j.security.core.enhancer.NextDoc4jPathExcluder;
@@ -77,12 +79,13 @@ public class NextDoc4jSaTokenAutoConfiguration {
     /**
      * 路径排除器
      *
+     * @param handlerMappingProvider MVC 映射（不存在时软失败为空集合）
      * @return 路径排除器实例
      */
     @Bean
     @Order(100)
-    public NextDoc4jPathExcluder saTokenPathExcluder() {
-        return new NextDoc4JSaTokenExcluderNextDoc4j();
+    public NextDoc4jPathExcluder saTokenPathExcluder(ObjectProvider<RequestMappingHandlerMapping> handlerMappingProvider) {
+        return new NextDoc4JSaTokenExcluderNextDoc4j(handlerMappingProvider);
     }
 
     /**

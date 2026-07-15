@@ -59,6 +59,15 @@
             <artifactId>nextdoc4j-plugin-gateway</artifactId>
             <version>${revision}</version>
         </dependency>
+        <dependency>
+            <groupId>top.nextdoc4j</groupId>
+            <artifactId>nextdoc4j-plugin-security-satoken</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.dev33</groupId>
+            <artifactId>sa-token-core</artifactId>
+        </dependency>
 
         <!-- provided API types used by product modules under test -->
         <dependency>

@@ -17,7 +17,6 @@
  */
 package top.nextdoc4j.spring.common.core.extension;
 
-import cn.hutool.core.io.unit.DataSizeUtil;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +30,7 @@ import org.springframework.util.StringUtils;
 import top.nextdoc4j.core.configuration.NextDoc4jExtension;
 import top.nextdoc4j.core.configuration.extension.NextDoc4jBrand;
 import top.nextdoc4j.core.configuration.extension.NextDoc4jMarkdown;
+import top.nextdoc4j.spring.common.core.util.NextDoc4jDataSizeFormat;
 import top.nextdoc4j.spring.common.core.util.NextDoc4jResourceUtils;
 
 import java.io.IOException;
@@ -344,12 +344,12 @@ public class NextDoc4jExtensionResolver {
                 .toLocalDateTime();
 
             markdownData.put("lastModified", lastModified);
-            markdownData.put("contentLength", DataSizeUtil.format(resource.contentLength()));
+            markdownData.put("contentLength", NextDoc4jDataSizeFormat.format(resource.contentLength()));
         } catch (IOException e) {
             log.debug("Failed to get resource metadata for: {}", resource.getDescription());
             // 设置默认值避免字段缺失
             markdownData.put("lastModified", Instant.EPOCH.atZone(ZoneId.of("Asia/Shanghai")).toLocalDateTime());
-            markdownData.put("contentLength", DataSizeUtil.format((long)content.length()));
+            markdownData.put("contentLength", NextDoc4jDataSizeFormat.format(content.length()));
         }
 
         return markdownData;
