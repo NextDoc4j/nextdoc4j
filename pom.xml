@@ -31,7 +31,7 @@
         <spring-cloud.version>2025.0.3</spring-cloud.version>
         <springdoc.version>2.8.17</springdoc.version>
         <hutool.version>5.8.46</hutool.version>
-        <swagger.version>2.2.51</swagger.version>
+        <!-- swagger 不单独钉版本：由 springdoc-openapi（${springdoc.version}）传递 swagger-core-jakarta -->
         <sa-token.version>1.45.0</sa-token.version>
     </properties>
 
@@ -84,11 +84,6 @@
                 <version>${sa-token.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>io.swagger.core.v3</groupId>
-                <artifactId>swagger-core-jakarta</artifactId>
-                <version>${swagger.version}</version>
             </dependency>
             <!-- 本仓库模块版本 -->
             <dependency>
