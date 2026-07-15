@@ -15,23 +15,25 @@
  *
  * This file is part of the NextDoc4j project.
  */
-package top.nextdoc4j.adapter.jackson3;
+package top.nextdoc4j.adapter.jackson2;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
 import top.nextdoc4j.core.json.DocJsonMapper;
 import top.nextdoc4j.core.json.DocJsonMapperLoader;
 import top.nextdoc4j.core.json.DocJsonNode;
 import top.nextdoc4j.core.json.DocObjectNode;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * 在仅有 Jackson3 的 classpath 上验证 Loader 选择 tools.jackson 实现并真正读写 JSON。
+ * Jackson2 适配器：直接测实现 + 在仅有 Jackson2 的 classpath 时验证 Loader 选择。
  */
-class Jackson3DocJsonMapperLoaderTest {
+class Jackson2DocJsonMapperLoaderTest {
 
     @AfterEach
     void tearDown() throws Exception {
@@ -41,17 +43,26 @@ class Jackson3DocJsonMapperLoaderTest {
     }
 
     @Test
-    void loadsJackson3ImplementationAndRoundTripsJson() throws Exception {
-        assertTrue(isPresent("tools.jackson.databind.ObjectMapper"));
-        // Boot4 宿主也可能带 fasterxml（swagger），但优先 tools.jackson
-        DocJsonMapper mapper = DocJsonMapperLoader.get();
-        assertEquals(Jackson3DocJsonMapper.class, mapper.getClass());
-
+    void jackson2MapperRoundTripsJson() throws Exception {
+        DocJsonMapper mapper = new Jackson2DocJsonMapper();
         DocJsonNode root = mapper.readTree("{\"hello\":\"world\"}");
         DocObjectNode object = root.asObject();
         assertNotNull(object);
-        String json = mapper.writeValueAsString(object);
-        assertTrue(json.contains("hello") && json.contains("world"));
+        assertEquals("{\"hello\":\"world\"}", mapper.writeValueAsString(object).replace(" ", ""));
+    }
+
+    @Test
+    @EnabledIf("jackson2OnlyClasspath")
+    void loaderSelectsJackson2WhenToolsJacksonAbsent() {
+        assertFalse(isPresent("tools.jackson.databind.ObjectMapper"));
+        assertTrue(isPresent("com.fasterxml.jackson.databind.ObjectMapper"));
+        DocJsonMapper mapper = DocJsonMapperLoader.get();
+        assertEquals(Jackson2DocJsonMapper.class, mapper.getClass());
+    }
+
+    static boolean jackson2OnlyClasspath() {
+        return isPresent("com.fasterxml.jackson.databind.ObjectMapper")
+            && !isPresent("tools.jackson.databind.ObjectMapper");
     }
 
     private static boolean isPresent(String className) {

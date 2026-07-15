@@ -43,6 +43,8 @@
         <module>nextdoc4j-common</module>
         <module>nextdoc4j-adapter</module>
         <module>nextdoc4j-starter</module>
+        <!-- 聚合单测，不发布到 Central（见 nextdoc4j-tests/pom.xml deploy skip） -->
+        <module>nextdoc4j-tests</module>
     </modules>
 
 
