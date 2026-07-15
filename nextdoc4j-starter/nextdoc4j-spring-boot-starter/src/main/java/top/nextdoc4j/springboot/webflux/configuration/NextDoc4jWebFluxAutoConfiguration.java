@@ -29,11 +29,13 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsWebFilter;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
+import org.springframework.web.server.WebFilter;
 import top.nextdoc4j.core.configuration.NextDoc4jProperties;
 import top.nextdoc4j.core.constant.NextDoc4jConstants;
 import top.nextdoc4j.spring.common.core.extension.NextDoc4jExtensionOpenApiCustomizer;
 import top.nextdoc4j.spring.common.core.extension.NextDoc4jExtensionResolver;
 import top.nextdoc4j.spring.common.webflux.configuration.NextDoc4jWebFluxResourceConfigurer;
+import top.nextdoc4j.spring.common.webflux.filter.NextDoc4jWebFluxDocPathFilter;
 
 /**
  * NextDoc4j WebFlux 自动配置。
@@ -45,8 +47,17 @@ import top.nextdoc4j.spring.common.webflux.configuration.NextDoc4jWebFluxResourc
 public class NextDoc4jWebFluxAutoConfiguration {
 
     @Bean
-    public NextDoc4jWebFluxResourceConfigurer nextdoc4jWebFluxResourceConfigurer() {
-        return new NextDoc4jWebFluxResourceConfigurer();
+    public NextDoc4jWebFluxResourceConfigurer nextdoc4jWebFluxResourceConfigurer(NextDoc4jProperties properties) {
+        return new NextDoc4jWebFluxResourceConfigurer(properties);
+    }
+
+    /**
+     * 自定义 doc-path 时禁用默认 /doc.html。
+     */
+    @Bean
+    @ConditionalOnProperty(prefix = NextDoc4jConstants.NEXTDOC4J, name = "doc-path")
+    public WebFilter nextdoc4jWebFluxDocPathFilter(NextDoc4jProperties properties) {
+        return new NextDoc4jWebFluxDocPathFilter(properties);
     }
 
     @Bean

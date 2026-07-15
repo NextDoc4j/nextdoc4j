@@ -202,7 +202,7 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
      * @return true 表示需要认证，false 表示不需要认证
      */
     private boolean isAuthenticationRequired(String uri) {
-        return NextDoc4jBasicAuthUtils.isAuthenticationRequired(uri, basicAuth.isEnabled());
+        return NextDoc4jBasicAuthUtils.isAuthenticationRequired(uri, basicAuth.isEnabled(), properties.getDocPath());
     }
 
     /**

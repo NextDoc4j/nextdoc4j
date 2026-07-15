@@ -21,12 +21,15 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
+import org.springframework.core.env.Environment;
+import top.nextdoc4j.core.configuration.NextDoc4jProperties;
 import top.nextdoc4j.core.constant.NextDoc4jConstants;
-import top.nextdoc4j.core.constant.NextDoc4jFilterConstant;
+import top.nextdoc4j.core.util.NextDoc4jDocPathSupport;
 import top.nextdoc4j.spring.common.filter.NextDoc4jProductionFilter;
 import top.nextdoc4j.spring.common.filter.NextDoc4jResourceFilter;
 
@@ -37,7 +40,7 @@ import top.nextdoc4j.spring.common.filter.NextDoc4jResourceFilter;
  * @since 1.0.0
  */
 
-@AutoConfiguration
+@AutoConfiguration(after = NextDoc4jPropertiesConfiguration.class)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 public class NextDoc4jFilterConfiguration {
 
@@ -48,12 +51,13 @@ public class NextDoc4jFilterConfiguration {
      */
     @Bean
     @ConditionalOnProperty(prefix = NextDoc4jConstants.NEXTDOC4J, name = NextDoc4jConstants.ENABLED, havingValue = "false", matchIfMissing = true)
-    public FilterRegistrationBean<NextDoc4jResourceFilter> nextdoc4jResourceFilter() {
+    public FilterRegistrationBean<NextDoc4jResourceFilter> nextdoc4jResourceFilter(ObjectProvider<NextDoc4jProperties> propertiesProvider,
+                                                                                   Environment environment) {
+        String docPath = resolveDocPath(propertiesProvider, environment);
         FilterRegistrationBean<NextDoc4jResourceFilter> bean = new FilterRegistrationBean<>();
-        bean.setFilter(new NextDoc4jResourceFilter());
+        bean.setFilter(new NextDoc4jResourceFilter(docPath));
         bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
-        // 过滤全部文档相关资源（含 springdoc 端点）
-        bean.addUrlPatterns(NextDoc4jFilterConstant.BlockedPaths.URL_PATTERNS);
+        bean.addUrlPatterns(NextDoc4jDocPathSupport.blockedUrlPatterns(docPath));
         return bean;
     }
 
@@ -64,13 +68,32 @@ public class NextDoc4jFilterConfiguration {
      */
     @Bean
     @ConditionalOnProperty(prefix = NextDoc4jConstants.NEXTDOC4J, name = NextDoc4jConstants.PRODUCTION, havingValue = "true")
-    public FilterRegistrationBean<NextDoc4jProductionFilter> nextdoc4jProductionFilter() {
+    public FilterRegistrationBean<NextDoc4jProductionFilter> nextdoc4jProductionFilter(ObjectProvider<NextDoc4jProperties> propertiesProvider,
+                                                                                       Environment environment) {
+        String docPath = resolveDocPath(propertiesProvider, environment);
         FilterRegistrationBean<NextDoc4jProductionFilter> bean = new FilterRegistrationBean<>();
-        bean.setFilter(new NextDoc4jProductionFilter());
+        bean.setFilter(new NextDoc4jProductionFilter(docPath));
         bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
-        // 使用统一配置的URL路径
-        bean.addUrlPatterns(NextDoc4jFilterConstant.BlockedPaths.URL_PATTERNS);
+        bean.addUrlPatterns(NextDoc4jDocPathSupport.blockedUrlPatterns(docPath));
         return bean;
     }
 
+    /**
+     * Prefer bound properties bean; fall back to Environment so doc-path is available
+     * even if the properties bean is not yet created.
+     */
+    public static String resolveDocPath(ObjectProvider<NextDoc4jProperties> propertiesProvider, Environment environment) {
+        NextDoc4jProperties properties = propertiesProvider.getIfAvailable();
+        if (properties != null && properties.getDocPath() != null && !properties.getDocPath().isBlank()) {
+            return properties.getDocPath();
+        }
+        if (environment != null) {
+            String fromEnv = environment.getProperty(NextDoc4jConstants.NEXTDOC4J + ".doc-path");
+            if (fromEnv != null && !fromEnv.isBlank()) {
+                return fromEnv;
+            }
+        }
+        // properties 存在时 getDocPath 已在上方判过 blank
+        return null;
+    }
 }

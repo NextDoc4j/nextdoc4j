@@ -33,11 +33,12 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 import top.nextdoc4j.core.configuration.NextDoc4jProperties;
 import top.nextdoc4j.core.constant.NextDoc4jConstants;
-import top.nextdoc4j.core.constant.NextDoc4jFilterConstant;
+import top.nextdoc4j.core.util.NextDoc4jDocPathSupport;
 import top.nextdoc4j.spring.common.configuration.NextDoc4jWebMvcResourceConfigurer;
 import top.nextdoc4j.spring.common.core.extension.NextDoc4jExtensionOpenApiCustomizer;
 import top.nextdoc4j.spring.common.core.extension.NextDoc4jExtensionResolver;
 import top.nextdoc4j.spring.common.filter.NextDoc4jBasicAuthFilter;
+import top.nextdoc4j.spring.common.filter.NextDoc4jDocPathFilter;
 
 /**
  * 自动配置
@@ -54,8 +55,22 @@ public class NextDoc4jAutoConfiguration {
      * NextDoc4j web mvc配置器
      */
     @Bean
-    public NextDoc4jWebMvcResourceConfigurer nextdoc4jWebMvcConfigurer() {
-        return new NextDoc4jWebMvcResourceConfigurer();
+    public NextDoc4jWebMvcResourceConfigurer nextdoc4jWebMvcConfigurer(NextDoc4jProperties properties) {
+        return new NextDoc4jWebMvcResourceConfigurer(properties);
+    }
+
+    /**
+     * 自定义 doc-path 时禁用默认 /doc.html（Boot 仍可能暴露 jar 静态资源）。
+     */
+    @Bean
+    @ConditionalOnProperty(prefix = NextDoc4jConstants.NEXTDOC4J, name = "doc-path")
+    public FilterRegistrationBean<NextDoc4jDocPathFilter> nextdoc4jDocPathFilter(NextDoc4jProperties properties) {
+        FilterRegistrationBean<NextDoc4jDocPathFilter> registration = new FilterRegistrationBean<>();
+        registration.setFilter(new NextDoc4jDocPathFilter(properties));
+        registration.addUrlPatterns(NextDoc4jDocPathSupport.DEFAULT_DOC_PATH);
+        registration.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);
+        registration.setEnabled(NextDoc4jDocPathSupport.isCustomDocPath(properties.getDocPath()));
+        return registration;
     }
 
     /**
@@ -97,7 +112,7 @@ public class NextDoc4jAutoConfiguration {
                                                                                      OpenAPI openAPI) {
         FilterRegistrationBean<NextDoc4jBasicAuthFilter> registration = new FilterRegistrationBean<>();
         registration.setFilter(new NextDoc4jBasicAuthFilter(properties, resourceLoader, openAPI));
-        registration.addUrlPatterns(NextDoc4jFilterConstant.BlockedPaths.URL_PATTERNS);
+        registration.addUrlPatterns(NextDoc4jDocPathSupport.blockedUrlPatterns(properties.getDocPath()));
         registration.setOrder(Ordered.HIGHEST_PRECEDENCE + 2);
         registration.setEnabled(properties.isEnabled() && properties.getAuth().isEnabled());
         return registration;

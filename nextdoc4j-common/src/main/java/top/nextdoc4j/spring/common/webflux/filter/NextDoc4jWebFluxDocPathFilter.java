@@ -17,35 +17,51 @@
  */
 package top.nextdoc4j.spring.common.webflux.filter;
 
+import org.springframework.core.Ordered;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
-import top.nextdoc4j.core.util.NextDoc4jPathMatcherUtils;
+import top.nextdoc4j.core.configuration.NextDoc4jProperties;
+import top.nextdoc4j.core.util.NextDoc4jDocPathSupport;
 
 /**
- * 当 nextdoc4j.enabled=false 时拦截文档相关资源（含 springdoc 端点）。
+ * WebFlux：自定义 doc-path 时禁用默认 {@code /doc.html}。
+ *
+ * @author echo
+ * @since 1.4.0
  */
-public class NextDoc4jWebFluxResourceFilter implements WebFilter {
+public class NextDoc4jWebFluxDocPathFilter implements WebFilter, Ordered {
 
+    private final boolean customPath;
     private final String configuredDocPath;
 
-    public NextDoc4jWebFluxResourceFilter() {
-        this((String)null);
+    public NextDoc4jWebFluxDocPathFilter(NextDoc4jProperties properties) {
+        String docPath = properties == null ? null : properties.getDocPath();
+        this.configuredDocPath = docPath;
+        this.customPath = NextDoc4jDocPathSupport.isCustomDocPath(docPath);
     }
 
-    public NextDoc4jWebFluxResourceFilter(String configuredDocPath) {
+    public NextDoc4jWebFluxDocPathFilter(String configuredDocPath) {
         this.configuredDocPath = configuredDocPath;
+        this.customPath = NextDoc4jDocPathSupport.isCustomDocPath(configuredDocPath);
     }
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-        String path = exchange.getRequest().getURI().getPath();
-        if (NextDoc4jPathMatcherUtils.shouldBlock(path, configuredDocPath)) {
-            exchange.getResponse().setStatusCode(HttpStatus.NOT_FOUND);
-            return exchange.getResponse().setComplete();
+        if (customPath) {
+            String path = exchange.getRequest().getURI().getPath();
+            if (NextDoc4jDocPathSupport.matchesDefaultDocPath(path)) {
+                exchange.getResponse().setStatusCode(HttpStatus.NOT_FOUND);
+                return exchange.getResponse().setComplete();
+            }
         }
         return chain.filter(exchange);
+    }
+
+    @Override
+    public int getOrder() {
+        return Ordered.HIGHEST_PRECEDENCE + 1;
     }
 }

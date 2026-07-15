@@ -29,10 +29,20 @@ import top.nextdoc4j.core.util.NextDoc4jPathMatcherUtils;
  */
 public class NextDoc4jWebFluxProductionFilter implements WebFilter {
 
+    private final String configuredDocPath;
+
+    public NextDoc4jWebFluxProductionFilter() {
+        this((String)null);
+    }
+
+    public NextDoc4jWebFluxProductionFilter(String configuredDocPath) {
+        this.configuredDocPath = configuredDocPath;
+    }
+
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         String path = exchange.getRequest().getURI().getPath();
-        if (NextDoc4jPathMatcherUtils.shouldBlock(path)) {
+        if (NextDoc4jPathMatcherUtils.shouldBlock(path, configuredDocPath)) {
             exchange.getResponse().setStatusCode(HttpStatus.NOT_FOUND);
             return exchange.getResponse().setComplete();
         }

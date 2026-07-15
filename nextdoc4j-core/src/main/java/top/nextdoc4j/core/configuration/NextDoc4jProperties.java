@@ -39,6 +39,14 @@ public class NextDoc4jProperties implements Serializable {
     private boolean enabled = false;
 
     /**
+     * 文档 UI 对外访问路径。
+     * <p>
+     * 未配置时默认为 {@code /doc.html}；配置后仅该路径可打开 UI，原 {@code /doc.html} 失效。
+     * 物理资源仍为 classpath {@code META-INF/resources/doc.html}。
+     */
+    private String docPath;
+
+    /**
      * 是否开启跨域
      */
     private boolean cors = false;
@@ -64,6 +72,14 @@ public class NextDoc4jProperties implements Serializable {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+    }
+
+    public String getDocPath() {
+        return docPath;
+    }
+
+    public void setDocPath(String docPath) {
+        this.docPath = docPath;
     }
 
     public boolean isCors() {

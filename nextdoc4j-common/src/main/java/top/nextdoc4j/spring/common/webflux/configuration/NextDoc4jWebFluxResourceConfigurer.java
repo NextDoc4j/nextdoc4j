@@ -20,7 +20,10 @@ package top.nextdoc4j.spring.common.webflux.configuration;
 import org.springframework.http.CacheControl;
 import org.springframework.web.reactive.config.ResourceHandlerRegistry;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
+import top.nextdoc4j.core.configuration.NextDoc4jProperties;
 import top.nextdoc4j.core.constant.NextDoc4jFilterConstant;
+import top.nextdoc4j.core.util.NextDoc4jDocPathSupport;
+import top.nextdoc4j.spring.common.webflux.resource.NextDoc4jWebFluxDocHtmlResourceResolver;
 
 import java.util.concurrent.TimeUnit;
 
@@ -29,10 +32,26 @@ import java.util.concurrent.TimeUnit;
  */
 public class NextDoc4jWebFluxResourceConfigurer implements WebFluxConfigurer {
 
+    private final String effectiveDocPath;
+
+    public NextDoc4jWebFluxResourceConfigurer() {
+        this((String)null);
+    }
+
+    public NextDoc4jWebFluxResourceConfigurer(NextDoc4jProperties properties) {
+        this(properties == null ? null : properties.getDocPath());
+    }
+
+    public NextDoc4jWebFluxResourceConfigurer(String configuredDocPath) {
+        this.effectiveDocPath = NextDoc4jDocPathSupport.effectiveDocPath(configuredDocPath);
+    }
+
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler(NextDoc4jFilterConstant.BlockedPaths.NEXT_DOC4J_HTML)
-            .addResourceLocations("classpath:/META-INF/resources/");
+        registry.addResourceHandler(effectiveDocPath)
+            .addResourceLocations("classpath:/META-INF/resources/")
+            .resourceChain(true)
+            .addResolver(new NextDoc4jWebFluxDocHtmlResourceResolver());
 
         registry.addResourceHandler(NextDoc4jFilterConstant.BlockedPaths.NEXT_DOC4J_PREFIX + "**")
             .addResourceLocations("classpath:/META-INF/resources/nextdoc/")

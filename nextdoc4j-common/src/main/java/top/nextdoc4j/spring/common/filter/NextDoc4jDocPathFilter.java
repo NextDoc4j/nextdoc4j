@@ -22,36 +22,43 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.filter.OncePerRequestFilter;
-import top.nextdoc4j.core.util.NextDoc4jPathMatcherUtils;
+import top.nextdoc4j.core.configuration.NextDoc4jProperties;
+import top.nextdoc4j.core.util.NextDoc4jDocPathSupport;
 
 import java.io.IOException;
 
 /**
- * 资源过滤器（nextdoc4j.enabled=false 时拦截文档相关路径）。
+ * 自定义 {@code nextdoc4j.doc-path} 时，使默认 {@code /doc.html} 失效（404）。
+ * <p>
+ * 生效入口由 ResourceHandler + {@code NextDoc4jDocHtmlResourceResolver} 映射到物理 {@code doc.html}。
+ * 未配置自定义路径时本过滤器不拦截。
  *
  * @author echo
- * @since 1.0.0
+ * @since 1.4.0
  */
-public class NextDoc4jResourceFilter extends OncePerRequestFilter {
+public class NextDoc4jDocPathFilter extends OncePerRequestFilter {
 
+    private final boolean customPath;
     private final String configuredDocPath;
 
-    public NextDoc4jResourceFilter() {
-        this((String)null);
+    public NextDoc4jDocPathFilter(NextDoc4jProperties properties) {
+        String docPath = properties == null ? null : properties.getDocPath();
+        this.configuredDocPath = docPath;
+        this.customPath = NextDoc4jDocPathSupport.isCustomDocPath(docPath);
     }
 
-    public NextDoc4jResourceFilter(String configuredDocPath) {
+    public NextDoc4jDocPathFilter(String configuredDocPath) {
         this.configuredDocPath = configuredDocPath;
+        this.customPath = NextDoc4jDocPathSupport.isCustomDocPath(configuredDocPath);
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        String uri = request.getRequestURI();
-
-        if (NextDoc4jPathMatcherUtils.shouldBlock(uri, configuredDocPath)) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND, "NextDoc4j is disabled");
+        if (customPath && NextDoc4jDocPathSupport.matchesDefaultDocPath(request.getRequestURI())) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "NextDoc4j default /doc.html is disabled; use "
+                + NextDoc4jDocPathSupport.effectiveDocPath(configuredDocPath));
             return;
         }
         filterChain.doFilter(request, response);

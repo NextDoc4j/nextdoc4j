@@ -27,23 +27,32 @@ import top.nextdoc4j.core.util.NextDoc4jPathMatcherUtils;
 import java.io.IOException;
 
 /**
- * 生产环境过滤器
+ * 生产环境资源过滤器。
  *
  * @author echo
- * @since 1.0.1
+ * @since 1.0.0
  */
 public class NextDoc4jProductionFilter extends OncePerRequestFilter {
+
+    private final String configuredDocPath;
+
+    public NextDoc4jProductionFilter() {
+        this((String)null);
+    }
+
+    public NextDoc4jProductionFilter(String configuredDocPath) {
+        this.configuredDocPath = configuredDocPath;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         String uri = request.getRequestURI();
-        if (NextDoc4jPathMatcherUtils.shouldBlock(uri)) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Resource not available in production environment");
+        if (NextDoc4jPathMatcherUtils.shouldBlock(uri, configuredDocPath)) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
         filterChain.doFilter(request, response);
     }
-
 }

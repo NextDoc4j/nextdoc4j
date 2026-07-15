@@ -57,6 +57,7 @@ public class NextDoc4jWebFluxBasicAuthFilter implements WebFilter {
     private static final Duration SESSION_TIMEOUT = Duration.ofMinutes(30);
     private static final String DOC_LOGIN = "classpath:/META-INF/resources/doclogin.html";
 
+    private final NextDoc4jProperties properties;
     private final NextDoc4jBasicAuth basicAuth;
     private final NextDoc4jExtension extension;
     private final ResourceLoader resourceLoader;
@@ -65,7 +66,7 @@ public class NextDoc4jWebFluxBasicAuthFilter implements WebFilter {
     public NextDoc4jWebFluxBasicAuthFilter(NextDoc4jProperties properties,
                                            ResourceLoader resourceLoader,
                                            OpenAPI openAPI) {
-        Objects.requireNonNull(properties, "NextDoc4jProperties cannot be null");
+        this.properties = Objects.requireNonNull(properties, "NextDoc4jProperties cannot be null");
         this.resourceLoader = Objects.requireNonNull(resourceLoader, "ResourceLoader cannot be null");
         this.openAPI = openAPI;
         this.basicAuth = properties.getAuth();
@@ -113,7 +114,8 @@ public class NextDoc4jWebFluxBasicAuthFilter implements WebFilter {
     }
 
     private boolean isAuthenticationRequired(String uri) {
-        return NextDoc4jBasicAuthUtils.isAuthenticationRequired(uri, basicAuth.isEnabled());
+        return NextDoc4jBasicAuthUtils.isAuthenticationRequired(uri, basicAuth.isEnabled(),
+            properties == null ? null : properties.getDocPath());
     }
 
     private boolean isLogoutRequest(ServerWebExchange exchange) {

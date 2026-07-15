@@ -20,22 +20,43 @@ package top.nextdoc4j.spring.common.configuration;
 import org.springframework.http.CacheControl;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import top.nextdoc4j.core.configuration.NextDoc4jProperties;
 import top.nextdoc4j.core.constant.NextDoc4jFilterConstant;
+import top.nextdoc4j.core.util.NextDoc4jDocPathSupport;
+import top.nextdoc4j.spring.common.resource.NextDoc4jDocHtmlResourceResolver;
 
 import java.util.concurrent.TimeUnit;
 
 /**
  * NextDoc4j WebMvc 资源映射配置。
+ * <p>
+ * 文档入口映射到物理 {@code doc.html}；对外路径由 {@code nextdoc4j.doc-path} 决定。
  *
  * @author echo
  * @since 1.2.1
  */
 public class NextDoc4jWebMvcResourceConfigurer implements WebMvcConfigurer {
 
+    private final String effectiveDocPath;
+
+    public NextDoc4jWebMvcResourceConfigurer() {
+        this((String)null);
+    }
+
+    public NextDoc4jWebMvcResourceConfigurer(NextDoc4jProperties properties) {
+        this(properties == null ? null : properties.getDocPath());
+    }
+
+    public NextDoc4jWebMvcResourceConfigurer(String configuredDocPath) {
+        this.effectiveDocPath = NextDoc4jDocPathSupport.effectiveDocPath(configuredDocPath);
+    }
+
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler(NextDoc4jFilterConstant.BlockedPaths.NEXT_DOC4J_HTML)
-            .addResourceLocations("classpath:/META-INF/resources/");
+        registry.addResourceHandler(effectiveDocPath)
+            .addResourceLocations("classpath:/META-INF/resources/")
+            .resourceChain(true)
+            .addResolver(new NextDoc4jDocHtmlResourceResolver());
 
         registry.addResourceHandler(NextDoc4jFilterConstant.BlockedPaths.NEXT_DOC4J_PREFIX + "**")
             .addResourceLocations("classpath:/META-INF/resources/nextdoc/")
