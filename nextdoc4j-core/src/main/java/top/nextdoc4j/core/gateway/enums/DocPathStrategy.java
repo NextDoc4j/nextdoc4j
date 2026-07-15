@@ -45,4 +45,3 @@ public enum DocPathStrategy {
      */
     MANUAL_ONLY
 }
-

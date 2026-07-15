@@ -158,4 +158,3 @@ public final class GatewaySecuritySchemeValidator {
         return value != null && !value.trim().isEmpty();
     }
 }
-

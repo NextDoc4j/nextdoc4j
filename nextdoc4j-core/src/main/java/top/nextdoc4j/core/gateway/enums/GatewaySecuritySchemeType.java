@@ -50,4 +50,3 @@ public enum GatewaySecuritySchemeType {
      */
     OPEN_ID_CONNECT
 }
-

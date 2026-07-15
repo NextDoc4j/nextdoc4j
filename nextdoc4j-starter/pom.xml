@@ -16,7 +16,7 @@
     <description>nextdoc4j Starter 聚合模块</description>
 
     <modules>
-        <module>nextdoc4j-springboot3</module>
-        <module>nextdoc4j-springboot4</module>
+        <module>nextdoc4j-spring-boot-starter</module>
+        <module>nextdoc4j-gateway-spring-boot-starter</module>
     </modules>
 </project>

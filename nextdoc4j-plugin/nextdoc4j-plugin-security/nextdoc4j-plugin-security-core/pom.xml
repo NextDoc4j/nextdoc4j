@@ -6,7 +6,7 @@
 
     <parent>
         <groupId>top.nextdoc4j</groupId>
-        <artifactId>nextdoc4j-plugin-security</artifactId>
+        <artifactId>nextdoc4j-plugin-security-parent</artifactId>
         <version>${revision}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>

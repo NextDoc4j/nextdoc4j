@@ -4,19 +4,166 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>top.nextdoc4j</groupId>
-        <artifactId>nextdoc4j</artifactId>
-        <version>${revision}</version>
-    </parent>
-
+    <!--
+      独立 BOM：不继承根 POM，避免把 Boot / Cloud / springdoc 等编译基线带入消费者。
+      仍作为根 reactor 的 <module> 参与构建；版本与根 revision 对齐（见 properties / .mvn/maven.config）。
+    -->
+    <groupId>top.nextdoc4j</groupId>
     <artifactId>nextdoc4j-bom</artifactId>
+    <version>${revision}</version>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
-    <description>nextdoc4j BOM 聚合模块</description>
+    <description>nextdoc4j 统一 BOM（仅管理 top.nextdoc4j 自身模块版本，不管理 Spring Boot / Cloud / springdoc）</description>
+    <url>https://github.com/NextDoc4j/nextdoc4j</url>
 
-    <modules>
-        <module>nextdoc4j-bom-springboot3</module>
-        <module>nextdoc4j-bom-springboot4</module>
-    </modules>
+    <properties>
+        <!-- 与根 pom 的 revision 保持一致；可用 .mvn/maven.config -Drevision=… 单源覆盖 -->
+        <revision>1.4.0-SNAPSHOT</revision>
+        <flatten-maven-plugin.version>1.7.3</flatten-maven-plugin.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <id>nextdoc4j</id>
+            <name>echo</name>
+            <email>nextdoc4j@163.com</email>
+            <roles>
+                <role>developer</role>
+                <role>maintainer</role>
+            </roles>
+            <timezone>+8</timezone>
+            <url>https://github.com/Time-w</url>
+        </developer>
+    </developers>
+    <scm>
+        <connection>scm:git:https://github.com/NextDoc4j/nextdoc4j.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/nextdoc4j/nextdoc4j.git</developerConnection>
+        <url>https://github.com/NextDoc4j/nextdoc4j</url>
+    </scm>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>top.nextdoc4j</groupId>
+                <artifactId>nextdoc4j-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>top.nextdoc4j</groupId>
+                <artifactId>nextdoc4j-ui</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>top.nextdoc4j</groupId>
+                <artifactId>nextdoc4j-common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>top.nextdoc4j</groupId>
+                <artifactId>nextdoc4j-adapter-jackson2</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>top.nextdoc4j</groupId>
+                <artifactId>nextdoc4j-adapter-jackson3</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>top.nextdoc4j</groupId>
+                <artifactId>nextdoc4j-spring-boot-starter</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>top.nextdoc4j</groupId>
+                <artifactId>nextdoc4j-gateway-spring-boot-starter</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>top.nextdoc4j</groupId>
+                <artifactId>nextdoc4j-plugin-enum</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>top.nextdoc4j</groupId>
+                <artifactId>nextdoc4j-plugin-gateway</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>top.nextdoc4j</groupId>
+                <artifactId>nextdoc4j-plugin-security-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>top.nextdoc4j</groupId>
+                <artifactId>nextdoc4j-plugin-security-schemes</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>top.nextdoc4j</groupId>
+                <artifactId>nextdoc4j-plugin-security-satoken</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <plugins>
+            <!-- 解析 ${revision}；无 parent，不会展开根 POM 的 Boot/Cloud/springdoc 管理 -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+                <version>${flatten-maven-plugin.version}</version>
+                <configuration>
+                    <updatePomFile>true</updatePomFile>
+                    <flattenMode>resolveCiFriendliesOnly</flattenMode>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>flatten</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>flatten-clean</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- 契约：校验发布用 flattened POM 仅管理 top.nextdoc4j -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.5.0</version>
+                <executions>
+                    <execution>
+                        <id>assert-thin-bom</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>python3</executable>
+                            <arguments>
+                                <argument>${project.basedir}/src/test/scripts/assert_thin_bom.py</argument>
+                                <argument>${project.basedir}/.flattened-pom.xml</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
