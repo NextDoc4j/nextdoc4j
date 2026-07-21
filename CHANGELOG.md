@@ -1,4 +1,84 @@
+## v1.4.0 (2026-07-21)
+
+### 新增功能
+* **后端（模块统一与接入）**
+  * 合并 Spring Boot 3 / 4 双轨模块为**单套坐标**：宿主统一引入 `nextdoc4j-spring-boot-starter`（Boot 3 / Boot 4 共用），网关统一引入 `nextdoc4j-gateway-spring-boot-starter`；插件收敛为 `nextdoc4j-plugin-enum`、`nextdoc4j-plugin-gateway` 等共用实现。
+  * 提供独立薄 BOM `nextdoc4j-bom`，平台栈（Spring Boot / Spring Cloud / springdoc）由宿主管理，降低版本耦合。
+  * 新增 Jackson 2 / Jackson 3 适配层（`nextdoc4j-adapter-jackson2` / `nextdoc4j-adapter-jackson3`），JSON 抽象与宿主 Jackson 主版本解耦。
+
+* **后端（文档入口与认证页）**
+  * 支持 `nextdoc4j.doc-path` 自定义文档入口（默认 `/doc.html`）；启动期 fail-fast 校验，热路径非法配置降级默认值；自定义路径时屏蔽 Boot 默认静态 `/doc.html`。
+  * 登录页重构：设计令牌驱动的浅色 / 深色主题、localStorage 主题持久化、右上角主题切换，以及品牌区 + 表单区响应式布局。
+
+* **后端（网关聚合）**
+  * 路由模型新增中立 `GatewayFilterDefinition`，WebFlux / WebMvc 路由定位器透传 filters。
+  * 文档路径解析识别 `StripPrefix`，按剥离段数还原网关外部前缀，并避免 routePrefix 与服务 `context-path` 重复拼接。
+  * 子服务 `swagger-config` 响应改写：去掉已包含的网关服务前缀，分组 URL 改为服务相对地址；`isSwaggerConfig` / `shouldRewrite` / `servers` 改写统一跟随可配置 `doc-path`。
+  * JSON 抽象扩展 `asText`、`forEachElement`，支撑 swagger-config 等场景的节点遍历与取值。
+
+* **前端（接口分组与详情）**
+  * 新增接口分组概览页，支持分组维度浏览与路由联动。
+  * 接口详情支持 `oneOf` / `anyOf` 组合关键字分段选择器，以及响应示例状态码切换标签页。
+  * 请求体类型溢出时支持折叠与提升展示；Body 枚举参数支持选择与内容校验。
+  * 增强响应体展示：支持 XML 与多格式高亮；右侧示例面板布局与响应式交互增强。
+  * 接口详情字段自适应展示，并与在线调试 Path 参数联动。
+
+* **前端（在线调试）**
+  * 支持 SSE 事件流实时展示、终止，以及事件列表虚拟滚动与滚动交互优化。
+  * `Content-Type` 输入增强自动补全。
+  * 增强调试与接口详情相关操作能力，并优化调试面板静默预加载策略。
+
+* **前端（导出与工具）**
+  * 文档导出增强响应示例生成与展示逻辑，并优化导出页布局。
+  * 优化 AI 复制按钮样式与图标体验。
+
+### 功能优化
+* **后端**
+  * 移除 Hutool 依赖，新增 `NextDoc4jDataSizeFormat` 等本地工具，降低第三方依赖面。
+  * Sa-Token 路径排除器改为注入 `RequestMappingHandlerMapping` 提供器，避免通过工具类硬取 Bean。
+  * 单测聚合至 `nextdoc4j-tests` 模块，产品模块不再散落测试与测试依赖；测试模块不发布中央库。
+  * `swagger-core-jakarta` 不再在各模块显式钉版本，统一由 springdoc 传递管理。
+  * 网关响应过滤器在 swagger-config 刷新后继续执行 body 改写，避免仅刷新不改写。
+
+* **前端**
+  * 重构接口文档详情布局、JSON 视图折叠 / 预览、全局参数配置与调试面板样式，统一卡片与主题配色。
+  * 优化暗黑主题、小屏响应式、示例面板高度测量与联动、主题切换动画等体验。
+  * 优化子菜单懒挂载、分组菜单交互、首页与文档管理卡片性能。
+  * 全局认证输入空格处理、内联 Tab 溢出、参数值编辑覆盖层定位等交互细节增强。
+
+### BUG 修复
+* **后端**
+  * 修复网关聚合下子服务 swagger-config 分组 URL 带重复服务前缀、以及自定义 `doc-path` 时改写/识别不一致的问题。
+  * 修复 StripPrefix 场景下文档路径推导错误、以及 routePrefix 与 context-path 重复拼接的问题。
+  * 修复 WebFlux / WebMvc 在 swagger-config 请求上 early-return，导致响应 body 未改写的问题。
+
+* **前端**
+  * 修复网关聚合模式下 URL 路径解析与处理异常。
+  * 修复 Markdown 预览请求体 JSON 示例为 `null`、请求体示例为空与编辑器切换异常。
+  * 对齐 `oneOf` / `anyOf` 分支切换与 query 类型 / 示例展示；补齐 `allOf` / `oneOf` / `anyOf` 可渲染检测。
+  * 修复接口调试请求与异常信息处理、长值换行展示，以及多响应示例首次高度异常。
+  * 修复分组概览重复加载菜单、菜单闪回、分组收起后自动展开、一级概览返回失效等问题。
+  * 修复长标题挤出接口数量徽标、空状态滚动、调试返回详情后示例卡片高度异常、首页同步入口菜单定位等问题。
+  * 修复文档导出表格溢出、全局搜索匹配、参数连续输入错行、不可展开节点指示器等边界问题。
+
+### 兼容性说明
+* **Maven 坐标迁移（重要）**
+  * 旧：`nextdoc4j-springboot3-starter` / `nextdoc4j-springboot4-starter` 及拆分的 gateway webflux/webmvc starter、`nextdoc4j-bom-springboot3/4`、双轨 common/plugin 模块。
+  * 新：单体 `nextdoc4j-spring-boot-starter`，网关 `nextdoc4j-gateway-spring-boot-starter`，BOM `nextdoc4j-bom`；请按 README 更新依赖与 springdoc UI 引入方式。
+* **配置**
+  * 可选配置 `nextdoc4j.doc-path` 自定义文档入口；未配置时仍为 `/doc.html`。
+
+### 依赖更新
+* **后端**
+  * **Spring Boot 3**：3.5.16（与 v1.3.2 对齐，本版本继续采用）
+  * **Spring Cloud（Spring Boot 3）**：2025.0.3
+  * **Springdoc**：2.8.17（Boot 3）；Boot 4 宿主请使用 springdoc 3.x
+  * **Sa-Token**：1.45.0
+  * **移除**：Hutool
+  * **swagger-core-jakarta**：版本改由 springdoc 传递管理，不再单独声明
+
 ## v1.3.2 (2026-06-29)
+
 
 ### 功能优化
 * **文档**
