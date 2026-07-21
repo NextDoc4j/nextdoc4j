@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>top.nextdoc4j</groupId>
+        <artifactId>nextdoc4j</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <artifactId>nextdoc4j-tests</artifactId>
+    <name>${project.artifactId}</name>
+    <description>
+        聚合单元测试模块（不发布到 Maven Central）。
+        生产模块不再分散 src/test；在此依赖产品模块并运行全部单测。
+    </description>
+
+    <!-- 明确不作为可发布库制品 -->
+    <properties>
+        <maven.deploy.skip>true</maven.deploy.skip>
+        <maven.install.skip>false</maven.install.skip>
+        <!-- 不 attach sources/javadoc for publish -->
+        <maven.source.skip>true</maven.source.skip>
+        <maven.javadoc.skip>true</maven.javadoc.skip>
+        <gpg.skip>true</gpg.skip>
+    </properties>
+
+    <dependencies>
+        <!-- modules under test -->
+        <dependency>
+            <groupId>top.nextdoc4j</groupId>
+            <artifactId>nextdoc4j-core</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>top.nextdoc4j</groupId>
+            <artifactId>nextdoc4j-common</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>top.nextdoc4j</groupId>
+            <artifactId>nextdoc4j-spring-boot-starter</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>top.nextdoc4j</groupId>
+            <artifactId>nextdoc4j-adapter-jackson2</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>top.nextdoc4j</groupId>
+            <artifactId>nextdoc4j-adapter-jackson3</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>top.nextdoc4j</groupId>
+            <artifactId>nextdoc4j-plugin-gateway</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>top.nextdoc4j</groupId>
+            <artifactId>nextdoc4j-plugin-security-satoken</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.dev33</groupId>
+            <artifactId>sa-token-core</artifactId>
+        </dependency>
+
+        <!-- provided API types used by product modules under test -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webflux</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-commons</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-common</artifactId>
+        </dependency>
+        <!-- swagger-core-jakarta 由 springdoc 传递，不单独钉版本 -->
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.18.3</version>
+        </dependency>
+        <dependency>
+            <groupId>tools.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>3.1.4</version>
+        </dependency>
+
+        <!-- test runtime -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.11.4</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <!-- 无 main 源码；仅 test -->
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.5.2</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.4.2</version>
+                <configuration>
+                    <!-- 空 jar 即可，不作为库发布 -->
+                    <skipIfEmpty>true</skipIfEmpty>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>3.1.3</version>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <version>3.1.3</version>
+                <configuration>
+                    <!-- 本地 install 可跳过，避免污染本地仓库产品坐标语义 -->
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <configuration>
+                    <skipPublishing>true</skipPublishing>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

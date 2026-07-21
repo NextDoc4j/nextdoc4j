@@ -29,8 +29,7 @@ import java.util.Map;
 public final class NextDoc4jResourcePureUtils {
 
     private static final Map<String, String> MIME_TYPE_MAPPING = Map
-        .of("svg", "image/svg+xml", "png", "image/png", "jpg", "image/jpeg", "jpeg", "image/jpeg", "gif",
-            "image/gif", "webp", "image/webp", "ico", "image/x-icon");
+        .of("svg", "image/svg+xml", "png", "image/png", "jpg", "image/jpeg", "jpeg", "image/jpeg", "gif", "image/gif", "webp", "image/webp", "ico", "image/x-icon");
 
     private static final String DEFAULT_MIME_TYPE = "application/octet-stream";
 

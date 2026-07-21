@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>top.nextdoc4j</groupId>
+        <artifactId>nextdoc4j-starter</artifactId>
+        <version>${revision}</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>nextdoc4j-gateway-spring-boot-starter</artifactId>
+    <name>${project.artifactId}</name>
+    <description>
+        nextdoc4j 网关 Spring Boot Starter（命名对齐 Spring Cloud 风格）。
+        WebFlux/WebMvc 条件装配，不硬拉 Gateway Server；聚合能力来自 nextdoc4j-plugin-gateway。
+    </description>
+
+    <dependencies>
+        <dependency>
+            <groupId>top.nextdoc4j</groupId>
+            <artifactId>nextdoc4j-spring-boot-starter</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <!-- 显式依赖 common：网关 auto-config 直接引用 spring.common 资源/过滤器 -->
+        <dependency>
+            <groupId>top.nextdoc4j</groupId>
+            <artifactId>nextdoc4j-common</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>top.nextdoc4j</groupId>
+            <artifactId>nextdoc4j-plugin-gateway</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>top.nextdoc4j</groupId>
+            <artifactId>nextdoc4j-adapter-jackson2</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>top.nextdoc4j</groupId>
+            <artifactId>nextdoc4j-adapter-jackson3</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <!-- 宿主自行引入 Gateway Server / springdoc UI；此处仅编译用 optional -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-gateway-server-webflux</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-gateway-server-webmvc</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webflux</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webflux-ui</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+</project>

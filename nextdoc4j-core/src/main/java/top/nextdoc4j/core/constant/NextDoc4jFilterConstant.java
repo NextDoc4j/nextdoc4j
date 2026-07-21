@@ -17,7 +17,11 @@
  */
 package top.nextdoc4j.core.constant;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * 路径过滤配置常量类
@@ -28,7 +32,7 @@ import java.util.Arrays;
 public class NextDoc4jFilterConstant {
 
     /**
-     * 需要过滤的路径配置
+     * 需要过滤的路径配置（唯一数据源：文档入口 + 非文档 springdoc/swagger/nextdoc 路径）。
      */
     public static final class BlockedPaths {
 
@@ -52,33 +56,64 @@ public class NextDoc4jFilterConstant {
         public static final String WEBJARS_SWAGGER_UI_PREFIX = "/webjars/swagger-ui/";
 
         /**
-         * 所有精确匹配的路径
+         * 非文档入口的精确路径（api-docs / swagger 等），不含 UI 入口。
          */
-        public static final String[] EXACT_PATHS = {NEXT_DOC4J_HTML, API_DOCS_YAML, API_DOCS, SWAGGER_UI_HTML,
-            SWAGGER_RESOURCES};
+        public static final String[] NON_DOC_EXACT_PATHS = {API_DOCS_YAML, API_DOCS, SWAGGER_UI_HTML, SWAGGER_RESOURCES};
 
         /**
-         * 所有前缀匹配的路径
+         * 前缀匹配路径（含 /nextdoc/ 与 springdoc/swagger 前缀）。
          */
         public static final String[] PREFIX_PATHS = {NEXT_DOC4J_PREFIX, API_DOCS_PREFIX, SWAGGER_UI_PREFIX,
             SWAGGER_RESOURCES_PREFIX, WEBJARS_SWAGGER_UI_PREFIX};
 
         /**
-         * 用于 FilterRegistrationBean 的 URL 模式
+         * 默认精确路径：默认 UI 入口 + {@link #NON_DOC_EXACT_PATHS}。
          */
-        public static final String[] URL_PATTERNS = {NEXT_DOC4J_HTML, NEXT_DOC4J_PREFIX + "*", API_DOCS,
-            API_DOCS_PREFIX + "*", API_DOCS_PREFIX + "**", SWAGGER_UI_HTML, SWAGGER_UI_PREFIX + "*",
-            SWAGGER_UI_PREFIX + "**", SWAGGER_RESOURCES, SWAGGER_RESOURCES_PREFIX + "*",
-            SWAGGER_RESOURCES_PREFIX + "**", WEBJARS_SWAGGER_UI_PREFIX + "*", WEBJARS_SWAGGER_UI_PREFIX + "**"};
+        public static final String[] EXACT_PATHS;
 
-        // ==================== Ant 模式转换方法 ====================
+        /**
+         * 默认 Filter URL 模式（文档入口为 {@link #NEXT_DOC4J_HTML}）。
+         */
+        public static final String[] URL_PATTERNS;
+
+        static {
+            EXACT_PATHS = concat(new String[] {NEXT_DOC4J_HTML}, NON_DOC_EXACT_PATHS);
+            URL_PATTERNS = buildUrlPatterns(NEXT_DOC4J_HTML, false);
+        }
+
+        /**
+         * 构建 FilterRegistrationBean URL 模式。
+         *
+         * @param effectiveDocPath 生效文档入口（已规范化）
+         * @param includeDefaultWhenCustom 自定义入口时是否额外包含默认 /doc.html
+         */
+        public static String[] buildUrlPatterns(String effectiveDocPath, boolean includeDefaultWhenCustom) {
+            Set<String> patterns = new LinkedHashSet<>();
+            if (effectiveDocPath != null && !effectiveDocPath.isEmpty()) {
+                patterns.add(effectiveDocPath);
+            }
+            if (includeDefaultWhenCustom) {
+                patterns.add(NEXT_DOC4J_HTML);
+            }
+            patterns.add(NEXT_DOC4J_PREFIX + "*");
+            patterns.add(API_DOCS);
+            patterns.add(API_DOCS_PREFIX + "*");
+            patterns.add(API_DOCS_PREFIX + "**");
+            patterns.add(API_DOCS_YAML);
+            patterns.add(SWAGGER_UI_HTML);
+            patterns.add(SWAGGER_UI_PREFIX + "*");
+            patterns.add(SWAGGER_UI_PREFIX + "**");
+            patterns.add(SWAGGER_RESOURCES);
+            patterns.add(SWAGGER_RESOURCES_PREFIX + "*");
+            patterns.add(SWAGGER_RESOURCES_PREFIX + "**");
+            patterns.add(WEBJARS_SWAGGER_UI_PREFIX + "*");
+            patterns.add(WEBJARS_SWAGGER_UI_PREFIX + "**");
+            return patterns.toArray(String[]::new);
+        }
 
         /**
          * 将精确路径转换为 Ant 模式（支持 context-path）
          * <p>转换规则：/doc.html -> /**\/doc.html</p>
-         *
-         * @param path 原始路径
-         * @return Ant 模式路径
          */
         public static String toAntExactPattern(String path) {
             if (path == null || path.isEmpty()) {
@@ -90,9 +125,6 @@ public class NextDoc4jFilterConstant {
         /**
          * 将前缀路径转换为 Ant 模式（支持 context-path）
          * <p>转换规则：/nextdoc/ -> /**\/nextdoc/**</p>
-         *
-         * @param prefix 原始前缀路径
-         * @return Ant 模式路径
          */
         public static String toAntPrefixPattern(String prefix) {
             if (prefix == null || prefix.isEmpty()) {
@@ -102,22 +134,23 @@ public class NextDoc4jFilterConstant {
             return cleanPrefix.startsWith("/") ? "/**" + cleanPrefix + "/**" : cleanPrefix + "/**";
         }
 
-        /**
-         * 获取所有精确匹配的 Ant 路径模式
-         *
-         * @return Ant 路径模式数组
-         */
         public static String[] getAntExactPatterns() {
             return Arrays.stream(EXACT_PATHS).map(BlockedPaths::toAntExactPattern).toArray(String[]::new);
         }
 
-        /**
-         * 获取所有前缀匹配的 Ant 路径模式
-         *
-         * @return Ant 路径模式数组
-         */
         public static String[] getAntPrefixPatterns() {
             return Arrays.stream(PREFIX_PATHS).map(BlockedPaths::toAntPrefixPattern).toArray(String[]::new);
+        }
+
+        public static String[] getAntNonDocExactPatterns() {
+            return Arrays.stream(NON_DOC_EXACT_PATHS).map(BlockedPaths::toAntExactPattern).toArray(String[]::new);
+        }
+
+        private static String[] concat(String[] head, String[] tail) {
+            List<String> all = new ArrayList<>(head.length + tail.length);
+            all.addAll(Arrays.asList(head));
+            all.addAll(Arrays.asList(tail));
+            return all.toArray(String[]::new);
         }
     }
 }

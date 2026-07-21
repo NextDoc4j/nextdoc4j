@@ -12,13 +12,30 @@
     </parent>
 
     <artifactId>nextdoc4j-plugin-enum</artifactId>
-    <packaging>pom</packaging>
     <name>${project.artifactId}</name>
-    <description>nextdoc4j 枚举插件聚合模块</description>
+    <description>
+        枚举插件（Boot 3/4 共用）：注解与元数据解析 + SpringDoc 自动配置。
+        包划分 — core/model/resolver/util 为中立能力，configuration/handler 为 Spring 集成。
+    </description>
 
-    <modules>
-        <module>nextdoc4j-plugin-enum-core</module>
-        <module>nextdoc4j-plugin-enum-springboot3</module>
-        <module>nextdoc4j-plugin-enum-springboot4</module>
-    </modules>
+    <dependencies>
+        <dependency>
+            <groupId>top.nextdoc4j</groupId>
+            <artifactId>nextdoc4j-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-common</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
 </project>

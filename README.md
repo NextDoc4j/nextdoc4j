@@ -66,8 +66,8 @@ NextDoc4j 帮助开发团队提高 API 文档的管理和调试效率，使文�
 ### 环境要求
 
 - **Java**: >= 17
-- **SpringBoot**: >= 3.4.x
-- **SpringDoc**: 与 OpenAPI 3 兼容
+- **Spring Boot**: 3.5.x 或 4.x
+- **SpringDoc**: 与 OpenAPI 3 兼容（WebMVC / WebFlux UI 由宿主引入）
 
 ### 安装使用
 
@@ -75,12 +75,49 @@ NextDoc4j 帮助开发团队提高 API 文档的管理和调试效率，使文�
 
 在 `pom.xml` 中添加以下依赖：
 ```xml
+<!-- 一个 dependencyManagement：先平台栈，再 NextDoc4j（仅对齐 top.nextdoc4j 自身模块） -->
+<dependencyManagement>
+    <dependencies>
+        <!-- 已有 spring-boot-starter-parent 时可省略 Boot BOM -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-dependencies</artifactId>
+            <version>3.5.16</version><!-- Boot 4 请改用 4.x -->
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+        <!-- springdoc 不在 Boot BOM 内：Boot 3 用 2.x，Boot 4 用 3.x -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-bom</artifactId>
+            <version>2.8.17</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+        <dependency>
+            <groupId>top.nextdoc4j</groupId>
+            <artifactId>nextdoc4j-bom</artifactId>
+            <version>{latest-version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+
+<!-- 单体：统一坐标（Boot 3 / Boot 4 共用）；版本可由上方 nextdoc4j-bom 管理 -->
 <dependency>
     <groupId>top.nextdoc4j</groupId>
-    <artifactId>nextdoc4j-springboot3-starter</artifactId>
-    <version>{latest-version}</version>
+    <artifactId>nextdoc4j-spring-boot-starter</artifactId>
+</dependency>
+<!-- 宿主引入匹配的 springdoc UI（版本由 springdoc BOM 管理） -->
+<dependency>
+    <groupId>org.springdoc</groupId>
+    <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+    <!-- WebFlux 单体请改用 springdoc-openapi-starter-webflux-ui -->
 </dependency>
 ```
+
+网关场景使用 `nextdoc4j-gateway-spring-boot-starter`（命名对齐 Spring Cloud 风格），并自行引入对应的 Spring Cloud Gateway（`spring-cloud-starter-gateway-server-webflux` 或 `spring-cloud-starter-gateway-server-webmvc`）与 springdoc UI。
 
 #### 2. 基础配置
 
@@ -105,8 +142,8 @@ nextdoc4j.enabled=true
 
 ## 🔧 技术栈
 
-- **核心框架**: SpringBoot 3.4.x
-- **文档规范**: SpringDoc + OpenAPI 3
+- **核心框架**: Spring Boot 3.5.x / Spring Boot 4.x
+- **文档规范**: SpringDoc + OpenAPI 3（版本由宿主管理）
 - **构建工具**: Maven
 - **JDK版本**: Java 17+
 

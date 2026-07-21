@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>top.nextdoc4j</groupId>
+        <artifactId>nextdoc4j</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <artifactId>nextdoc4j-adapter</artifactId>
+    <packaging>pom</packaging>
+    <name>${project.artifactId}</name>
+    <description>nextdoc4j 断代适配模块聚合</description>
+
+    <modules>
+        <module>nextdoc4j-adapter-jackson2</module>
+        <module>nextdoc4j-adapter-jackson3</module>
+    </modules>
+</project>

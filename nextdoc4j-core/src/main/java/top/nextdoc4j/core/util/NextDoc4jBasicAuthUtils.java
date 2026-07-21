@@ -81,10 +81,19 @@ public final class NextDoc4jBasicAuthUtils {
     }
 
     /**
-     * 判断请求路径是否需要认证。
+     * 判断请求路径是否需要认证（默认文档入口）。
      */
     public static boolean isAuthenticationRequired(String requestUri, boolean authEnabled) {
-        return NextDoc4jPathMatcherUtils.isAuthenticationRequired(requestUri, authEnabled);
+        return isAuthenticationRequired(requestUri, authEnabled, null);
+    }
+
+    /**
+     * 判断请求路径是否需要认证。
+     *
+     * @param configuredDocPath {@code nextdoc4j.doc-path}
+     */
+    public static boolean isAuthenticationRequired(String requestUri, boolean authEnabled, String configuredDocPath) {
+        return NextDoc4jPathMatcherUtils.isAuthenticationRequired(requestUri, authEnabled, configuredDocPath);
     }
 
     /**

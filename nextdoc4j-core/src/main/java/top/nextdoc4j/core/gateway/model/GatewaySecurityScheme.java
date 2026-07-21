@@ -155,4 +155,3 @@ public class GatewaySecurityScheme implements Serializable {
         this.extensions = extensions;
     }
 }
-

@@ -12,13 +12,49 @@
     </parent>
 
     <artifactId>nextdoc4j-plugin-gateway</artifactId>
-    <packaging>pom</packaging>
     <name>${project.artifactId}</name>
-    <description>nextdoc4j 网关插件聚合模块</description>
+    <description>
+        网关聚合文档插件（Boot 3/4 共用）。
+        包划分 — model/configuration/constant/provider 接口为中立模型；
+        customizer/filter/resolver 为 Spring 集成；rewrite 为 OpenAPI 改写。
+    </description>
 
-    <modules>
-        <module>nextdoc4j-plugin-gateway-core</module>
-        <module>nextdoc4j-plugin-gateway-springboot3</module>
-        <module>nextdoc4j-plugin-gateway-springboot4</module>
-    </modules>
+    <dependencies>
+        <dependency>
+            <groupId>top.nextdoc4j</groupId>
+            <artifactId>nextdoc4j-core</artifactId>
+        </dependency>
+        <!-- provided：版本与有无由宿主 Boot/Cloud/SpringDoc 决定 -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-commons</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-common</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!-- swagger-core-jakarta 不显式引入：随 springdoc-openapi-starter-common 传递（版本由 springdoc 栈决定） -->
+        <!-- 必须传递：GatewayRouteDocProvider 返回 Flux，纯 MVC Gateway 宿主无 WebFlux 时否则缺 Publisher -->
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
 </project>

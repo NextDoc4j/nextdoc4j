@@ -83,4 +83,3 @@ public class GatewayOAuthFlows implements Serializable {
         this.authorizationCode = authorizationCode;
     }
 }
-

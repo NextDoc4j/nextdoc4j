@@ -11,16 +11,14 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>nextdoc4j-plugin-security</artifactId>
+    <artifactId>nextdoc4j-plugin-security-parent</artifactId>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
-    <description>nextdoc4j 安全插件聚合模块</description>
+    <description>nextdoc4j 安全插件聚合</description>
 
     <modules>
         <module>nextdoc4j-plugin-security-core</module>
-        <module>nextdoc4j-plugin-security-schemes-springboot3</module>
-        <module>nextdoc4j-plugin-security-schemes-springboot4</module>
-        <module>nextdoc4j-plugin-security-satoken-springboot3</module>
-        <module>nextdoc4j-plugin-security-satoken-springboot4</module>
+        <module>nextdoc4j-plugin-security-schemes</module>
+        <module>nextdoc4j-plugin-security-satoken</module>
     </modules>
 </project>
