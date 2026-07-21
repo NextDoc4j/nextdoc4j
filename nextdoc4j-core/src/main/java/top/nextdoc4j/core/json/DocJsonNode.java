@@ -43,6 +43,13 @@ public interface DocJsonNode {
     DocArrayNode asArray();
 
     /**
+     * 转为字符串值；非文本节点返回 null。
+     */
+    default String asText() {
+        return null;
+    }
+
+    /**
      * 深拷贝当前节点。
      */
     DocJsonNode deepCopy();

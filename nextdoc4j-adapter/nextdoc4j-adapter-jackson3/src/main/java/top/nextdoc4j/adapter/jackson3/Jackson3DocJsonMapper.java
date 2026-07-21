@@ -27,6 +27,7 @@ import top.nextdoc4j.core.json.DocJsonNode;
 import top.nextdoc4j.core.json.DocObjectNode;
 
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 /**
  * Jackson 3（tools.jackson）实现的 {@link DocJsonMapper}。
@@ -122,6 +123,11 @@ public class Jackson3DocJsonMapper implements DocJsonMapper {
         }
 
         @Override
+        public String asText() {
+            return delegate.isString() ? delegate.asText() : null;
+        }
+
+        @Override
         public DocJsonNode deepCopy() {
             return wrap(delegate.deepCopy());
         }
@@ -183,6 +189,11 @@ public class Jackson3DocJsonMapper implements DocJsonMapper {
         @Override
         public void add(DocJsonNode node) {
             array.add(unwrap(node));
+        }
+
+        @Override
+        public void forEachElement(Consumer<DocJsonNode> consumer) {
+            array.forEach(node -> consumer.accept(wrap(node)));
         }
 
         @Override

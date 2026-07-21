@@ -17,6 +17,8 @@
  */
 package top.nextdoc4j.core.json;
 
+import java.util.function.Consumer;
+
 /**
  * JSON 数组节点抽象。
  */
@@ -26,6 +28,12 @@ public interface DocArrayNode extends DocJsonNode {
      * 追加元素。
      */
     void add(DocJsonNode node);
+
+    /**
+     * 遍历数组元素。
+     */
+    default void forEachElement(Consumer<DocJsonNode> consumer) {
+    }
 
     /**
      * 数组是否为空。
