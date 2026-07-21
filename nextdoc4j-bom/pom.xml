@@ -7,6 +7,7 @@
     <!--
       独立 BOM：不继承根 POM，避免把 Boot / Cloud / springdoc 等编译基线带入消费者。
       仍作为根 reactor 的 <module> 参与构建；版本与根 revision 对齐（见 properties / .mvn/maven.config）。
+      因无 parent，发布相关元数据与 -Prelease 插件需在本 POM 自洽配置（与根 POM 保持一致）。
     -->
     <groupId>top.nextdoc4j</groupId>
     <artifactId>nextdoc4j-bom</artifactId>
@@ -14,40 +15,18 @@
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
     <description>nextdoc4j 统一 BOM（仅管理 top.nextdoc4j 自身模块版本，不管理 Spring Boot / Cloud / springdoc）</description>
-    <url>https://github.com/NextDoc4j/nextdoc4j</url>
 
     <properties>
         <!-- 与根 pom 的 revision 保持一致；可用 .mvn/maven.config -Drevision=… 单源覆盖 -->
         <revision>1.4.1-SNAPSHOT</revision>
-        <flatten-maven-plugin.version>1.7.3</flatten-maven-plugin.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- 以下版本与根 POM 对齐，便于独立模块发布到 Central -->
+        <flatten-maven-plugin.version>1.7.3</flatten-maven-plugin.version>
+        <maven-source-plugin.version>3.4.0</maven-source-plugin.version>
+        <maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
+        <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
+        <central-publishing-maven-plugin.version>0.11.0</central-publishing-maven-plugin.version>
     </properties>
-
-    <licenses>
-        <license>
-            <name>Apache License, Version 2.0</name>
-            <url>https://www.apache.org/licenses/LICENSE-2.0</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
-    <developers>
-        <developer>
-            <id>nextdoc4j</id>
-            <name>echo</name>
-            <email>nextdoc4j@163.com</email>
-            <roles>
-                <role>developer</role>
-                <role>maintainer</role>
-            </roles>
-            <timezone>+8</timezone>
-            <url>https://github.com/Time-w</url>
-        </developer>
-    </developers>
-    <scm>
-        <connection>scm:git:https://github.com/NextDoc4j/nextdoc4j.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/nextdoc4j/nextdoc4j.git</developerConnection>
-        <url>https://github.com/NextDoc4j/nextdoc4j</url>
-    </scm>
 
     <dependencyManagement>
         <dependencies>
@@ -166,4 +145,95 @@
             </plugin>
         </plugins>
     </build>
+
+    <!-- 与根 POM 对齐：独立模块无法继承根 release profile，在本模块直接声明一套（版本只写一次） -->
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>${maven-source-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>${maven-javadoc-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>${maven-gpg-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>${central-publishing-maven-plugin.version}</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>central</publishingServerId>
+                            <autoPublish>false</autoPublish>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+    <!-- 与根 POM 发布元数据一致（Central 校验需要） -->
+    <url>https://github.com/NextDoc4j/nextdoc4j</url>
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <id>nextdoc4j</id>
+            <name>echo</name>
+            <email>nextdoc4j@163.com</email>
+            <roles>
+                <role>developer</role>
+                <role>maintainer</role>
+            </roles>
+            <timezone>+8</timezone>
+            <url>https://github.com/Time-w</url>
+        </developer>
+    </developers>
+    <scm>
+        <connection>scm:git:https://github.com/NextDoc4j/nextdoc4j.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/nextdoc4j/nextdoc4j.git</developerConnection>
+        <url>https://github.com/NextDoc4j/nextdoc4j</url>
+    </scm>
 </project>
