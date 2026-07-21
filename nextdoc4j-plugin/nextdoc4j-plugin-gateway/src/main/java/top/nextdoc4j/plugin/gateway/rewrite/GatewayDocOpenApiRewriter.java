@@ -73,14 +73,14 @@ public class GatewayDocOpenApiRewriter {
      * 是否为 swagger-config 请求。
      */
     public boolean isSwaggerConfig(String path) {
-        return StringUtils.hasText(path) && path.endsWith(GatewayMetadataConstants.SWAGGER_CONFIG_SUFFIX);
+        return StringUtils.hasText(path) && path.endsWith(resolveDocPath() + "/swagger-config");
     }
 
     /**
      * 是否需要改写 OpenAPI 响应。
      */
     public boolean shouldRewrite(String path) {
-        return StringUtils.hasText(path) && path.contains(GatewayMetadataConstants.API_DOCS_PATH);
+        return StringUtils.hasText(path) && path.contains(resolveDocPath());
     }
 
     /**
@@ -96,7 +96,11 @@ public class GatewayDocOpenApiRewriter {
             if (objectNode == null) {
                 return sourceBody;
             }
-            rewriteApiDocs(path, objectNode);
+            if (isSwaggerConfig(path)) {
+                rewriteSwaggerConfig(path, objectNode);
+            } else {
+                rewriteApiDocs(path, objectNode);
+            }
             return jsonMapper.writeValueAsString(objectNode);
         } catch (Exception e) {
             return sourceBody;
@@ -110,6 +114,68 @@ public class GatewayDocOpenApiRewriter {
         List<String> globalRequirementSchemes = mergeGlobalSecuritySchemes(root);
         rewriteOperationSecurity(path, root, globalRequirementSchemes);
         rewriteServers(path, root);
+    }
+
+    /**
+     * 将子服务 swagger-config 中已包含网关服务前缀的分组地址转换为服务相对地址。
+     *
+     * @param path swagger-config 请求路径
+     * @param root swagger-config 根对象
+     */
+    private void rewriteSwaggerConfig(String path, DocObjectNode root) {
+        String servicePrefix = resolveServicePrefix(path);
+        if (!StringUtils.hasText(servicePrefix)) {
+            return;
+        }
+
+        DocJsonNode urlsNode = root.get("urls");
+        DocArrayNode urls = urlsNode != null ? urlsNode.asArray() : null;
+        if (urls == null || urls.isEmptyArray()) {
+            return;
+        }
+
+        String prefixedDocPath = servicePrefix + resolveDocPath();
+        urls.forEachElement(node -> {
+            DocObjectNode urlNode = node != null ? node.asObject() : null;
+            if (urlNode == null) {
+                return;
+            }
+            DocJsonNode valueNode = urlNode.get("url");
+            String value = valueNode != null ? valueNode.asText() : null;
+            if (!StringUtils.hasText(value) || !value.startsWith(prefixedDocPath)) {
+                return;
+            }
+            urlNode.put("url", value.substring(servicePrefix.length()));
+        });
+    }
+
+    /**
+     * 从子服务文档请求路径中提取网关外部服务前缀。
+     *
+     * @param path 子服务文档或 swagger-config 请求路径
+     * @return 文档路径之前的网关服务前缀；网关自身文档请求返回空字符串
+     */
+    private String resolveServicePrefix(String path) {
+        if (!StringUtils.hasText(path)) {
+            return "";
+        }
+        int docPathIndex = path.indexOf(resolveDocPath());
+        if (docPathIndex <= 0) {
+            return "";
+        }
+        return normalizePrefix(path.substring(0, docPathIndex));
+    }
+
+    /**
+     * 获取归一化后的微服务文档路径。
+     *
+     * @return 以斜杠开头且不以斜杠结尾的文档路径
+     */
+    private String resolveDocPath() {
+        String docPath = StringUtils.hasText(properties.getDocPath())
+            ? properties.getDocPath()
+            : GatewayMetadataConstants.API_DOCS_PATH;
+        return normalizePrefix(docPath);
     }
 
     /**
@@ -434,7 +500,7 @@ public class GatewayDocOpenApiRewriter {
      * 根据请求路径修正 servers.url。
      */
     private void rewriteServers(String path, DocObjectNode root) {
-        int apiDocsIndex = path.indexOf(GatewayMetadataConstants.API_DOCS_PATH);
+        int apiDocsIndex = path.indexOf(resolveDocPath());
         if (apiDocsIndex <= 0) {
             return;
         }

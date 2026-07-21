@@ -70,8 +70,6 @@ public class GatewayDocResponseRewriteFilter extends OncePerRequestFilter {
             if (customizer != null) {
                 customizer.refreshUrls();
             }
-            filterChain.doFilter(request, response);
-            return;
         }
 
         if (!rewriter.shouldRewrite(path)) {

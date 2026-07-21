@@ -64,14 +64,14 @@ public class GatewayDocResponseRewriteWebFilter implements WebFilter {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         String path = exchange.getRequest().getURI().getPath();
+        Mono<Void> refreshMono = Mono.empty();
         if (rewriter.isSwaggerConfig(path)) {
             GatewaySwaggerConfigCustomizer customizer = swaggerConfigCustomizerProvider.getIfAvailable();
-            Mono<Void> refreshMono = customizer != null ? customizer.refreshUrlsAsync() : Mono.empty();
-            return refreshMono.then(chain.filter(exchange));
+            refreshMono = customizer != null ? customizer.refreshUrlsAsync() : Mono.empty();
         }
 
         if (!rewriter.shouldRewrite(path)) {
-            return chain.filter(exchange);
+            return refreshMono.then(chain.filter(exchange));
         }
 
         ServerHttpResponse originalResponse = exchange.getResponse();
@@ -104,7 +104,7 @@ public class GatewayDocResponseRewriteWebFilter implements WebFilter {
             }
         };
 
-        return chain.filter(exchange.mutate().response(decoratedResponse).build());
+        return refreshMono.then(chain.filter(exchange.mutate().response(decoratedResponse).build()));
     }
 
     /**
