@@ -44,6 +44,8 @@ public class GatewayRouteDefinition implements Serializable {
 
     private List<GatewayPredicateDefinition> predicates = new ArrayList<>();
 
+    private List<GatewayFilterDefinition> filters = new ArrayList<>();
+
     public GatewayRouteDefinition() {
     }
 
@@ -87,5 +89,13 @@ public class GatewayRouteDefinition implements Serializable {
 
     public void setPredicates(List<GatewayPredicateDefinition> predicates) {
         this.predicates = predicates == null ? new ArrayList<>() : new ArrayList<>(predicates);
+    }
+
+    public List<GatewayFilterDefinition> getFilters() {
+        return filters;
+    }
+
+    public void setFilters(List<GatewayFilterDefinition> filters) {
+        this.filters = filters == null ? new ArrayList<>() : new ArrayList<>(filters);
     }
 }

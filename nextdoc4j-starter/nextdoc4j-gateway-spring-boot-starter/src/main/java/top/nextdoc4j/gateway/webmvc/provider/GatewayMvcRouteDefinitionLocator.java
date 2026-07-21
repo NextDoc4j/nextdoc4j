@@ -18,10 +18,12 @@
 package top.nextdoc4j.gateway.webmvc.provider;
 
 import org.springframework.cloud.gateway.server.mvc.config.GatewayMvcProperties;
+import org.springframework.cloud.gateway.server.mvc.config.FilterProperties;
 import org.springframework.cloud.gateway.server.mvc.config.PredicateProperties;
 import org.springframework.cloud.gateway.server.mvc.config.RouteProperties;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import top.nextdoc4j.plugin.gateway.model.GatewayFilterDefinition;
 import top.nextdoc4j.plugin.gateway.model.GatewayPredicateDefinition;
 import top.nextdoc4j.plugin.gateway.model.GatewayRouteDefinition;
 import top.nextdoc4j.plugin.gateway.provider.NextDoc4jGatewayRouteDefinitionLocator;
@@ -93,6 +95,7 @@ public class GatewayMvcRouteDefinitionLocator implements NextDoc4jGatewayRouteDe
             ? routeProperties.getPredicates()
             : null);
         routeDefinition.setPredicates(predicates);
+        routeDefinition.setFilters(convertFilters(routeProperties != null ? routeProperties.getFilters() : null));
         return routeDefinition;
     }
 
@@ -123,6 +126,30 @@ public class GatewayMvcRouteDefinitionLocator implements NextDoc4jGatewayRouteDe
             predicateDefinitions.add(predicateDefinition);
         }
         return predicateDefinitions;
+    }
+
+    /**
+     * 将 Gateway MVC 过滤器配置列表转为中立过滤器定义。
+     *
+     * @param filterPropertiesList Gateway MVC 过滤器属性列表，可为 {@code null}/空
+     * @return 中立过滤器列表；输入为空时返回空列表
+     */
+    private List<GatewayFilterDefinition> convertFilters(List<FilterProperties> filterPropertiesList) {
+        if (CollectionUtils.isEmpty(filterPropertiesList)) {
+            return Collections.emptyList();
+        }
+
+        List<GatewayFilterDefinition> filterDefinitions = new ArrayList<>();
+        for (FilterProperties filterProperties : filterPropertiesList) {
+            if (filterProperties == null || !StringUtils.hasText(filterProperties.getName())) {
+                continue;
+            }
+            GatewayFilterDefinition filterDefinition = new GatewayFilterDefinition();
+            filterDefinition.setName(filterProperties.getName());
+            filterDefinition.setArgs(filterProperties.getArgs());
+            filterDefinitions.add(filterDefinition);
+        }
+        return filterDefinitions;
     }
 
     /**

@@ -17,9 +17,11 @@
  */
 package top.nextdoc4j.gateway.webflux.provider;
 
+import org.springframework.cloud.gateway.filter.FilterDefinition;
 import org.springframework.cloud.gateway.handler.predicate.PredicateDefinition;
 import org.springframework.cloud.gateway.route.RouteDefinition;
 import org.springframework.cloud.gateway.route.RouteDefinitionLocator;
+import top.nextdoc4j.plugin.gateway.model.GatewayFilterDefinition;
 import top.nextdoc4j.plugin.gateway.model.GatewayPredicateDefinition;
 import top.nextdoc4j.plugin.gateway.model.GatewayRouteDefinition;
 import top.nextdoc4j.plugin.gateway.provider.NextDoc4jGatewayRouteDefinitionLocator;
@@ -66,11 +68,27 @@ public class SpringCloudRouteDefinitionLocatorAdapter implements NextDoc4jGatewa
         target.setPredicates(source.getPredicates() == null
             ? Collections.emptyList()
             : source.getPredicates().stream().map(this::convertPredicate).toList());
+        target.setFilters(source.getFilters() == null
+            ? Collections.emptyList()
+            : source.getFilters().stream().map(this::convertFilter).toList());
         return target;
     }
 
     private GatewayPredicateDefinition convertPredicate(PredicateDefinition source) {
         GatewayPredicateDefinition target = new GatewayPredicateDefinition();
+        target.setName(source.getName());
+        target.setArgs(source.getArgs() == null ? Collections.emptyMap() : new LinkedHashMap<>(source.getArgs()));
+        return target;
+    }
+
+    /**
+     * 将 Spring Cloud Gateway 过滤器转换为中立过滤器定义。
+     *
+     * @param source Spring Cloud Gateway 过滤器定义
+     * @return NextDoc4j 中立过滤器定义
+     */
+    private GatewayFilterDefinition convertFilter(FilterDefinition source) {
+        GatewayFilterDefinition target = new GatewayFilterDefinition();
         target.setName(source.getName());
         target.setArgs(source.getArgs() == null ? Collections.emptyMap() : new LinkedHashMap<>(source.getArgs()));
         return target;

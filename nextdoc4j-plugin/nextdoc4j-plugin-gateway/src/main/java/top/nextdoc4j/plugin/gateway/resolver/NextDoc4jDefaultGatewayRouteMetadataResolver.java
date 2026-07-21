@@ -22,6 +22,7 @@ import top.nextdoc4j.core.gateway.enums.DocPathStrategy;
 import top.nextdoc4j.core.gateway.enums.NameResolveStrategy;
 import top.nextdoc4j.plugin.gateway.configuration.GatewayDocProperties;
 import top.nextdoc4j.plugin.gateway.constant.GatewayMetadataConstants;
+import top.nextdoc4j.plugin.gateway.model.GatewayFilterDefinition;
 import top.nextdoc4j.plugin.gateway.model.GatewayRouteDefinition;
 
 import java.util.Map;
@@ -151,8 +152,120 @@ public class NextDoc4jDefaultGatewayRouteMetadataResolver implements NextDoc4jGa
                 }
                 return path;
             })
-            .map(contextPath -> appendPathSegments(contextPath, serviceContextPath, properties.getDocPath()))
+            .map(routePrefix -> resolveRoutePredicateDocPath(route, routePrefix, serviceContextPath))
             .orElse(null);
+    }
+
+    /**
+     * 根据路由前缀、StripPrefix 和服务 context-path 推导网关外部文档路径。
+     *
+     * @param route              网关路由定义
+     * @param routePrefix        Path 谓词提取出的静态路由前缀
+     * @param serviceContextPath 下游服务 context-path
+     * @return 浏览器通过网关访问的文档路径
+     */
+    private String resolveRoutePredicateDocPath(GatewayRouteDefinition route,
+                                                String routePrefix,
+                                                String serviceContextPath) {
+        Integer stripPrefixParts = resolveStripPrefixParts(route);
+        if (stripPrefixParts == null) {
+            return appendPathSegments(mergeRoutePrefixAndContextPath(routePrefix, serviceContextPath), properties
+                .getDocPath());
+        }
+
+        String removedPrefix = extractLeadingPathSegments(routePrefix, stripPrefixParts);
+        String candidate = appendPathSegments(removedPrefix, serviceContextPath, properties.getDocPath());
+        if (matchesRoutePrefix(candidate, routePrefix)) {
+            return candidate;
+        }
+        return appendPathSegments(mergeRoutePrefixAndContextPath(routePrefix, serviceContextPath), properties
+            .getDocPath());
+    }
+
+    /**
+     * 从路由过滤器中解析 StripPrefix 的 parts 参数。
+     *
+     * @param route 网关路由定义
+     * @return 非负 parts；未配置或配置非法时返回 {@code null}
+     */
+    private Integer resolveStripPrefixParts(GatewayRouteDefinition route) {
+        if (route == null || route.getFilters() == null) {
+            return null;
+        }
+        for (GatewayFilterDefinition filter : route.getFilters()) {
+            if (filter == null || !"StripPrefix".equalsIgnoreCase(filter.getName()) || filter.getArgs() == null) {
+                continue;
+            }
+            String value = filter.getArgs().get("parts");
+            if (!StringUtils.hasText(value)) {
+                value = filter.getArgs().get("_genkey_0");
+            }
+            if (!StringUtils.hasText(value) && !filter.getArgs().isEmpty()) {
+                value = filter.getArgs().values().iterator().next();
+            }
+            try {
+                int parts = Integer.parseInt(value);
+                return parts >= 0 ? parts : null;
+            } catch (Exception ignored) {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 提取路径开头指定数量的路径段，用于还原 StripPrefix 删除的网关外部前缀。
+     *
+     * @param path  路由静态前缀
+     * @param count 需要提取的路径段数量
+     * @return 提取后的路径前缀；数量为零时返回空字符串
+     */
+    private String extractLeadingPathSegments(String path, int count) {
+        if (count <= 0 || !StringUtils.hasText(path)) {
+            return "";
+        }
+        String normalizedPath = appendPathSegments(path);
+        String[] segments = normalizedPath.substring(1).split("/");
+        int segmentCount = Math.min(count, segments.length);
+        StringBuilder prefix = new StringBuilder();
+        for (int index = 0; index < segmentCount; index++) {
+            prefix.append('/').append(segments[index]);
+        }
+        return prefix.toString();
+    }
+
+    /**
+     * 合并路由前缀与服务 context-path，并避免相同路径被重复追加。
+     *
+     * @param routePrefix        网关 Path 谓词前缀
+     * @param serviceContextPath 下游服务 context-path
+     * @return 合并后的外部服务路径前缀
+     */
+    private String mergeRoutePrefixAndContextPath(String routePrefix, String serviceContextPath) {
+        String normalizedRoutePrefix = appendPathSegments(routePrefix);
+        if (!StringUtils.hasText(serviceContextPath)) {
+            return normalizedRoutePrefix;
+        }
+        String normalizedContextPath = appendPathSegments(serviceContextPath);
+        if (normalizedRoutePrefix.equals(normalizedContextPath) || normalizedRoutePrefix
+            .endsWith(normalizedContextPath)) {
+            return normalizedRoutePrefix;
+        }
+        return appendPathSegments(normalizedRoutePrefix, normalizedContextPath);
+    }
+
+    /**
+     * 判断候选文档路径是否仍位于 Path 谓词的静态路由前缀下。
+     *
+     * @param candidate   候选网关外部文档路径
+     * @param routePrefix Path 谓词静态前缀
+     * @return 候选路径匹配路由前缀时返回 {@code true}
+     */
+    private boolean matchesRoutePrefix(String candidate, String routePrefix) {
+        String normalizedCandidate = appendPathSegments(candidate);
+        String normalizedRoutePrefix = appendPathSegments(routePrefix);
+        return normalizedCandidate.equals(normalizedRoutePrefix) || normalizedCandidate
+            .startsWith(normalizedRoutePrefix + "/");
     }
 
     /**
