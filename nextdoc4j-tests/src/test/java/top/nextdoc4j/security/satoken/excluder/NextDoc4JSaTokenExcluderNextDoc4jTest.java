@@ -111,6 +111,58 @@ class NextDoc4JSaTokenExcluderNextDoc4jTest {
         }
     }
 
+    @Test
+    void multipleHandlerMappings_collectsExcludedPaths() {
+        try (AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext()) {
+            context.setServletContext(new MockServletContext());
+            context.register(TestWebConfig.class);
+            context.refresh();
+
+            RequestMappingHandlerMapping applicationMapping = context.getBean(RequestMappingHandlerMapping.class);
+            RequestMappingHandlerMapping actuatorMapping = new RequestMappingHandlerMapping();
+            ObjectProvider<RequestMappingHandlerMapping> provider = new ObjectProvider<>() {
+                @Override
+                public RequestMappingHandlerMapping getObject() {
+                    return applicationMapping;
+                }
+
+                @Override
+                public RequestMappingHandlerMapping getObject(Object... args) {
+                    return applicationMapping;
+                }
+
+                @Override
+                public RequestMappingHandlerMapping getIfAvailable() {
+                    throw new AssertionError("multiple mappings must not use getIfAvailable()");
+                }
+
+                @Override
+                public RequestMappingHandlerMapping getIfUnique() {
+                    return null;
+                }
+
+                @Override
+                public Stream<RequestMappingHandlerMapping> stream() {
+                    return Stream.of(applicationMapping, actuatorMapping);
+                }
+
+                @Override
+                public Stream<RequestMappingHandlerMapping> orderedStream() {
+                    return Stream.of(applicationMapping, actuatorMapping);
+                }
+            };
+
+            NextDoc4JSaTokenExcluderNextDoc4j excluder = new NextDoc4JSaTokenExcluderNextDoc4j(
+                provider);
+            Set<String> paths = excluder.getExcludedPaths();
+
+            assertTrue(paths.stream().anyMatch(p -> p.contains("ignored-login") || p.contains("/ignored-login")),
+                "expected /ignored-login pattern in " + paths);
+            assertTrue(paths.stream().noneMatch(p -> p.contains("secured")),
+                "non-ignore endpoints must not be excluded: " + paths);
+        }
+    }
+
     @Configuration
     @EnableWebMvc
     static class TestWebConfig {
