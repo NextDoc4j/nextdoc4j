@@ -14,7 +14,7 @@
     </description>
 
     <properties>
-        <revision>1.4.0</revision>
+        <revision>1.4.1</revision>
         <java.version>17</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>

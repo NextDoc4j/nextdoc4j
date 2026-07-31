@@ -18,7 +18,7 @@
 
     <properties>
         <!-- 与根 pom 的 revision 保持一致；可用 .mvn/maven.config -Drevision=… 单源覆盖 -->
-        <revision>1.4.0</revision>
+        <revision>1.4.1</revision>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- 以下版本与根 POM 对齐，便于独立模块发布到 Central -->
         <flatten-maven-plugin.version>1.7.3</flatten-maven-plugin.version>
