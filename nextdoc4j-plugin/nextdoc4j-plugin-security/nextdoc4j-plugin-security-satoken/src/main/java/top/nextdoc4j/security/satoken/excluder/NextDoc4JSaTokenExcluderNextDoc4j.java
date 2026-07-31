@@ -48,22 +48,21 @@ public class NextDoc4JSaTokenExcluderNextDoc4j implements NextDoc4jPathExcluder 
     @Override
     public Set<String> getExcludedPaths() {
         Set<String> paths = new HashSet<>();
-        RequestMappingHandlerMapping handlerMapping = handlerMappingProvider == null ? null
-            : handlerMappingProvider.getIfAvailable();
-        if (handlerMapping == null) {
+        if (handlerMappingProvider == null) {
             return paths;
         }
 
-        Map<RequestMappingInfo, HandlerMethod> handlerMethods = handlerMapping.getHandlerMethods();
-
-        handlerMethods.forEach((info, method) -> {
-            if (method.hasMethodAnnotation(NextDoc4jSaTokenConstant.SA_IGNORE_CLASS) || method.getBeanType()
-                .isAnnotationPresent(NextDoc4jSaTokenConstant.SA_IGNORE_CLASS)) {
-                Set<String> patterns = info.getPatternValues();
-                if (!patterns.isEmpty()) {
-                    paths.addAll(patterns);
+        handlerMappingProvider.stream().forEach(handlerMapping -> {
+            Map<RequestMappingInfo, HandlerMethod> handlerMethods = handlerMapping.getHandlerMethods();
+            handlerMethods.forEach((info, method) -> {
+                if (method.hasMethodAnnotation(NextDoc4jSaTokenConstant.SA_IGNORE_CLASS) || method.getBeanType()
+                    .isAnnotationPresent(NextDoc4jSaTokenConstant.SA_IGNORE_CLASS)) {
+                    Set<String> patterns = info.getPatternValues();
+                    if (!patterns.isEmpty()) {
+                        paths.addAll(patterns);
+                    }
                 }
-            }
+            });
         });
 
         return paths;
