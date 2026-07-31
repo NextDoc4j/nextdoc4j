@@ -20,11 +20,11 @@
 
 ## 📦 代码仓库
 
-| 平台      | 仓库地址                                                                             |
-|---------|----------------------------------------------------------------------------------|
-| GitCode | [https://gitcode.com/NextDoc4j/nextdoc4j](https://gitcode.com/NextDoc4j/nextdoc4j)       |
-| Gitee   | [https://gitee.com/nextdoc4j/nextdoc4j](https://gitee.com/nextdoc4j/nextdoc4j)   |
-| GitHub  | [https://github.com/NextDoc4j/nextdoc4j](https://github.com/NextDoc4j/nextdoc4j) |
+| 平台      | 仓库地址                                                                               |
+|---------|------------------------------------------------------------------------------------|
+| GitCode | [https://gitcode.com/NextDoc4j/nextdoc4j](https://gitcode.com/NextDoc4j/nextdoc4j) |
+| Gitee   | [https://gitee.com/nextdoc4j/nextdoc4j](https://gitee.com/nextdoc4j/nextdoc4j)     |
+| GitHub  | [https://github.com/NextDoc4j/nextdoc4j](https://github.com/NextDoc4j/nextdoc4j)   |
 
 
 ## 📖 项目简介
