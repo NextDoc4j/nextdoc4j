@@ -11,7 +11,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>nextdoc4j-plugin-security-parent</artifactId>
+    <artifactId>nextdoc4j-plugin-security</artifactId>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
     <description>nextdoc4j 安全插件聚合</description>
