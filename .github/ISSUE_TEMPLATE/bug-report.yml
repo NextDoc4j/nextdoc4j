@@ -1,54 +1,94 @@
 name: 🐞 Bug 报告
-description: 报告 NextDoc4j 中的缺陷
+description: 报告可复现的功能缺陷或兼容性问题
 title: "[Bug]: "
-labels: ["bug"]
+labels:
+  - bug
 body:
   - type: markdown
     attributes:
       value: |
-        感谢你报告问题
-        请尽量提供 **完整上下文**，包括 SpringDoc / OpenAPI JSON 和报错信息，方便我们重现。
+        感谢反馈问题。请先搜索已有 Issue，避免重复提交。
+        安全漏洞请按照 [SECURITY.md](../../SECURITY.md) 私下报告，不要公开填写在这里。
+  - type: dropdown
+    id: module
+    attributes:
+      label: 涉及模块
+      description: 请选择问题最主要涉及的模块。
+      options:
+        - 后端 nextdoc4j
+        - 前端 nextdoc4j-ui
+        - 官网 nextdoc4j-doc
+        - 集成示例 nextdoc4j-demo
+        - 集中测试 nextdoc4j-tests
+        - 发布脚本 release
+        - 不确定
+    validations:
+      required: true
   - type: input
     id: version
     attributes:
       label: NextDoc4j 版本
-      description: 你使用的 NextDoc4j 版本号
-      placeholder: e.g. v1.2.0
+      description: 请填写 Maven 版本、Git Tag 或提交 SHA。
+      placeholder: 例如 1.5.0、v1.5.0 或 abc1234
+    validations:
+      required: true
+  - type: input
+    id: runtime
+    attributes:
+      label: 运行环境
+      description: 请填写 Java、Spring Boot、SpringDoc、Node.js 或浏览器版本等相关信息。
+      placeholder: 例如 JDK 17、Spring Boot 3.5.x、Chrome 140
     validations:
       required: true
   - type: textarea
     id: reproduce
     attributes:
       label: 复现步骤
-      description: 请描述触发 bug 的操作步骤
-      placeholder: 1. 打开页面 ... 2. 点击 ... 3. 出现错误 ...
+      description: 请按顺序描述可以稳定复现问题的最小步骤。
+      placeholder: |
+        1. 配置 ...
+        2. 启动 ...
+        3. 访问 ...
+        4. 执行 ...
     validations:
       required: true
   - type: textarea
     id: expected
     attributes:
       label: 预期行为
-      description: 你本来期望的结果
+      description: 你原本期望看到什么结果？
     validations:
       required: true
   - type: textarea
     id: actual
     attributes:
       label: 实际行为
-      description: 实际发生了什么
+      description: 实际发生了什么？请描述页面、接口或构建输出的差异。
     validations:
       required: true
   - type: textarea
-    id: openapi-json
+    id: openapi
     attributes:
-      label: SpringDoc / OpenAPI JSON
-      description: 请附上出问题时使用的 **完整 OpenAPI JSON** 或至少是相关片段
+      label: OpenAPI 文档
+      description: 如果问题与接口文档有关，请提供脱敏后的 OpenAPI JSON 或最小片段。
       render: json
-    validations:
-      required: true
   - type: textarea
     id: logs
     attributes:
-      label: 浏览器/控制台报错信息
-      description: 请粘贴报错内容（浏览器控制台、后端日志等）
+      label: 日志和错误信息
+      description: 请粘贴浏览器控制台、后端日志或构建日志，并删除密码、令牌和个人信息。
       render: shell
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: 最小复现项目
+      description: 如果可以，请提供仓库链接、分支或可复现代码。不要上传真实业务数据。
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: 提交前确认
+      options:
+        - label: 我已经搜索过现有 Issue，确认不是重复问题。
+          required: true
+        - label: 我已经删除了密码、令牌和其他敏感信息。
+          required: true

@@ -1,12 +1,8 @@
 blank_issues_enabled: false
-
-issue_templates:
-  - name: 🐞 Bug 报告
-    description: 报告 NextDoc4j 中的缺陷
-    labels: ["bug"]
-    file: ISSUE_TEMPLATE/bug-report.yml
-
-  - name: ✨ 功能请求
-    description: 提出新功能或改进建议
-    labels: ["enhancement"]
-    file: ISSUE_TEMPLATE/feature-request.yml
+contact_links:
+  - name: 安全漏洞报告
+    url: https://github.com/NextDoc4j/nextdoc4j/security/advisories/new
+    about: 请不要公开提交安全漏洞，优先使用私下报告渠道。
+  - name: 使用问题和讨论
+    url: https://github.com/NextDoc4j/nextdoc4j/discussions
+    about: 一般使用问题、方案讨论和经验交流请发起 Discussion。

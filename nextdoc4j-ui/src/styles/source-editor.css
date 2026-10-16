@@ -1,0 +1,1613 @@
+/* NextDoc4j Modern Unified JSON Theme (Light & Dark)
+ * High-Contrast Typography, Solid Tree-Branch Indent Guides with Elbow Hooks (└─),
+ * Inline Fold Chevron Buttons (left of brackets), Long String Truncation, and Rich Enum Metadata
+ */
+:root {
+  --cm-primary: #0969da;
+  --cm-primary-light: #e0f2fe;
+}
+
+html.dark {
+  --cm-primary: #58a6ff;
+  --cm-primary-light: #0c2642;
+}
+
+.source-editor {
+  /* Theme tokens: Light */
+  --cm-bg: #ffffff;
+  --cm-text: #1e293b;
+  --cm-cursor: #000000;
+  --cm-active-line: rgba(9, 105, 218, 0.04);
+  --cm-selection: rgba(9, 105, 218, 0.18);
+  --cm-gutter-bg: #f8fafc;
+  --cm-gutter-text: #94a3b8;
+  --cm-gutter-active: #0969da;
+
+  --cm-key: #0969da; /* Crisp Sapphire Blue */
+  --cm-string: var(--type-string-text); /* Vivid Emerald Green */
+  --cm-number: var(--type-number-text); /* Warm Amber Bronze */
+  --cm-boolean: var(--type-bool-text); /* Refined Violet */
+  --cm-null: #be123c; /* Muted Rose */
+  --cm-punctuation: #64748b; /* Clean Slate */
+
+  /* Indent Guides & Paired Scope (Solid, Crisp - Pure Grayscale, No Colors) */
+  --cm-guide: #e2e8f0; /* Subtle Gray Line */
+  --cm-guide-active: #94a3b8; /* Balanced Soft Gray when active/hovered (pure neutral, gentle) */
+  --cm-match-bg: rgba(148, 163, 184, 0.15);
+  --cm-match-border: #94a3b8;
+
+  /* Descriptions & Annotations */
+  --cm-desc-text: #64748b;
+  --cm-desc-slash: #94a3b8;
+  --cm-desc-bg: #f1f5f9;
+  --cm-desc-tag-bg: #e0f2fe;
+  --cm-desc-tag-text: #0369a1;
+
+  --cm-primary: #0969da;
+  --cm-primary-light: #e0f2fe;
+  --cm-border: #e2e8f0;
+  --cm-border-hover: #cbd5e1;
+
+  --cm-line-padding-left: 20px;
+  --cm-line-padding-right: 8px;
+
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  color: var(--cm-text);
+  background: transparent !important;
+  font-family: var(--font-mono);
+  font-feature-settings:
+    'calt' 1,
+    'liga' 1;
+  font-size: 12.5px;
+  line-height: 1.7;
+  border-radius: 0;
+  position: relative;
+}
+
+html.dark .source-editor {
+  /* Theme tokens: Dark */
+  --cm-bg: #161f2e;
+  --cm-text: #f0f6fc;
+  --cm-cursor: #ffffff;
+  --cm-active-line: rgba(88, 166, 255, 0.05);
+  --cm-selection: rgba(88, 166, 255, 0.25);
+  --cm-gutter-bg: var(--cm-bg);
+  --cm-gutter-text: #768390;
+  --cm-gutter-active: #58a6ff;
+
+  --cm-key: #79c0ff; /* Sky Ice Blue */
+  --cm-string: var(--type-string-text); /* Fresh Mint Green */
+  --cm-number: var(--type-number-text); /* Soft Warm Amber */
+  --cm-boolean: var(--type-bool-text); /* Lavender Purple */
+  --cm-null: #ff7b72; /* Coral Pink */
+  --cm-punctuation: #8b949e; /* Neutral Slate Gray */
+
+  /* Indent Guides & Paired Scope (Solid, Crisp - Pure Grayscale, No Colors) */
+  --cm-guide: #27354a; /* Dim Dark Gray Line */
+  --cm-guide-active: #64748b; /* Balanced Soft Slate Line when active/hovered (pure neutral, gentle) */
+  --cm-match-bg: rgba(255, 255, 255, 0.12);
+  --cm-match-border: #94a3b8;
+
+  /* Descriptions & Annotations */
+  --cm-desc-text: #94a3b8;
+  --cm-desc-slash: #484f58;
+  --cm-desc-bg: #161f2e;
+  --cm-desc-tag-bg: #0c2642;
+  --cm-desc-tag-text: #7dd3fc;
+
+  --cm-primary: #58a6ff;
+  --cm-primary-light: #0c2642;
+  --cm-border: #27354a;
+  --cm-border-hover: #3b4d66;
+}
+
+.source-editor__host {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* CodeMirror 6 Custom Styles */
+.source-editor .cm-editor {
+  flex: 1;
+  min-height: 0;
+  background: transparent !important;
+  color: var(--cm-text) !important;
+  font-family: inherit !important;
+  font-size: inherit !important;
+  line-height: inherit !important;
+}
+
+.source-editor .cm-editor.cm-focused {
+  outline: none !important;
+}
+
+.source-editor .cm-scroller {
+  font-family: inherit !important;
+  line-height: inherit !important;
+}
+
+.source-editor .cm-content {
+  min-height: 0;
+  padding: 8px 0 !important;
+  caret-color: var(--cm-cursor) !important;
+}
+
+.source-editor .cm-cursor,
+.source-editor .cm-dropCursor,
+.source-editor .cm-cursorLayer .cm-cursor,
+.source-editor.cm-focused .cm-cursor,
+.source-editor .cm-editor.cm-focused .cm-cursor {
+  border-left-color: var(--cm-cursor) !important;
+}
+
+.source-editor .cm-line {
+  padding: 3px var(--cm-line-padding-right, 8px) 3px var(--cm-line-padding-left, 20px) !important;
+  transition: background-color 0.12s ease;
+  position: relative;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.source-editor .cm-line.cm-wrapped-indent {
+  padding-left: calc(var(--cm-line-padding-left, 20px) + var(--cm-indent-cols, 0) * 1ch) !important;
+  text-indent: calc(-1 * var(--cm-indent-cols, 0) * 1ch) !important;
+}
+
+/* Foldable lines that open a block have their wrapped annotations start further right to never collide with child indent guides */
+.source-editor .cm-line.cm-foldable-line.cm-wrapped-indent {
+  padding-left: calc(
+    var(--cm-line-padding-left, 20px) + (var(--cm-indent-cols, 0) + 4) * 1ch
+  ) !important;
+  text-indent: calc(-1 * (var(--cm-indent-cols, 0) + 4) * 1ch) !important;
+}
+
+/* Prevent text-indent from being inherited by child widgets and tokens */
+.source-editor .cm-line * {
+  text-indent: 0 !important;
+}
+
+/* Active Line Highlight */
+.source-editor .cm-activeLine {
+  background-color: var(--cm-active-line) !important;
+}
+
+.source-editor .cm-activeLineGutter {
+  background-color: var(--cm-active-line) !important;
+  color: var(--cm-gutter-active) !important;
+  font-weight: 700 !important;
+}
+
+/* Row Hover Highlight */
+.source-editor .cm-line.cm-active-hover-line {
+  background-color: transparent !important;
+  border-radius: 4px;
+}
+
+.source-editor .cm-json-hover-layer {
+  pointer-events: none;
+}
+
+.source-editor .cm-json-hover-background {
+  border-radius: 4px;
+  background-color: var(--cm-active-line);
+  pointer-events: none;
+  transition:
+    top 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    left 220ms ease,
+    width 220ms ease,
+    height 220ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .source-editor .cm-json-hover-background {
+    transition: none;
+  }
+}
+
+/* Line Numbers */
+.source-editor .cm-gutters {
+  background-color: var(--cm-gutter-bg) !important;
+  color: var(--cm-gutter-text) !important;
+  border-right: 1px solid var(--cm-border) !important;
+  font-size: 11px !important;
+  font-family: inherit;
+  user-select: none;
+}
+
+.source-editor .cm-gutterElement {
+  padding: 0 8px 0 6px !important;
+  min-width: 30px !important;
+  text-align: right !important;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+/* 2. Inline Fold Button - Zero-width anchor positioned cleanly before field name or bracket */
+.cm-inline-fold-anchor {
+  display: inline-block;
+  width: 0;
+  height: 1em;
+  position: relative;
+  vertical-align: middle;
+  user-select: none;
+  pointer-events: none;
+  z-index: 20 !important;
+}
+
+.cm-inline-fold-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  right: calc(1ch - 4px);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
+  line-height: 1;
+  padding: 0;
+  margin: 0;
+  border: 1px solid var(--cm-border);
+  background-color: var(--cm-bg) !important;
+  color: var(--cm-desc-text);
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.15s ease;
+  user-select: none;
+  pointer-events: auto;
+  z-index: 20 !important;
+  box-sizing: border-box;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.cm-inline-fold-btn:hover {
+  color: var(--cm-primary) !important;
+  border-color: var(--cm-primary) !important;
+  background-color: var(--cm-primary-light) !important;
+}
+
+.cm-inline-fold-btn svg {
+  width: 8.5px;
+  height: 8.5px;
+  transition: transform 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+}
+
+.cm-inline-fold-btn.is-open svg {
+  transform: rotate(90deg); /* Points down when unfolded */
+}
+
+.cm-inline-fold-btn.is-closed svg {
+  transform: rotate(0deg); /* Points right when folded */
+}
+
+/* Selection */
+.source-editor .cm-selectionBackground,
+.source-editor .cm-editor.cm-focused .cm-selectionBackground,
+.source-editor .cm-content ::selection {
+  background: var(--cm-selection) !important;
+}
+
+/* 1. 100% Seamless Continuous Solid Vertical Indent Guides with Elbow Hooks (└─) */
+.cm-indent-guide {
+  position: static;
+  display: inline;
+}
+
+/* Normal Vertical Guide Line */
+.cm-indent-guide::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--cm-line-padding-left, 20px) + (var(--cm-guide-col, 2) - 3) * 1ch - 2px);
+  width: 1px;
+  background-color: var(--cm-guide);
+  pointer-events: none;
+  z-index: 10 !important;
+  transition: background-color 0.12s ease;
+}
+
+/* Normal Elbow Hook (L-shape corner └─ connecting directly into closing bracket) */
+.cm-indent-guide.is-elbow::before {
+  bottom: auto !important;
+  top: 0 !important;
+  height: 50% !important;
+  width: calc(1ch + 3px) !important;
+  background-color: transparent !important;
+  border-left: 1px solid var(--cm-guide) !important;
+  border-bottom: 1px solid var(--cm-guide) !important;
+  border-bottom-left-radius: 3px !important;
+  border-top: none !important;
+  border-right: none !important;
+  z-index: 10 !important;
+}
+
+/* Paired scopes keep the same 1px geometry and highlight only through color. */
+.cm-indent-guide.is-paired::before {
+  background-color: var(--cm-guide-active) !important;
+  width: 1px !important;
+  z-index: 11 !important;
+}
+
+.cm-indent-guide.is-elbow.is-paired::before {
+  width: calc(1ch + 3px) !important;
+  background-color: transparent !important;
+  border-left: 1px solid var(--cm-guide-active) !important;
+  border-bottom: 1px solid var(--cm-guide-active) !important;
+  z-index: 11 !important;
+}
+
+/* Start Guide (extends child vertical guide down through any wrapped annotations) */
+.cm-indent-guide.is-start::before {
+  top: 14px !important;
+  bottom: 0 !important;
+  width: 1px !important;
+  background-color: var(--cm-guide) !important;
+  z-index: 10 !important;
+}
+
+.cm-indent-guide.is-start.is-paired::before {
+  width: 1px !important;
+  background-color: var(--cm-guide-active) !important;
+  z-index: 11 !important;
+}
+
+/* Brackets share the guide colors without changing their geometry on hover. */
+.source-editor .cm-token-bracket {
+  color: var(--cm-guide) !important;
+  transition: color 0.12s ease;
+}
+
+.source-editor .cm-bracket-paired,
+.source-editor .cm-matchingBracket {
+  color: var(--cm-guide-active) !important;
+  background: transparent !important;
+  outline: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.source-editor .cm-bracket-paired .cm-token-bracket,
+.source-editor .cm-matchingBracket .cm-token-bracket {
+  color: var(--cm-guide-active) !important;
+}
+
+/* High-Contrast Token Colors */
+.cm-token-key,
+.source-editor__key {
+  color: var(--cm-key) !important;
+  font-weight: 600;
+  cursor: inherit;
+  transition: opacity 0.1s ease;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.cm-token-string,
+.source-editor__string {
+  color: var(--cm-string) !important;
+}
+
+.cm-token-number,
+.source-editor__number {
+  color: var(--cm-number) !important;
+}
+
+.cm-token-boolean,
+.source-editor__boolean {
+  color: var(--cm-boolean) !important;
+  font-weight: 600;
+}
+
+.cm-token-null,
+.source-editor__null {
+  color: var(--cm-null) !important;
+  font-weight: 600;
+}
+
+.cm-token-punctuation,
+.source-editor__punctuation {
+  color: var(--cm-punctuation) !important;
+}
+
+.source-editor__comment {
+  color: var(--cm-desc-text) !important;
+}
+
+/* 2. Long String Truncation & Toggle Button */
+.cm-long-string-box {
+  display: inline-flex !important;
+  align-items: center !important;
+  vertical-align: middle !important;
+  white-space: nowrap !important;
+  word-break: keep-all !important;
+  flex-shrink: 0 !important;
+  position: relative !important;
+  top: -1.2px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Base64 Image Preview Chip (Icon-only) */
+.cm-base64-chip {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 18px !important;
+  height: 18px !important;
+  padding: 0 !important;
+  margin: 0 4px 0 0 !important;
+  border-radius: 4px !important;
+  background: var(--cm-desc-tag-bg, rgba(9, 105, 218, 0.08)) !important;
+  border: 1px solid var(--cm-match-border, rgba(9, 105, 218, 0.22)) !important;
+  color: var(--cm-primary, #0969da) !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  vertical-align: middle !important;
+  transition: all 0.15s ease !important;
+  box-sizing: border-box !important;
+}
+
+.cm-base64-chip:hover {
+  background: var(--cm-primary, #0969da) !important;
+  color: #ffffff !important;
+  border-color: var(--cm-primary, #0969da) !important;
+  box-shadow: 0 1px 4px rgba(9, 105, 218, 0.28) !important;
+}
+
+.cm-base64-chip svg {
+  flex-shrink: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Floating Hover Card for Base64 Image Preview */
+.cm-base64-hover-card {
+  position: fixed;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow:
+    0 10px 25px -5px rgba(0, 0, 0, 0.2),
+    0 4px 10px -2px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  pointer-events: none;
+  animation: cmBase64HoverFadeIn 0.12s ease-out;
+  max-width: 230px;
+}
+
+html.dark .cm-base64-hover-card {
+  background: #1e2530;
+  border-color: #334155;
+  box-shadow:
+    0 10px 25px -5px rgba(0, 0, 0, 0.5),
+    0 4px 10px -2px rgba(0, 0, 0, 0.25);
+}
+
+@keyframes cmBase64HoverFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.cm-base64-hover-card__preview {
+  width: 100%;
+  min-height: 60px;
+  max-height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  background-color: #f8fafc;
+  background-image:
+    linear-gradient(45deg, #e2e8f0 25%, transparent 25%),
+    linear-gradient(-45deg, #e2e8f0 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #e2e8f0 75%),
+    linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);
+  background-size: 16px 16px;
+  background-position:
+    0 0,
+    0 8px,
+    8px -8px,
+    -8px 0px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+html.dark .cm-base64-hover-card__preview {
+  background-color: #0f172a;
+  background-image:
+    linear-gradient(45deg, #1e293b 25%, transparent 25%),
+    linear-gradient(-45deg, #1e293b 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #1e293b 75%),
+    linear-gradient(-45deg, transparent 75%, #1e293b 75%);
+}
+
+.cm-base64-hover-card__preview img {
+  max-width: 100%;
+  max-height: 120px;
+  object-fit: contain;
+  border-radius: 3px;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.15));
+}
+
+.cm-base64-hover-card__footer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  background: #f1f5f9;
+  border-top: 1px solid #e2e8f0;
+  font-size: 11px;
+}
+
+html.dark .cm-base64-hover-card__footer {
+  background: #161e2b;
+  border-top-color: #334155;
+}
+
+.cm-base64-hover-card__tag {
+  font-weight: 600;
+  font-size: 10px;
+  color: #0969da;
+  background: #e0f2fe;
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+html.dark .cm-base64-hover-card__tag {
+  color: #7dd3fc;
+  background: #0c2642;
+}
+
+.cm-base64-hover-card__meta {
+  font-size: 10.5px;
+  color: #64748b;
+  font-family: var(--font-mono);
+}
+
+html.dark .cm-base64-hover-card__meta {
+  color: #94a3b8;
+}
+
+.cm-base64-hover-card__hint {
+  margin-left: auto;
+  font-size: 10px;
+  color: #94a3b8;
+}
+
+html.dark .cm-base64-hover-card__hint {
+  color: #64748b;
+}
+
+.cm-long-string-truncated {
+  color: var(--cm-string);
+  cursor: pointer;
+  white-space: nowrap !important;
+  word-break: keep-all !important;
+  user-select: text;
+  transition: opacity 0.15s ease;
+}
+
+.cm-long-string-truncated:hover {
+  opacity: 0.82;
+}
+
+.cm-long-string-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  position: relative;
+  top: -1.2px;
+  width: 14px;
+  height: 14px;
+  line-height: 1;
+  padding: 0;
+  margin: 0 4px;
+  border: none;
+  background: transparent;
+  color: var(--cm-gutter-text);
+  cursor: pointer;
+  border-radius: 3px;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
+  user-select: none;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.cm-long-string-box .cm-long-string-toggle {
+  top: 0 !important;
+  margin: 0 0 0 4px !important;
+}
+
+.cm-long-string-toggle:hover {
+  color: var(--cm-primary) !important;
+  background-color: var(--cm-primary-light) !important;
+}
+
+.cm-long-string-toggle svg {
+  transition: transform 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+}
+
+.cm-long-string-toggle.is-collapsed svg {
+  transform: rotate(0deg); /* Points right > when folded/collapsed */
+}
+
+.cm-long-string-toggle.is-expanded svg {
+  transform: rotate(90deg); /* Points down v when expanded */
+}
+
+/* 3. Description Annotations (Capsule / Pill Badge for Response & Request) */
+.cm-inline-desc {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  margin-left: 8px !important;
+  margin-top: 2px !important;
+  margin-bottom: 2px !important;
+  padding: 0 6px !important;
+  height: 19px !important;
+  box-sizing: border-box !important;
+  border-radius: 4px !important;
+  background: rgba(148, 163, 184, 0.08) !important;
+  border: 0 !important;
+  font-size: 10.5px !important;
+  line-height: 17px !important;
+  color: var(--cm-desc-text) !important;
+  user-select: none !important;
+  font-family: var(--font-sans) !important;
+  vertical-align: middle !important;
+  transition: all 0.15s ease !important;
+  white-space: nowrap !important;
+  max-width: min(320px, calc(100% - 16px)) !important;
+  overflow: hidden !important;
+  flex-shrink: 1 !important;
+  text-indent: 0 !important;
+  position: relative !important;
+  z-index: 1 !important;
+  cursor: default !important;
+}
+
+.cm-inline-desc:hover {
+  background: rgba(148, 163, 184, 0.14) !important;
+}
+
+html.dark .cm-inline-desc {
+  background: transparent !important;
+}
+
+html.dark .cm-inline-desc:hover {
+  background: transparent !important;
+}
+
+.cm-inline-desc-type {
+  display: inline-block !important;
+  font-weight: 600 !important;
+  font-size: 10px !important;
+  font-family: var(--font-mono) !important;
+  text-indent: 0 !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 13px;
+  letter-spacing: 0.2px !important;
+}
+
+.cm-inline-desc-text {
+  display: inline-block !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  max-width: 220px !important;
+  min-width: 0 !important;
+  color: var(--cm-desc-text) !important;
+  text-indent: 0 !important;
+  flex: 1 1 auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Enum Trigger Button in Line Annotations */
+.cm-enum-trigger-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 2px !important;
+  margin: 0 !important;
+  padding: 0 5px !important;
+  height: 15px !important;
+  box-sizing: border-box !important;
+  border-radius: 3px !important;
+  background: var(--cm-primary-light) !important;
+  border: 1px solid var(--cm-border) !important;
+  font-size: 10px !important;
+  line-height: 13px !important;
+  color: var(--cm-primary) !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  user-select: none !important;
+  font-family: var(--font-sans) !important;
+  text-indent: 0 !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  vertical-align: middle !important;
+}
+
+.cm-enum-trigger-btn:hover {
+  filter: brightness(0.92);
+  border-color: var(--cm-primary) !important;
+}
+
+html.dark .cm-enum-trigger-btn:hover {
+  filter: brightness(1.15);
+  border-color: var(--cm-primary) !important;
+}
+
+/* 4. Sleek Fold Placeholder Pill */
+.source-editor .cm-foldPlaceholder {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 5px !important;
+  height: 16px !important;
+  line-height: 14px !important;
+  font-size: 11px !important;
+  font-family: var(--font-mono) !important;
+  color: var(--cm-desc-text) !important;
+  background: rgba(148, 163, 184, 0.14) !important;
+  border: 1px solid var(--cm-border) !important;
+  border-radius: 3px !important;
+  margin: 0 3px !important;
+  cursor: pointer !important;
+  vertical-align: middle !important;
+  transition: all 0.15s ease !important;
+  user-select: none !important;
+  letter-spacing: 0.5px !important;
+}
+
+.source-editor .cm-foldPlaceholder:hover {
+  color: var(--cm-primary) !important;
+  border-color: var(--cm-primary) !important;
+  background: var(--cm-primary-light) !important;
+}
+
+html.dark .source-editor .cm-foldPlaceholder {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: var(--cm-border) !important;
+  color: var(--cm-desc-text) !important;
+}
+
+html.dark .source-editor .cm-foldPlaceholder:hover {
+  color: var(--cm-primary) !important;
+  border-color: var(--cm-primary) !important;
+  background: var(--cm-primary-light) !important;
+}
+
+/* Floating Field Hover Tooltip */
+.source-editor-field-tooltip {
+  position: fixed;
+  z-index: 1000;
+  background: var(--cm-bg);
+  border: 1px solid var(--cm-border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  box-shadow:
+    0 10px 25px -5px rgba(0, 0, 0, 0.15),
+    0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  font-size: 12px;
+  max-width: 380px;
+  pointer-events: none;
+  animation: cmFadeIn 0.15s ease;
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  color: var(--cm-text);
+}
+
+html.dark .source-editor-field-tooltip {
+  box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.6);
+}
+
+@keyframes cmFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.source-editor-field-tooltip__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  gap: 8px;
+}
+
+.source-editor-field-tooltip__title {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--cm-key);
+  font-family: var(--font-mono);
+}
+
+.source-editor-field-tooltip__badges {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.source-editor-field-tooltip__type {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+}
+
+.source-editor-field-tooltip__required {
+  font-size: 10px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+html.dark .source-editor-field-tooltip__required {
+  background: #450a0a;
+  color: #fca5a5;
+}
+
+.source-editor-field-tooltip__optional {
+  font-size: 10px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--cm-desc-bg);
+  color: var(--cm-desc-text);
+}
+
+.source-editor-field-tooltip__desc {
+  color: var(--cm-text);
+  margin-bottom: 8px;
+  line-height: 1.45;
+}
+
+.source-editor-field-tooltip__enums {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--cm-border);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.source-editor-field-tooltip__enums-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--cm-desc-text);
+  margin-bottom: 2px;
+}
+
+.source-editor-field-tooltip__enum-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 11px;
+}
+
+.source-editor-field-tooltip__enum-row code {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--cm-string);
+}
+
+.source-editor-field-tooltip__enum-row span {
+  color: var(--cm-desc-text);
+}
+
+.source-editor-field-tooltip__enum-row.is-current {
+  font-weight: 700;
+  color: var(--cm-primary);
+}
+
+.source-editor-field-tooltip__extra {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--cm-border);
+  font-size: 10.5px;
+  color: var(--cm-desc-text);
+}
+
+.source-editor-field-tooltip__extra code {
+  font-family: var(--font-mono);
+  color: var(--cm-primary);
+}
+
+/* Floating Anchored Enum Popover (Compact 220px width, No selected highlight) */
+.cm-enum-popover {
+  position: fixed;
+  z-index: 99999;
+  width: 220px;
+  max-width: calc(100vw - 32px);
+  background: #ffffff;
+  background: var(--ui-surface, #ffffff);
+  border: 1px solid var(--ui-line, #e2e8f0);
+  border-radius: 6px;
+  box-shadow:
+    0 10px 25px -4px rgba(15, 23, 42, 0.15),
+    0 4px 10px -2px rgba(15, 23, 42, 0.06);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  color: var(--ui-text, #1e293b);
+  font-family: var(--font-sans);
+  animation: cmPopoverIn 0.14s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html.dark .cm-enum-popover {
+  background: #141d2b !important;
+  border-color: #2a3b53 !important;
+  box-shadow:
+    0 16px 36px -4px rgba(0, 0, 0, 0.65),
+    0 6px 14px -2px rgba(0, 0, 0, 0.4) !important;
+  color: #f0f6fc !important;
+}
+
+@keyframes cmPopoverIn {
+  from {
+    opacity: 0;
+    transform: translateY(-3px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.cm-enum-popover__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 10px;
+  background: rgba(15, 23, 42, 0.02);
+  border-bottom: 1px solid var(--ui-line, #e2e8f0);
+}
+
+html.dark .cm-enum-popover__header {
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom-color: #243348;
+}
+
+.cm-enum-popover__title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ui-text, #0f172a);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+}
+
+html.dark .cm-enum-popover__title {
+  color: #f0f6fc;
+}
+
+.cm-enum-popover__name,
+.cm-enum-popover__title > span:first-child {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cm-enum-popover__count {
+  font-size: 10px;
+  padding: 0 5px;
+  background: #e0f2fe;
+  color: #0369a1;
+  border-radius: 4px;
+  font-weight: 600;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+html.dark .cm-enum-popover__count {
+  background: #0c2642;
+  color: #7dd3fc;
+}
+
+.cm-enum-popover__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--ui-muted, #94a3b8);
+  font-size: 12px;
+  line-height: 1;
+  padding: 0;
+  border-radius: 4px;
+  transition: all 0.12s ease;
+  flex-shrink: 0;
+}
+
+.cm-enum-popover__close:hover {
+  color: var(--ui-text, #0f172a);
+  background: rgba(15, 23, 42, 0.08);
+}
+
+html.dark .cm-enum-popover__close:hover {
+  color: #f0f6fc;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.cm-enum-popover__path {
+  padding: 4px 10px;
+  font-size: 10.5px;
+  color: var(--ui-muted, #64748b);
+  background: rgba(15, 23, 42, 0.015);
+  border-bottom: 1px solid var(--ui-line, #e2e8f0);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+html.dark .cm-enum-popover__path {
+  background: rgba(0, 0, 0, 0.15);
+  border-bottom-color: #243348;
+  color: #94a3b8;
+}
+
+.cm-enum-popover__path code {
+  font-family: var(--font-mono);
+  color: #0969da;
+  font-weight: 600;
+}
+
+html.dark .cm-enum-popover__path code {
+  color: #79c0ff;
+}
+
+.cm-enum-popover__list {
+  padding: 6px 8px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  max-height: 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cm-enum-popover__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 8px;
+  border-radius: 4px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  font-size: 11.5px;
+  transition: all 0.12s ease;
+}
+
+html.dark .cm-enum-popover__item {
+  background: #182335;
+  border-color: #273951;
+}
+
+.cm-enum-popover__item-val-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  width: 100%;
+}
+
+.cm-enum-popover__item-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11.5px;
+  color: var(--ui-text, #334155);
+}
+
+html.dark .cm-enum-popover__item-label {
+  color: #e2e8f0;
+}
+
+.cm-enum-popover__item-code {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 11.5px;
+  color: #0969da;
+}
+
+html.dark .cm-enum-popover__item-code {
+  color: #79c0ff;
+}
+
+.cm-enum-popover__item-tag {
+  font-size: 9.5px;
+  font-weight: 600;
+  padding: 0 4px;
+  background: rgba(148, 163, 184, 0.16);
+  color: #64748b;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+html.dark .cm-enum-popover__item-tag {
+  background: rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+}
+
+/* Inline enum picker; decoration only, never part of the JSON source. */
+.source-editor .cm-enum-picker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  margin: 0 2px 0 3px;
+  padding: 0;
+  vertical-align: -2px;
+  color: var(--ui-muted);
+  background: var(--ui-soft);
+  border: 1px solid var(--ui-line);
+  border-radius: 3px;
+  cursor: pointer;
+  opacity: 0.75;
+  transition: all 0.14s ease;
+}
+
+.source-editor .cm-enum-picker:hover,
+.source-editor .cm-enum-picker:focus-visible {
+  opacity: 1;
+  color: var(--cm-primary);
+  background: var(--ui-soft);
+  border-color: var(--cm-primary);
+  outline: none;
+}
+
+/* Enum completion menu uses the exact same surface and elevation as select-menu. */
+.source-editor .cm-tooltip.cm-tooltip-autocomplete.source-editor__completions {
+  width: max-content;
+  min-width: min(140px, calc(100vw - 32px));
+  max-width: min(280px, calc(100vw - 32px));
+  padding: 0;
+  color: var(--ui-text);
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-line);
+  border-radius: 7px;
+  overflow: hidden;
+  font: 12px/1.5 var(--font-sans, system-ui, -apple-system, sans-serif);
+  box-shadow:
+    0 10px 24px rgb(15 23 42 / 12%),
+    0 2px 6px rgb(15 23 42 / 6%);
+  animation: cm-enum-menu-enter 0.14s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+html.dark .source-editor .cm-tooltip.cm-tooltip-autocomplete.source-editor__completions {
+  box-shadow:
+    0 14px 28px rgb(0 0 0 / 28%),
+    0 3px 8px rgb(0 0 0 / 16%),
+    inset 0 1px 0 rgb(255 255 255 / 4%);
+}
+
+.source-editor .cm-tooltip.cm-tooltip-autocomplete.source-editor__completions > ul {
+  min-width: 0;
+  max-width: 100%;
+  max-height: 220px;
+  height: auto;
+  padding: 3px;
+  margin: 0;
+  box-sizing: border-box;
+  white-space: normal;
+  font: inherit;
+  list-style: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+.source-editor
+  .cm-tooltip.cm-tooltip-autocomplete.source-editor__completions
+  .source-editor__enum-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  position: sticky;
+  top: -3px;
+  z-index: 2;
+  margin: -3px -3px 3px;
+  padding: 5px 8px;
+  color: var(--ui-muted);
+  background: var(--ui-soft);
+  border-bottom: 1px solid var(--ui-line);
+  line-height: 1.4;
+  user-select: none;
+}
+
+.source-editor__enum-heading-title {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.source-editor__enum-type {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 5px;
+  border-radius: 3px;
+  font: 9.5px/1.4 var(--font-mono);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.source-editor .cm-tooltip.cm-tooltip-autocomplete.source-editor__completions ul > li {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  min-height: 26px;
+  padding: 4px 6px;
+  margin: 1px 0;
+  border-radius: 4px;
+  line-height: 1.45;
+  white-space: normal;
+  cursor: pointer;
+  transition:
+    color 0.12s ease,
+    background-color 0.12s ease;
+}
+
+.source-editor .cm-tooltip.cm-tooltip-autocomplete.source-editor__completions ul > li:hover {
+  color: var(--ui-text);
+  background: var(--ui-soft);
+}
+
+.source-editor
+  .cm-tooltip.cm-tooltip-autocomplete.source-editor__completions
+  ul
+  > li[aria-selected='true'] {
+  color: var(--cm-primary);
+  background: var(--cm-primary-light, color-mix(in srgb, var(--cm-primary) 12%, var(--ui-surface)));
+}
+
+.source-editor .source-editor__completions .cm-completionLabel {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  max-width: 60%;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--cm-primary);
+  background: color-mix(in srgb, var(--cm-primary) 10%, transparent);
+  padding: 0 4px;
+  border-radius: 3px;
+  line-height: 1.45;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+}
+
+.source-editor .source-editor__completions .cm-completionLabel:only-child,
+.source-editor
+  .source-editor__completions
+  ul
+  > li:not(:has(.cm-completionDetail))
+  .cm-completionLabel {
+  max-width: 100%;
+}
+
+.source-editor
+  .cm-tooltip.cm-tooltip-autocomplete.source-editor__completions
+  ul
+  > li:hover
+  .cm-completionLabel,
+.source-editor
+  .cm-tooltip.cm-tooltip-autocomplete.source-editor__completions
+  ul
+  > li[aria-selected='true']
+  .cm-completionLabel {
+  color: var(--cm-primary);
+  background: color-mix(in srgb, var(--cm-primary) 18%, transparent);
+}
+
+.source-editor__enum-separator {
+  flex: 0 0 auto;
+  color: var(--ui-muted);
+  font-size: 11.5px;
+  line-height: 1.45;
+  user-select: none;
+}
+
+.source-editor .source-editor__completions .cm-completionDetail {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin-left: 0;
+  text-align: left;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  color: var(--ui-muted);
+  font-size: 11.5px;
+  font-style: normal;
+  line-height: 1.45;
+}
+
+.source-editor
+  .cm-tooltip.cm-tooltip-autocomplete.source-editor__completions
+  ul
+  > li[aria-selected='true']
+  .cm-completionDetail {
+  color: var(--cm-primary);
+  opacity: 0.9;
+}
+
+@keyframes cm-enum-menu-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-3px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Compact JSON presentation shared by examples, editable bodies and live responses. */
+.source-editor.source-editor--json {
+  font-size: 12px;
+  line-height: 20px;
+  --cm-line-padding-right: 32px;
+  --cm-desc-text: #8492a7;
+}
+html.dark .source-editor.source-editor--json {
+  --cm-desc-text: #8b9bb1;
+}
+.source-editor--json .cm-line {
+  padding-top: 2px !important;
+  padding-bottom: 2px !important;
+}
+.source-editor--json .cm-line.cm-foldable-line.cm-wrapped-indent {
+  padding-left: calc(var(--cm-line-padding-left, 20px) + var(--cm-indent-cols, 0) * 1ch) !important;
+  text-indent: calc(-1 * var(--cm-indent-cols, 0) * 1ch) !important;
+}
+.source-editor--json .cm-inline-fold-btn {
+  /* Match the demo hit area while keeping its center on the existing guide. */
+  right: calc(1ch - 8px);
+  border: 0;
+  background: transparent !important;
+  box-shadow: none;
+  width: 19px;
+  height: 20px;
+  color: #7f90aa;
+  border-radius: 3px;
+}
+.source-editor--json .cm-inline-fold-btn:hover {
+  background: transparent !important;
+}
+.source-editor--json .cm-inline-fold-btn svg {
+  width: 11px;
+  height: 11px;
+  transition: transform 0.15s;
+}
+.source-editor--json .cm-inline-desc,
+.source-editor--json .cm-inline-desc:hover {
+  display: inline !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  height: auto !important;
+  max-width: none !important;
+  overflow: visible !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  font: 11px/20px var(--font-mono) !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  vertical-align: baseline !important;
+}
+.source-editor--json .cm-inline-desc-type,
+.source-editor--json .cm-inline-desc-text {
+  display: inline !important;
+  font: inherit !important;
+  color: var(--cm-desc-text) !important;
+  max-width: none !important;
+  overflow: visible !important;
+  white-space: normal !important;
+  border: 0 !important;
+  background: transparent !important;
+  letter-spacing: 0 !important;
+}
+.source-editor--json .cm-enum-trigger-btn {
+  padding: 0 3px !important;
+  margin-left: 2px !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--cm-desc-text) !important;
+  height: 18px !important;
+  font-weight: normal !important;
+}
+.source-editor--json .cm-enum-trigger-btn:hover {
+  color: var(--cm-primary) !important;
+}
+.source-editor--json .cm-json-count {
+  color: var(--cm-desc-text);
+  font: 10px/20px var(--font-mono);
+  margin: 0 7px;
+  user-select: none;
+  white-space: nowrap;
+  text-indent: 0;
+}
+.source-editor--json .cm-json-copy-anchor {
+  display: inline;
+  width: 0;
+}
+.source-editor--json .cm-json-node-copy {
+  position: absolute;
+  right: 4px;
+  top: 2px;
+  width: 24px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--cm-desc-text);
+  opacity: 0;
+  z-index: 15;
+  cursor: pointer;
+}
+.source-editor--json .cm-line:hover .cm-json-node-copy,
+.source-editor--json .cm-line:focus-within .cm-json-node-copy {
+  opacity: 1;
+}
+.source-editor--json .cm-json-node-copy:hover {
+  color: var(--cm-primary);
+  background: var(--cm-primary-light);
+}
+.source-editor--json .cm-indent-guide.is-elbow::before,
+.source-editor--json .cm-indent-guide.is-elbow.is-paired::before {
+  height: 12px !important;
+  width: 1ch !important;
+}
+.source-editor--json .cm-indent-guide.is-start::before {
+  /* Leave breathing room below the chevron instead of crossing its center. */
+  top: 22px !important;
+}
+.source-editor.source-editor--json .cm-foldPlaceholder,
+.source-editor.source-editor--json .cm-foldPlaceholder:hover,
+html.dark .source-editor.source-editor--json .cm-foldPlaceholder,
+html.dark .source-editor.source-editor--json .cm-foldPlaceholder:hover {
+  display: inline !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  margin: 0 7px !important;
+  height: auto !important;
+  line-height: inherit !important;
+  vertical-align: baseline !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  letter-spacing: 0 !important;
+}
+
+.json-description-toggle {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ui-muted, #8492a7);
+  cursor: pointer;
+}
+.json-description-toggle[aria-pressed='true'] {
+  color: var(--ui-primary, #386cf4);
+}
+.json-description-toggle:hover {
+  background: var(--ui-soft, #f1f5ff);
+}
+.json-node-copy-menu {
+  position: fixed;
+  z-index: 1200;
+  width: 220px;
+  padding: 6px;
+  border-radius: 8px;
+  border: 1px solid var(--ui-line, #e7ecf3);
+  background: var(--ui-surface, #fff);
+  color: var(--ui-text, #26364c);
+  box-shadow: 0 12px 32px rgb(23 43 77 / 18%);
+}
+.json-node-copy-menu__path {
+  padding: 8px;
+  color: var(--ui-muted, #8492a7);
+  font: 11px var(--font-mono);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.json-node-copy-menu button {
+  display: block;
+  width: 100%;
+  padding: 8px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  font-size: 12px;
+  cursor: pointer;
+}
+.json-node-copy-menu button:hover,
+.json-node-copy-menu button:focus-visible {
+  background: var(--ui-soft, #f1f5ff);
+}
+@media (hover: none) {
+  .source-editor--json .cm-json-node-copy {
+    opacity: 0.7;
+  }
+}
+
+/* Compact source may contain several nodes on one line; keep every action individually reachable. */
+.source-editor--json .cm-json-copy-anchor.is-inline {
+  display: inline-block;
+  position: relative;
+  width: 18px;
+  height: 20px;
+  vertical-align: middle;
+}
+.source-editor--json .cm-json-copy-anchor.is-inline .cm-json-node-copy {
+  position: static;
+  width: 18px;
+}
+.cm-enum-popover__item-val-box button.cm-enum-popover__item-label {
+  border: 0;
+  padding: 0;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}

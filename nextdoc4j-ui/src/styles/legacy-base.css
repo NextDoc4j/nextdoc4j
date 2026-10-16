@@ -1,0 +1,49 @@
+/* Legacy Vue layout fidelity: React data flow intentionally uses these original page proportions. */
+.legacy-home,
+.legacy-overview,
+.legacy-entity,
+.legacy-markdown,
+.legacy-auth,
+.legacy-config,
+.legacy-export,
+.legacy-operation {
+  --legacy-page: #f5f7fa;
+  --legacy-panel: #fff;
+  --legacy-line: #ebeef5;
+  --legacy-text: #303133;
+  --legacy-regular: #606266;
+  --legacy-muted: #909399;
+  --legacy-primary: #409eff;
+  --legacy-primary-light: #ecf5ff;
+  --legacy-shadow-sm: 0 1px 2px rgb(48 49 51 / 6%), 0 5px 18px rgb(48 49 51 / 4%);
+  color: var(--legacy-text);
+  background: var(--legacy-page);
+}
+
+.legacy-home button,
+.legacy-overview button,
+.legacy-entity button,
+.legacy-markdown button,
+.legacy-auth button,
+.legacy-config button,
+.legacy-operation button {
+  font: inherit;
+}
+
+html.dark .legacy-home,
+html.dark .legacy-overview,
+html.dark .legacy-entity,
+html.dark .legacy-markdown,
+html.dark .legacy-auth,
+html.dark .legacy-config,
+html.dark .legacy-export,
+html.dark .legacy-operation {
+  --legacy-page: #0f172a;
+  --legacy-panel: #111827;
+  --legacy-line: #263449;
+  --legacy-text: #e2e8f0;
+  --legacy-regular: #cbd5e1;
+  --legacy-muted: #94a3b8;
+  --legacy-primary-light: rgb(64 158 255 / 13%);
+  --legacy-shadow-sm: 0 1px 2px rgb(0 0 0 / 20%), 0 5px 18px rgb(0 0 0 / 16%);
+}

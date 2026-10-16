@@ -1,0 +1,54 @@
+{
+  "lastUpdate": 1792115880543,
+  "version": "1.0.0",
+  "members": [
+    {
+      "login": "wenjing_1129",
+      "name": "Duan",
+      "avatar_url": "https://foruda.gitee.com/avatar/1722476700398445801/7908429_wenjing_1129_1722476700.png",
+      "html_url": "https://gitee.com/wenjing_1129",
+      "bio": "",
+      "location": "浙江·杭州",
+      "blog": null,
+      "company": null,
+      "platform": "gitee",
+      "cached_at": 1792115878426,
+      "username": "wenjing_1129",
+      "role": "前端开发工程师",
+      "skills": [
+        "Vue.js",
+        "React",
+        "TypeScript",
+        "Node.js"
+      ],
+      "social": {
+        "github": "Mm-Dxx",
+        "gitee": "wenjing_1129"
+      }
+    },
+    {
+      "login": "dom-w",
+      "name": "liquor",
+      "avatar_url": "https://foruda.gitee.com/avatar/1712037917547786884/8010824_dom-w_1712037917.png",
+      "html_url": "https://gitee.com/dom-w",
+      "bio": "生活要乐，代码要美。",
+      "location": "浙江·杭州",
+      "blog": null,
+      "company": null,
+      "platform": "gitee",
+      "cached_at": 1792115879542,
+      "username": "dom-w",
+      "role": "后端开发工程师",
+      "skills": [
+        "Java",
+        "Spring Boot",
+        "Vue.js",
+        "MySQL"
+      ],
+      "social": {
+        "github": "Time-w",
+        "gitee": "dom-w"
+      }
+    }
+  ]
+}

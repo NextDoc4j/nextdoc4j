@@ -1,0 +1,371 @@
+/* Shared visual tokens copied from the approved tab-switcher demo. */
+:root {
+  --tab-track-bg: rgba(0, 0, 0, 0.045);
+  --tab-track-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.04), inset 0 1px 1.5px rgba(0, 0, 0, 0.035);
+  --tab-thumb-bg: #fff;
+  --tab-thumb-shadow:
+    0 0 0 0.5px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06),
+    0 3px 8px -1px rgba(0, 0, 0, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  --tab-active-text: #0f172a;
+  --tab-item-text: #475569;
+  --tab-hover-bg: rgba(0, 0, 0, 0.035);
+  --tab-spring: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --document-tab-bg: #eeede9;
+  --document-tab-shadow:
+    0 0 0 0.5px rgba(38, 119, 183, 0.25), 0 1px 3px rgba(30, 65, 105, 0.12), inset 0 1px 0 #fff;
+  --document-tab-text: #64748b;
+}
+html.dark {
+  --tab-track-bg: #1b1e21;
+  --tab-track-shadow:
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.06), inset 0 1px 2px rgba(0, 0, 0, 0.4);
+  --tab-thumb-bg: #32373c;
+  --tab-thumb-shadow: none;
+  --tab-active-text: #fff;
+  --tab-item-text: #94a3b8;
+  --tab-hover-bg: #25292d;
+  --document-tab-bg: #32373c;
+  --document-tab-shadow:
+    0 0 0 0.5px rgba(255, 255, 255, 0.08), 0 2px 8px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  --document-tab-text: #8090a1;
+}
+
+/* Existing role, value, option layout and callbacks stay owned by SegmentedControl. */
+:root .workspace-segmented[role] {
+  padding: 2.5px;
+  gap: 0;
+  border: 0;
+  border-radius: 8px;
+  background: var(--tab-track-bg);
+  box-shadow: var(--tab-track-shadow);
+  isolation: isolate;
+}
+:root .workspace-segmented > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: var(--workspace-segment-height, 30px);
+  padding-inline: var(--workspace-segment-padding-inline, 12px);
+  color: var(--tab-item-text);
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  font-size: var(--workspace-segment-font-size, 12.5px);
+  font-weight: 480;
+  letter-spacing: -0.1px;
+  z-index: 2;
+  transition:
+    color 0.14s ease,
+    transform 0.1s ease;
+}
+:root .workspace-segmented > .workspace-segmented__active {
+  color: var(--tab-active-text);
+  font-weight: 550;
+  background: transparent;
+  box-shadow: none;
+}
+:root .workspace-segmented > button:active {
+  transform: scale(0.975);
+}
+:root .workspace-segmented > button:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+  border-radius: 5px;
+}
+:root .workspace-segmented--vertical > button {
+  justify-content: flex-start;
+}
+
+/* Both layers share local scroll coordinates, so scroll never needs to change selection. */
+:root .workspace-segmented::before,
+:root .workspace-segmented::after,
+:root .workspace-tabs::before,
+:root .workspace-tabs::after {
+  content: '';
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: auto;
+  bottom: auto;
+  pointer-events: none;
+  border: 0;
+  border-radius: 6px;
+  transition: none;
+}
+:root .workspace-segmented::before,
+:root .workspace-tabs::before {
+  z-index: 1;
+  width: var(--tab-active-width, 0px);
+  height: var(--tab-active-height, 0px);
+  opacity: var(--tab-active-visible, 0);
+  transform: translate3d(var(--tab-active-x, 0px), var(--tab-active-y, 0px), 0);
+  background: var(--tab-thumb-bg);
+  box-shadow: var(--tab-thumb-shadow);
+}
+:root .workspace-segmented::after,
+:root .workspace-tabs::after {
+  z-index: 0;
+  width: var(--tab-hover-width, 0px);
+  height: var(--tab-hover-height, 0px);
+  opacity: var(--tab-hover-visible, 0);
+  transform: translate3d(var(--tab-hover-x, 0px), var(--tab-hover-y, 0px), 0);
+  background: var(--tab-hover-bg);
+  box-shadow: none;
+}
+:root [data-tab-motion-ready].workspace-segmented::before,
+:root [data-tab-motion-ready].workspace-tabs::before {
+  transition:
+    transform 250ms var(--tab-spring),
+    width 250ms var(--tab-spring),
+    height 250ms var(--tab-spring),
+    background-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+:root [data-tab-motion-ready].workspace-segmented::after,
+:root [data-tab-motion-ready].workspace-tabs::after {
+  transition:
+    transform 0.16s ease-out,
+    width 0.16s ease-out,
+    height 0.16s ease-out,
+    opacity 0.12s ease;
+}
+
+/* Workspace document actions remain separate buttons with their existing handlers. */
+:root .workspace-tabs {
+  position: relative !important;
+  isolation: isolate;
+  gap: 0 !important;
+  padding: 0 !important;
+}
+:root .workspace-tabs::before {
+  background: var(--document-tab-bg);
+  box-shadow: var(--document-tab-shadow);
+}
+:root .workspace-tabs .workspace-tab,
+:root .workspace-tabs .workspace-tab:hover,
+:root .workspace-tabs .workspace-tab.workspace-tab-active,
+:root .workspace-tabs .workspace-tab.workspace-tab-active:hover {
+  z-index: 2;
+  height: 32px !important;
+  padding: 0 10px !important;
+  gap: 7px !important;
+  border: 0 !important;
+  border-radius: 6px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--document-tab-text) !important;
+  transition:
+    color 0.14s ease,
+    transform 0.1s ease,
+    opacity 0.18s ease;
+}
+:root .workspace-tabs .workspace-tab.workspace-tab-active {
+  color: var(--tab-active-text) !important;
+}
+:root .workspace-tabs .workspace-tab:not(.workspace-tab-dragging):active {
+  transform: scale(0.975);
+}
+:root .workspace-tabs .workspace-tab .workspace-tab-method[class] {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  height: 16px;
+  padding: 0 5px !important;
+  line-height: 16px !important;
+}
+:root .workspace-tabs.workspace-tabs-dragging::before,
+:root .workspace-tabs.workspace-tabs-dragging::after {
+  opacity: 0;
+  transition: none;
+}
+:root .workspace-tabs .workspace-tab.workspace-tab-dragging {
+  opacity: 0.35 !important;
+  cursor: grabbing !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root [data-tab-motion-ready].workspace-segmented::before,
+  :root [data-tab-motion-ready].workspace-segmented::after,
+  :root [data-tab-motion-ready].workspace-tabs::before,
+  :root [data-tab-motion-ready].workspace-tabs::after,
+  :root .workspace-segmented > button,
+  :root .workspace-tabs .workspace-tab {
+    transition: none;
+  }
+  :root .workspace-segmented > button:active,
+  :root .workspace-tabs .workspace-tab:active {
+    transform: none;
+  }
+}
+
+/* Map the existing compact surfaces onto the demo's 24px size variant. */
+:root
+  .workspace-segmented:is(
+    .playground-panel__tabs,
+    .playground-response__format,
+    .playground-body-editor__types,
+    .playground-console-segment,
+    .operation-request__branch-switch,
+    .operation-response__statuses,
+    .operation-json__statuses,
+    .preferences-choice-control,
+    .auth-workspace__scheme-filters,
+    .workspace-segmented--config-parameters,
+    .workspace-segmented--config-scope,
+    .legacy-overview__filters
+  ) {
+  --workspace-segment-height: 24px;
+  --workspace-segment-font-size: 11.5px;
+  --workspace-segment-padding-inline: 9px;
+  padding: 2px;
+  border-radius: 7px;
+}
+:root
+  .workspace-segmented:is(
+    .playground-panel__tabs,
+    .playground-response__format,
+    .playground-body-editor__types,
+    .playground-console-segment,
+    .operation-request__branch-switch,
+    .operation-response__statuses,
+    .operation-json__statuses,
+    .preferences-choice-control,
+    .auth-workspace__scheme-filters,
+    .workspace-segmented--config-parameters,
+    .workspace-segmented--config-scope,
+    .legacy-overview__filters
+  )::before,
+:root
+  .workspace-segmented:is(
+    .playground-panel__tabs,
+    .playground-response__format,
+    .playground-body-editor__types,
+    .playground-console-segment,
+    .operation-request__branch-switch,
+    .operation-response__statuses,
+    .operation-json__statuses,
+    .preferences-choice-control,
+    .auth-workspace__scheme-filters,
+    .workspace-segmented--config-parameters,
+    .workspace-segmented--config-scope,
+    .legacy-overview__filters
+  )::after {
+  border-radius: 5px;
+}
+:root
+  .workspace-tabs
+  .workspace-tab:not(.workspace-tab-active)
+  .workspace-tab-method.bg-violet-100 {
+  color: #a86a1f !important;
+}
+html.dark
+  .workspace-tabs
+  .workspace-tab:not(.workspace-tab-active)
+  .workspace-tab-method.bg-violet-100 {
+  color: #fb923c !important;
+}
+:root .workspace-tabs .workspace-tab.workspace-tab-active .workspace-tab-method.bg-violet-100 {
+  background-color: #a86a1f !important;
+}
+
+:root .workspace-segmented.preferences-tabs__control {
+  --workspace-segment-height: 30px;
+  --workspace-segment-font-size: 12.5px;
+  --workspace-segment-padding-inline: 12px;
+}
+:root .workspace-segmented.workspace-segmented--vertical {
+  --workspace-segment-height: 36px;
+  --workspace-segment-font-size: 13.5px;
+  --workspace-segment-padding-inline: 16px;
+  padding: 3.5px;
+  border-radius: 10px;
+}
+:root .workspace-segmented.workspace-segmented--vertical::before,
+:root .workspace-segmented.workspace-segmented--vertical::after {
+  border-radius: 7px;
+}
+
+:root .workspace-segmented > button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+:root .workspace-segmented > button:disabled:active {
+  transform: none;
+}
+
+.workspace-tab-content > svg {
+  flex-shrink: 0;
+}
+
+/* Light selection backgrounds only; geometry, borders, shadows and dark colors stay unchanged. */
+html:not(.dark) .workspace-tabs {
+  --tab-hover-bg: #f6f6f3;
+}
+html:not(.dark) .auth-workspace__scheme-item:not(.is-active) {
+  background-color: #fff;
+}
+html:not(.dark) .auth-workspace__scheme-item:not(.is-active):hover {
+  background-color: #f6f6f3;
+}
+html:not(.dark) .auth-workspace__scheme-item.is-active {
+  background-color: transparent;
+}
+html:not(.dark) .auth-workspace__scheme-selection {
+  background-color: #f0efeb;
+}
+
+/* Dark selection backgrounds only; retain existing borders, shadows and animations. */
+html.dark .workspace-tabs {
+  --tab-hover-bg: #25292d;
+}
+html.dark .auth-workspace__scheme-item:not(.is-active) {
+  background-color: #1b1e21;
+}
+html.dark .auth-workspace__scheme-item:not(.is-active):hover {
+  background-color: #25292d;
+}
+html.dark .auth-workspace__scheme-item.is-active {
+  background-color: transparent;
+}
+html.dark .auth-workspace__scheme-selection {
+  background-color: #32373c;
+}
+
+/* Override legacy page backgrounds so every dark segmented track shares the same palette. */
+html.dark .workspace-segmented[role] {
+  background: var(--tab-track-bg) !important;
+}
+
+/* Auth selection keeps its existing geometry but no longer draws an outer highlight. */
+:root .auth-workspace__scheme-selection,
+html.dark .auth-workspace__scheme-selection {
+  border-color: transparent;
+  box-shadow: none;
+}
+:root .workspace-segmented.playground-body-editor__types {
+  margin: 14px 0 10px;
+  max-width: 100%;
+}
+
+/* Overview methods retain their semantic selection colors on the shared animated thumb. */
+.legacy-overview__filters.is-get {
+  --tab-thumb-bg: #23804e;
+}
+.legacy-overview__filters.is-post {
+  --tab-thumb-bg: #2677b7;
+}
+.legacy-overview__filters.is-put {
+  --tab-thumb-bg: #7254aa;
+}
+.legacy-overview__filters.is-delete {
+  --tab-thumb-bg: #b94e64;
+}
+.legacy-overview__filters.is-patch {
+  --tab-thumb-bg: #a86a1f;
+}
+.legacy-overview__filters:not(.is-all) {
+  --tab-active-text: #fff;
+}

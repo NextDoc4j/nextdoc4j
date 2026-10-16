@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>top.nextdoc4j</groupId>
+        <artifactId>nextdoc4j-demo-bom-sb4</artifactId>
+        <version>${revision}</version>
+        <relativePath>../nextdoc4j-demo-build/nextdoc4j-demo-bom-sb4/pom.xml</relativePath>
+    </parent>
+
+    <artifactId>nextdoc4j-demo-boot4</artifactId>
+    <packaging>pom</packaging>
+    <name>nextdoc4j-demo-boot4</name>
+    <description>Spring Boot 4 演示聚合模块（单体、微服务、网关）</description>
+
+    <modules>
+        <module>nextdoc4j-demo-boot4-monolith</module>
+        <module>nextdoc4j-demo-boot4-monolith-webflux</module>
+        <module>nextdoc4j-demo-boot4-service-user</module>
+        <module>nextdoc4j-demo-boot4-service-system</module>
+        <module>nextdoc4j-demo-boot4-service-file</module>
+        <module>nextdoc4j-demo-boot4-gateway-webflux</module>
+        <module>nextdoc4j-demo-boot4-gateway-webmvc</module>
+    </modules>
+
+</project>

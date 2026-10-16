@@ -8,6 +8,7 @@
         <groupId>top.nextdoc4j</groupId>
         <artifactId>nextdoc4j</artifactId>
         <version>${revision}</version>
+        <relativePath>../nextdoc4j/pom.xml</relativePath>
     </parent>
 
     <artifactId>nextdoc4j-tests</artifactId>

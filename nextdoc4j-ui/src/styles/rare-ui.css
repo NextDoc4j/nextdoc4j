@@ -1,0 +1,906 @@
+/* Adapted from Rare UI: https://rareui.com. Copyright (c) 2026 Swami Malode.
+ * MIT + Commons Clause + Attribution; src/components/rare-ui/LICENSE. */
+.rare-animated-counter {
+  height: 1.1em;
+  vertical-align: middle;
+}
+
+.rare-animated-counter [data-digit]::before {
+  content: attr(data-digit);
+}
+
+.rare-delete {
+  display: inline-flex;
+  flex: none;
+  vertical-align: middle;
+}
+
+.rare-delete .rare-delete-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 4px 8px;
+  color: var(--ui-danger);
+  font: inherit;
+  font-size: 12px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.rare-delete .rare-delete-trigger.is-compact {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+}
+
+.rare-delete .rare-delete-trigger:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--ui-danger) 9%, transparent);
+}
+
+.rare-delete-confirm {
+  position: fixed;
+  z-index: 120;
+  width: min(280px, calc(100vw - 24px));
+  padding: 14px;
+  color: var(--ui-text);
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-line);
+  border-radius: 10px;
+  box-shadow: 0 8px 28px rgb(15 23 42 / 18%);
+  font-size: 12px;
+  transform-origin: var(--rare-delete-arrow-left, 50%) bottom;
+}
+
+.rare-delete-confirm::after {
+  position: absolute;
+  left: var(--rare-delete-arrow-left, 50%);
+  bottom: -5px;
+  width: 9px;
+  height: 9px;
+  content: '';
+  background: var(--ui-surface);
+  border-right: 1px solid var(--ui-line);
+  border-bottom: 1px solid var(--ui-line);
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.rare-delete-confirm > strong {
+  font-size: 13px;
+}
+
+.rare-delete-confirm > p {
+  margin: 7px 0 12px;
+  color: var(--ui-muted);
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.rare-delete-confirm > .rare-delete-error {
+  color: var(--ui-danger);
+}
+
+.rare-delete-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.rare-delete-confirm-actions > button {
+  min-height: 28px;
+  padding: 4px 12px;
+  color: var(--ui-text);
+  background: var(--ui-soft);
+  border: 1px solid var(--ui-line);
+  border-radius: 6px;
+}
+
+.rare-delete-confirm-actions > .is-danger {
+  color: var(--ui-danger);
+  border-color: color-mix(in srgb, var(--ui-danger) 35%, var(--ui-line));
+}
+
+.rare-delete :is(button):disabled,
+.rare-delete-confirm button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+:is(.rare-delete, .rare-delete-confirm) button:focus-visible {
+  outline: 2px solid var(--ui-primary);
+  outline-offset: 2px;
+}
+
+.rare-folder-paper,
+.rare-folder-flap {
+  transform-box: fill-box;
+  transform-origin: bottom center;
+  transition: transform 0.2s ease;
+}
+
+.legacy-home__entry:is(:hover, :focus-visible) .rare-folder-paper {
+  transform: translateY(-24px) rotate(-5deg);
+}
+
+.legacy-home__entry:is(:hover, :focus-visible) .rare-folder-flap {
+  transform: scaleY(0.85);
+}
+
+.markdown-content [data-slot='code-block'] {
+  margin: 12px 0;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.markdown-content [data-slot='code-block'] pre {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  color: inherit;
+}
+
+.markdown-content [data-slot='code-block'] code {
+  padding: 0;
+  background: transparent;
+  color: inherit;
+}
+
+.parameter-typescript__code {
+  min-height: 0;
+  max-height: 65dvh;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+@media (max-width: 767px) {
+  .ui-modal.ui-modal--mobile-sheet {
+    inset: auto 0 0;
+    width: 100%;
+    height: auto;
+    max-height: 85dvh;
+    margin: auto auto 0;
+    border-width: 1px 0 0;
+    border-radius: 18px 18px 0 0;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .ui-modal.ui-modal--mobile-sheet[open] {
+    animation: rare-sheet-enter 0.2s ease-out;
+  }
+
+  .ui-modal.ui-modal--mobile-sheet[open].is-closing {
+    animation: rare-sheet-exit 0.16s ease-in forwards;
+  }
+
+  .ui-modal--mobile-sheet .ui-modal__body {
+    overscroll-behavior: contain;
+  }
+
+  .ui-modal--mobile-sheet .preferences-drawer__body {
+    flex: auto;
+    max-height: 65dvh;
+  }
+}
+
+@keyframes rare-sheet-enter {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes rare-sheet-exit {
+  to {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rare-folder-paper,
+  .rare-folder-flap {
+    transition: none;
+  }
+
+  .legacy-home__entry:is(:hover, :focus-visible) :is(.rare-folder-paper, .rare-folder-flap) {
+    transform: none;
+  }
+
+  .ui-modal.ui-modal--mobile-sheet[open],
+  .ui-modal.ui-modal--mobile-sheet[open].is-closing {
+    animation: none;
+  }
+}
+
+/* Compact row confirmation keeps its context available to assistive technology. */
+.rare-delete-confirm.is-compact {
+  width: 84px;
+  padding: 5px;
+  border-radius: 8px;
+}
+
+.rare-delete-confirm.is-compact::after {
+  left: var(--rare-delete-arrow-left, 50%);
+}
+
+.rare-delete-confirm.is-compact > .sr-only {
+  margin: 0;
+}
+
+.rare-delete-confirm.is-compact .rare-delete-confirm-actions {
+  justify-content: center;
+  gap: 4px;
+}
+
+.rare-delete-confirm.is-compact button {
+  display: grid;
+  width: 34px;
+  height: 32px;
+  padding: 0;
+  place-items: center;
+  background: transparent;
+  border-color: transparent;
+}
+
+.rare-delete-confirm.is-compact button:hover:not(:disabled) {
+  background: var(--ui-soft);
+}
+
+.rare-delete-confirm.is-compact .is-danger:hover:not(:disabled),
+.rare-delete-confirm.is-compact .has-error {
+  background: color-mix(in srgb, var(--ui-danger) 12%, transparent);
+}
+
+.rare-delete-confirm.is-compact .is-pending svg {
+  animation: rare-delete-pending 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes rare-delete-pending {
+  to {
+    opacity: 0.35;
+  }
+}
+
+.rare-rail-toc {
+  --rail: color-mix(
+    in srgb,
+    var(--markdown-text, var(--ui-text)) 45%,
+    var(--markdown-surface, var(--ui-surface))
+  );
+  width: 100%;
+  color: var(--markdown-text, var(--ui-text));
+  font-size: 12px;
+}
+
+.rare-rail-toc-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  color: var(--markdown-regular, var(--ui-muted));
+  font-weight: 600;
+}
+
+.rare-rail-toc [data-slot='rail-toc-list'] {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.rare-rail-toc-track {
+  stroke: color-mix(in srgb, currentColor 25%, transparent);
+}
+
+.rare-rail-toc-node {
+  fill: transparent;
+  stroke: color-mix(in srgb, currentColor 30%, transparent);
+}
+
+.rare-rail-toc-plane {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  color: var(--markdown-text, var(--ui-text));
+  pointer-events: none;
+  filter: drop-shadow(0 0 2px rgb(0 0 0 / 20%));
+}
+
+.rare-rail-toc .rare-rail-toc-button {
+  display: block;
+  width: 100%;
+  padding-top: 6px;
+  padding-right: 8px;
+  padding-bottom: 6px;
+  border-radius: 6px;
+  color: var(--markdown-muted, var(--ui-muted));
+  font-size: inherit;
+  line-height: 20px;
+  text-align: left;
+  overflow-wrap: anywhere;
+  transition: color 0.2s ease;
+}
+
+.rare-rail-toc .rare-rail-toc-button:hover,
+.rare-rail-toc .rare-rail-toc-button.is-active {
+  color: var(--markdown-text, var(--ui-text));
+  background: transparent;
+}
+
+.rare-rail-toc .rare-rail-toc-button.is-active {
+  font-weight: 600;
+}
+
+.rare-rail-toc-button:focus-visible {
+  outline: 2px solid var(--ui-primary);
+  outline-offset: -2px;
+}
+
+.legacy-markdown__rail-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px 0 18px;
+  color: var(--markdown-muted);
+  font-size: 11px;
+}
+
+.rare-moving-menu,
+.rare-moving-fields,
+.rare-moving-code {
+  isolation: isolate;
+}
+
+.rare-moving-fields,
+.rare-moving-code {
+  position: relative;
+}
+
+.rare-moving-menu::before,
+.rare-moving-menu::after,
+.rare-moving-fields::after,
+.rare-moving-code::after {
+  position: absolute;
+  top: 0;
+  left: 0;
+  content: '';
+  pointer-events: none;
+  border-radius: 8px;
+}
+
+.rare-moving-menu::before {
+  z-index: 0;
+  width: var(--moving-active-width, 0px);
+  height: var(--moving-active-height, 0px);
+  opacity: var(--moving-active-visible, 0);
+  background: #eef2ff;
+  transform: translate3d(var(--moving-active-x, 0px), var(--moving-active-y, 0px), 0);
+}
+
+.rare-moving-menu::after,
+.rare-moving-fields::after,
+.rare-moving-code::after {
+  width: var(--moving-hover-width, 0px);
+  height: var(--moving-hover-height, 0px);
+  opacity: var(--moving-hover-visible, 0);
+  transform: translate3d(var(--moving-hover-x, 0px), var(--moving-hover-y, 0px), 0);
+}
+
+.rare-moving-menu::after {
+  z-index: 0;
+  background: rgb(79 70 229 / 6%);
+}
+
+html.dark .rare-moving-menu::before {
+  background: linear-gradient(145deg, #2c4c73, #243d5e);
+}
+
+html.dark .rare-moving-menu::after {
+  background: rgb(157 202 250 / 8%);
+}
+
+.rare-moving-fields::after {
+  z-index: 2;
+  background: color-mix(in srgb, var(--ui-primary) 8%, transparent);
+}
+
+.rare-moving-code::after {
+  z-index: 1;
+  background: var(--cb-line-wash);
+  border-radius: 4px;
+}
+
+.rare-moving-menu[data-moving-ready]::before,
+.rare-moving-menu[data-moving-ready]::after,
+.rare-moving-fields[data-moving-ready]::after,
+.rare-moving-code[data-moving-ready]::after {
+  transition:
+    transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    width 220ms ease,
+    height 220ms ease,
+    opacity 120ms ease;
+}
+
+/* Folding already moves the rows: follow that geometry without a second trailing transition. */
+.rare-moving-menu[data-moving-layout]::before,
+.rare-moving-menu[data-moving-layout]::after {
+  transition: none;
+}
+
+/* Existing row colors and controls stay above the shared menu surfaces. */
+:root
+  .rare-moving-menu
+  :is(
+    .workspace-menu-leaf,
+    .workspace-menu-operation,
+    .workspace-menu-branch,
+    .workspace-collapsed-nav-item
+  ) {
+  z-index: 1;
+  background: transparent;
+  box-shadow: none;
+  animation: none;
+}
+
+html:root
+  .rare-moving-menu
+  :is(.workspace-menu-leaf, .workspace-menu-branch, .workspace-collapsed-nav-item) {
+  position: relative;
+}
+
+:root
+  .rare-moving-menu
+  :is(
+    .workspace-menu-leaf,
+    .workspace-menu-operation,
+    .workspace-menu-branch,
+    .workspace-collapsed-nav-item
+  ):hover {
+  background: transparent;
+  box-shadow: none;
+}
+
+:root .rare-moving-fields .operation-request__record:hover {
+  background: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rare-moving-menu[data-moving-ready]::before,
+  .rare-moving-menu[data-moving-ready]::after,
+  .rare-moving-fields[data-moving-ready]::after,
+  .rare-moving-code[data-moving-ready]::after,
+  .rare-rail-toc button,
+  .rare-rail-toc circle {
+    transition: none;
+  }
+  .rare-delete-confirm.is-compact .is-pending svg {
+    animation: none;
+  }
+}
+
+/* Match the code header's inner corners to its frame, including composited content. */
+[data-slot='code-block'][data-frame='true'] {
+  min-width: 0;
+  isolation: isolate;
+}
+
+[data-slot='code-block'][data-frame='true'] > [data-slot='code-block-header'] {
+  border-top-left-radius: 7px;
+  border-top-right-radius: 7px;
+}
+
+.rare-scroll-progress {
+  position: fixed;
+  right: 22px;
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  z-index: 20;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 38px;
+  padding: 7px 13px 7px 9px;
+  color: var(--ui-text);
+  background: color-mix(in srgb, var(--ui-surface) 88%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ui-line) 75%, transparent);
+  border-radius: 999px;
+  box-shadow: 0 5px 18px rgb(15 23 42 / 12%);
+  backdrop-filter: blur(12px);
+  cursor: pointer;
+}
+
+.rare-scroll-progress-icon {
+  position: relative;
+  display: grid;
+  width: 24px;
+  height: 24px;
+  flex: none;
+  place-items: center;
+}
+
+.rare-scroll-progress-ring {
+  position: absolute;
+  inset: 0;
+  width: 24px;
+  height: 24px;
+  transform: rotate(-90deg);
+}
+
+.rare-scroll-progress-track {
+  stroke: color-mix(in srgb, var(--ui-text) 15%, transparent);
+}
+
+.rare-scroll-progress-fill {
+  stroke: var(--ui-primary);
+}
+
+.rare-scroll-progress-label {
+  min-width: 4ch;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.rare-scroll-progress:focus-visible {
+  outline: 2px solid var(--ui-primary);
+  outline-offset: 3px;
+}
+
+html.dark .rare-scroll-progress {
+  box-shadow: 0 5px 18px rgb(0 0 0 / 25%);
+}
+
+@media (max-width: 767px) {
+  .rare-scroll-progress {
+    right: 12px;
+    bottom: calc(12px + env(safe-area-inset-bottom));
+  }
+}
+
+/* Native controls remain the interaction target; only their feedback is animated. */
+.rare-check {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.rare-checkbox {
+  position: relative;
+  display: inline-grid;
+  width: 15px;
+  height: 15px;
+  flex: none;
+  color: var(--export-brand, var(--ui-primary));
+  vertical-align: middle;
+}
+.rare-checkbox > input[type='checkbox'] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 1;
+}
+.rare-checkbox:has(input:focus-visible) {
+  outline: 2px solid var(--ui-primary);
+  outline-offset: 3px;
+  border-radius: 50%;
+}
+.rare-checkbox:has(input:disabled) {
+  opacity: 0.45;
+}
+.rare-checkbox > .rare-check {
+  pointer-events: none;
+}
+.scope-item-row {
+  transition: background-color 180ms ease;
+}
+.scope-item-row:has(input:checked) {
+  background: var(--export-selected);
+}
+
+.rare-copy-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.rare-copy-icon {
+  display: grid;
+  width: 14px;
+  height: 14px;
+  flex: none;
+}
+.rare-copy-icon > span {
+  display: grid;
+  grid-area: 1 / 1;
+  place-items: center;
+}
+.rare-copy-icon svg {
+  display: block;
+  width: 14px;
+  height: 14px;
+}
+.rare-copy-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rare-copy-button.is-copied {
+  color: var(--ui-primary);
+}
+[data-slot='code-block-copy'].is-copied {
+  color: var(--cb-accent);
+  background: var(--cb-hover-wash);
+}
+.legacy-operation__address .rare-copy-button {
+  justify-content: flex-start;
+}
+
+/* Use one moving layer for both pointer and keyboard navigation. */
+.rare-moving-options {
+  position: relative;
+  --moving-choice-active: color-mix(in srgb, var(--ui-primary) 12%, var(--ui-surface));
+  --moving-choice-hover: color-mix(in srgb, var(--ui-primary) 7%, var(--ui-surface));
+}
+html:root .rare-moving-options::before {
+  background: var(--moving-choice-active);
+  border-radius: 5px;
+}
+html:root .rare-moving-options::after {
+  background: var(--moving-choice-hover);
+  border-radius: 5px;
+}
+html:root .rare-moving-options :is(.select-menu__option, .command-search__item) {
+  position: relative;
+  z-index: 1;
+  background: transparent;
+}
+html:root
+  .rare-moving-options
+  :is(.select-menu__option, .command-search__item):is(
+    :hover,
+    :focus-visible,
+    .is-focused,
+    .is-selected,
+    .is-active
+  ) {
+  background: transparent;
+}
+html:root
+  .rare-moving-options
+  button[role='option'].select-menu__option:is(:hover, :focus-visible, .is-focused, .is-selected) {
+  background: transparent;
+}
+.command-search__results.rare-moving-options::before {
+  border-radius: 6px;
+}
+.rare-moving-table::after {
+  border-radius: 4px;
+}
+.rare-moving-overview::after {
+  border-radius: 12px;
+}
+html:root .rare-moving-overview .legacy-overview__api-list button:is(:hover, :focus-visible) {
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+}
+html:root .rare-moving-table tbody tr[data-motion-row]:hover {
+  background: transparent;
+}
+
+:root {
+  --rare-motion-collapse: 180ms;
+  --rare-motion-move: 220ms;
+  --rare-motion-feedback: 120ms;
+  --rare-motion-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.rare-height-transition {
+  min-width: 0;
+  overflow: hidden;
+}
+.rare-height-content {
+  position: relative;
+  display: flow-root;
+  min-width: 0;
+}
+fieldset.rare-height-transition {
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.rare-height-content.workflow-step-body {
+  display: grid;
+}
+.rare-height-content.operation-request__children {
+  display: flex;
+}
+
+.source-editor .cm-editor[data-layout-motion] {
+  overflow: clip;
+}
+.source-editor .cm-editor[data-height-motion] {
+  flex: none;
+}
+.source-editor .cm-editor[data-layout-motion] .cm-scroller {
+  overflow: hidden;
+}
+.operation-json__body[data-json-motion],
+.entity-model__json-content[data-json-motion] {
+  overflow: hidden;
+}
+.source-editor .cm-editor[data-layout-motion] .cm-json-hover-layer {
+  opacity: 0;
+}
+.source-editor .cm-inline-fold-btn svg,
+.source-editor .cm-long-string-toggle svg,
+.workflow-step-head-actions .workflow-step-toggle-icon,
+.aggregation-service-tree__group > header > button svg {
+  transition: transform var(--rare-motion-collapse) var(--rare-motion-ease);
+}
+@media (prefers-reduced-motion: reduce) {
+  .source-editor .cm-inline-fold-btn svg,
+  .source-editor .cm-long-string-toggle svg,
+  .workflow-step-head-actions .workflow-step-toggle-icon,
+  .aggregation-service-tree__group > header > button svg {
+    transition: none;
+  }
+}
+.rare-details:is(.workflow-cache-object, .legacy-markdown__mobile-toc) > summary {
+  list-style: none;
+}
+.rare-details:is(.workflow-cache-object, .legacy-markdown__mobile-toc)
+  > summary::-webkit-details-marker {
+  display: none;
+}
+.rare-details:is(.workflow-cache-object, .legacy-markdown__mobile-toc) > summary::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 8px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform var(--rare-motion-collapse) var(--rare-motion-ease);
+}
+.rare-details:is(.workflow-cache-object, .legacy-markdown__mobile-toc)[data-expanded='true']
+  > summary::before {
+  transform: rotate(45deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .rare-details:is(.workflow-cache-object, .legacy-markdown__mobile-toc) > summary::before {
+    transition: none;
+  }
+}
+/* The summary changes immediately; native details stays open just for the closing motion. */
+.rare-details[data-expanded='false'] .when-open,
+.rare-details[data-expanded='true'] .when-closed {
+  display: none;
+}
+.rare-details[data-expanded='false'] .when-closed,
+.rare-details[data-expanded='true'] .when-open {
+  display: inline;
+}
+.rare-details .operation-security-view__toggle svg {
+  transition: transform 180ms ease;
+}
+.rare-details[data-expanded='false'] .operation-security-view__toggle svg {
+  transform: rotate(0deg);
+}
+.rare-details[data-expanded='true'] .operation-security-view__toggle svg {
+  transform: rotate(180deg);
+}
+.workspace-branch-folder {
+  display: inline-grid;
+  flex: none;
+  vertical-align: middle;
+}
+.workspace-branch-folder > svg {
+  grid-area: 1 / 1;
+  transform-origin: bottom center;
+  transition:
+    opacity 160ms ease,
+    transform 200ms ease;
+}
+.workspace-branch-folder__closed {
+  opacity: 1;
+  transform: none;
+}
+.workspace-branch-folder__open {
+  opacity: 0;
+  transform: translateY(1px) scaleY(0.85);
+}
+.workspace-branch-folder[data-open='true'] > .workspace-branch-folder__closed {
+  opacity: 0;
+  transform: scaleY(0.85);
+}
+.workspace-branch-folder[data-open='true'] > .workspace-branch-folder__open {
+  opacity: 1;
+  transform: none;
+}
+
+/* Selection paints a separate layer: method text and neighbouring labels never move. */
+html:root
+  .workspace-sidebar
+  .workspace-menu-operation
+  .workspace-menu-operation-method.rare-http-method-badge,
+html:root
+  .workspace-tabs
+  .workspace-tab[aria-selected]
+  .workspace-tab-method.rare-http-method-badge {
+  position: relative;
+  isolation: isolate;
+  justify-content: center;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  filter: none !important;
+  transition: color 140ms ease;
+}
+html:root .workspace-sidebar .workspace-menu-operation .rare-http-method-badge {
+  flex: 0 0 36px;
+  width: 36px;
+  height: 18px;
+  padding: 0 !important;
+  border-radius: 5px;
+}
+html:root .workspace-tabs .workspace-tab .rare-http-method-badge {
+  height: 16px;
+  padding: 0 5px !important;
+  letter-spacing: 0.02em !important;
+  border-radius: 3px !important;
+}
+html:root .workspace-tabs .workspace-tab:has(.rare-http-method-badge) {
+  font-weight: 400 !important;
+}
+html:root .workspace-tabs .workspace-tab:has(.rare-http-method-badge):active {
+  transform: none;
+}
+.rare-http-method-badge__fill {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--http-method-selected-fill);
+  pointer-events: none;
+}
+.rare-http-method-badge__label {
+  position: relative;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .export-format-card,
+  .export-format-check,
+  .scope-item-row,
+  .workspace-branch-folder > svg,
+  .rare-details .operation-security-view__toggle svg,
+  html:root
+    .workspace-sidebar
+    .workspace-menu-operation
+    .workspace-menu-operation-method.rare-http-method-badge,
+  html:root
+    .workspace-tabs
+    .workspace-tab[aria-selected]
+    .workspace-tab-method.rare-http-method-badge {
+    transition: none;
+  }
+}

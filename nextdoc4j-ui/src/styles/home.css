@@ -1,0 +1,699 @@
+/* ==========================================================================
+   Home Dashboard (Minimalist & Modern To-C Design System)
+   Unified with Nextdoc4j Operation Detail & Workspace dark palette
+   ========================================================================== */
+
+.legacy-home {
+  --legacy-page: var(--ui-page, #f8fafc);
+  --legacy-panel: var(--ui-surface, #ffffff);
+  --legacy-line: var(--ui-line, #e4e4e7);
+  --legacy-text: var(--ui-text, #18181b);
+  --legacy-regular: var(--ui-muted, #52525b);
+  --legacy-muted: var(--ui-muted, #71717a);
+  --legacy-primary: var(--ui-primary, #2563eb);
+  --legacy-primary-light: var(--ui-soft, #eff6ff);
+
+  --home-card-surface: var(--ui-surface, #ffffff);
+  --home-card-text: var(--ui-text, #18181b);
+  --home-card-line: var(--ui-line, #e4e4e7);
+  --home-card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.02);
+
+  --home-hover-surface: var(--ui-surface, #ffffff);
+  --home-hover-text: var(--ui-text, #18181b);
+  --home-hover-line: var(--ui-muted, #a1a1aa);
+  --home-hover-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.03);
+
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  min-height: 100%;
+  padding: 24px;
+  overflow: auto;
+}
+
+/* Dark Mode Palette: strictly aligned with legacy-operation & dark-theme.css */
+html.dark .legacy-home {
+  --legacy-page: #15191f;
+  --legacy-panel: #202630;
+  --legacy-line: rgb(239 244 249 / 8%);
+  --legacy-text: #edf1f5;
+  --legacy-regular: #c3cad2;
+  --legacy-muted: #909aa5;
+  --legacy-primary: #75b7ff;
+  --legacy-primary-light: #183653;
+
+  --home-card-surface: linear-gradient(160deg, #272f39 0%, #1f262f 100%);
+  --home-card-text: #edf1f5;
+  --home-card-line: rgb(239 244 249 / 8%);
+  --home-card-shadow:
+    0 18px 36px rgb(0 0 0 / 23%), 0 4px 10px rgb(0 0 0 / 13%), inset 0 1px 0 rgb(255 255 255 / 6%);
+
+  --home-hover-surface: linear-gradient(160deg, #2e3743 0%, #252e38 100%);
+  --home-hover-text: #ffffff;
+  --home-hover-line: rgb(239 244 249 / 18%);
+  --home-hover-shadow:
+    0 24px 46px rgb(0 0 0 / 27%), 0 4px 12px rgb(0 0 0 / 15%), inset 0 1px 0 rgb(255 255 255 / 8%);
+
+  background:
+    radial-gradient(760px 380px at 80% -14%, rgb(214 224 234 / 6%), transparent 68%),
+    radial-gradient(560px 300px at 0 0, rgb(144 160 178 / 4%), transparent 72%), var(--legacy-page);
+}
+
+/* ==========================================================================
+   Section Headers (Airy, Unboxed, Modern Typography)
+   ========================================================================== */
+.legacy-home__section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.legacy-home__section-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 2px;
+}
+
+.legacy-home__section-head h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--legacy-text);
+  letter-spacing: -0.01em;
+}
+
+.legacy-home__section-badge {
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.08);
+  color: var(--legacy-primary);
+  border: 1px solid rgba(37, 99, 235, 0.2);
+}
+
+html.dark .legacy-home__section-badge {
+  background: #172d48;
+  color: #b9d9ff;
+  border-color: #345270;
+}
+
+/* ==========================================================================
+   1. Hero Card
+   ========================================================================== */
+.legacy-home__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 36px;
+  flex: none;
+  padding: 32px 36px;
+  color: var(--legacy-text);
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--home-card-surface);
+  border: 1px solid var(--home-card-line);
+  box-shadow: var(--home-card-shadow);
+}
+
+.legacy-home__project {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.legacy-home__title {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--legacy-text);
+  line-height: 1.3;
+}
+
+.legacy-home__chips {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.legacy-home__chip {
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 3px 9px;
+  border-radius: 6px;
+  line-height: 1.2;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--ui-soft, #f4f4f5);
+  color: var(--legacy-text);
+  border: 1px solid var(--legacy-line);
+}
+
+.legacy-home__chip--version {
+  background: var(--ui-soft, #f4f4f5);
+  color: var(--legacy-text);
+}
+
+html.dark .legacy-home__chip--version {
+  background: #242c37;
+  color: #edf1f5;
+  border-color: rgb(239 244 249 / 12%);
+}
+
+.legacy-home__chip--engine {
+  background: rgba(37, 99, 235, 0.08);
+  color: #2563eb;
+  border-color: rgba(37, 99, 235, 0.2);
+}
+
+html.dark .legacy-home__chip--engine {
+  color: #b9d9ff;
+  background: #172d48;
+  border-color: #345270;
+}
+
+.legacy-home__chip--spec {
+  background: rgba(16, 185, 129, 0.08);
+  color: #059669;
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+html.dark .legacy-home__chip--spec {
+  color: #a7f3d0;
+  background: #102a24;
+  border-color: #1f4e42;
+}
+
+.legacy-home__description,
+.legacy-home__description .markdown-content,
+.legacy-home__description p {
+  margin: 0;
+  color: var(--legacy-regular);
+  font-size: 14px;
+  line-height: 1.68;
+  max-width: 680px;
+}
+
+.legacy-home__meta-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.legacy-home__host-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--ui-soft, #f4f4f5);
+  border: 1px solid var(--legacy-line);
+  padding: 5px 11px;
+  border-radius: 8px;
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  color: var(--legacy-regular);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.legacy-home__host-pill:hover {
+  border-color: var(--home-hover-line);
+  color: var(--legacy-text);
+  background: var(--home-card-surface);
+}
+
+html.dark .legacy-home__host-pill {
+  background: #202731;
+  border-color: rgb(239 244 249 / 10%);
+  color: #c3cad2;
+}
+
+html.dark .legacy-home__host-pill:hover {
+  background: #26303c;
+  border-color: rgb(239 244 249 / 18%);
+  color: #edf1f5;
+}
+
+.legacy-home__copied-hint {
+  font-size: 11px;
+  color: #10b981;
+  font-weight: 600;
+  margin-left: 2px;
+}
+
+html.dark .legacy-home__copied-hint {
+  color: #34d399;
+}
+
+.legacy-home__meta-item,
+.legacy-home__meta-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--legacy-muted);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.legacy-home__meta-link:hover {
+  color: var(--legacy-text);
+}
+
+.legacy-home__meta-link strong {
+  color: var(--legacy-regular);
+  font-weight: 500;
+}
+
+.legacy-home__meta-link:hover strong {
+  color: var(--legacy-text);
+}
+
+/* Pure Logo (No background box, enlarged) */
+.legacy-home__logo-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.legacy-home__logo {
+  width: 108px;
+  height: auto;
+  max-height: 124px;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.08));
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.legacy-home__logo:hover {
+  transform: scale(1.05);
+}
+
+/* ==========================================================================
+   2. Statistics & Metrics Section
+   ========================================================================== */
+.legacy-home__stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.legacy-home__stat-card {
+  background: var(--home-card-surface);
+  border: 1px solid var(--home-card-line);
+  border-radius: 12px;
+  padding: 18px 20px;
+  box-shadow: var(--home-card-shadow);
+  transition:
+    border-color 0.15s ease,
+    transform 0.15s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.legacy-home__stat-card:hover {
+  border-color: var(--home-hover-line);
+  transform: translateY(-2px);
+  box-shadow: var(--home-hover-shadow);
+}
+
+.legacy-home__stat-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--legacy-muted);
+  margin-bottom: 6px;
+}
+
+.legacy-home__stat-value {
+  font-family: var(--font-mono, monospace);
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--legacy-text);
+  line-height: 1.1;
+}
+
+.legacy-home__stat-sub {
+  font-size: 12px;
+  color: var(--legacy-muted);
+  margin-top: 6px;
+}
+
+/* HTTP Method Distribution */
+.legacy-home__distribution-box {
+  background: var(--home-card-surface);
+  border: 1px solid var(--home-card-line);
+  border-radius: 12px;
+  padding: 16px 20px;
+  box-shadow: var(--home-card-shadow);
+}
+
+.legacy-home__distribution-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.legacy-home__distribution-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--legacy-regular);
+}
+
+.legacy-home__distribution-total {
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  color: var(--legacy-muted);
+}
+
+.legacy-home__method-bar {
+  display: flex;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--ui-soft, #f4f4f5);
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+html.dark .legacy-home__method-bar {
+  background: #18202b;
+}
+
+.legacy-home__method-bar span {
+  height: 100%;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.legacy-home__method-legend {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.legacy-home__method-legend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--legacy-regular);
+}
+
+.legacy-home__method-legend i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legacy-home__method-legend b {
+  font-family: var(--font-mono, monospace);
+  font-weight: 600;
+  color: var(--legacy-text);
+}
+
+.legacy-home__method-legend small {
+  color: var(--legacy-muted);
+  font-size: 11px;
+}
+
+.legacy-home__empty {
+  margin: 0;
+  font-size: 13px;
+  color: var(--legacy-muted);
+}
+
+/* ==========================================================================
+   3. Service Grid (Aggregation Mode - Standalone Floating Cards)
+   ========================================================================== */
+.legacy-home__service-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.legacy-home__service {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+  padding: 15px 18px;
+  text-align: left;
+  cursor: pointer;
+  background: var(--home-card-surface);
+  border: 1px solid var(--home-card-line);
+  border-radius: 12px;
+  transition: all 0.18s ease;
+  box-shadow: var(--home-card-shadow);
+  gap: 10px;
+}
+
+.legacy-home__service:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.legacy-home__service:hover:not(:disabled) {
+  border-color: var(--home-hover-line);
+  transform: translateY(-2px);
+  box-shadow: var(--home-hover-shadow);
+}
+
+.legacy-home__service.is-active {
+  border-color: var(--legacy-primary);
+  background: var(--ui-soft, #eff6ff);
+}
+
+html.dark .legacy-home__service.is-active {
+  background: #1d3555;
+  border-color: #5d8dc4;
+  box-shadow:
+    inset 0 0 0 1px rgb(117 182 255 / 14%),
+    0 3px 10px rgb(0 0 0 / 18%);
+}
+
+.legacy-home__service-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.legacy-home__service-name {
+  font-family: var(--font-mono, monospace);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--legacy-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.legacy-home__service-status {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 1px 7px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.legacy-home__service-status.is-up {
+  color: #059669;
+  background: rgba(16, 185, 129, 0.08);
+}
+
+html.dark .legacy-home__service-status.is-up {
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.15);
+}
+
+.legacy-home__service-status.is-down {
+  color: #dc2626;
+  background: rgba(220, 38, 38, 0.08);
+}
+
+html.dark .legacy-home__service-status.is-down {
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.15);
+}
+
+.legacy-home__service-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 8px;
+  border-top: 1px solid var(--legacy-line);
+  font-size: 11px;
+  color: var(--legacy-muted);
+}
+
+.legacy-home__service-url {
+  font-family: var(--font-mono, monospace);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 170px;
+}
+
+.legacy-home__service-indicator {
+  color: var(--legacy-primary);
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+html.dark .legacy-home__service-indicator {
+  color: #75b7ff;
+}
+
+/* ==========================================================================
+   4. Quick Action Entries (Floating Cards, Inline Arrow, No Inner Buttons)
+   ========================================================================== */
+.legacy-home__entries {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.legacy-home__entry {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  padding: 16px 18px;
+  text-align: left;
+  cursor: pointer;
+  background: var(--home-card-surface);
+  border: 1px solid var(--home-card-line);
+  border-radius: 12px;
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--home-card-shadow);
+}
+
+.legacy-home__entry:hover {
+  border-color: var(--home-hover-line);
+  transform: translateY(-2px);
+  box-shadow: var(--home-hover-shadow);
+}
+
+.legacy-home__entry-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--ui-soft, #f4f4f5);
+  border: 1px solid var(--legacy-line);
+  color: var(--legacy-text);
+  transition: all 0.18s ease;
+}
+
+html.dark .legacy-home__entry-icon {
+  background: #202731;
+  border-color: rgb(239 244 249 / 10%);
+  color: #edf1f5;
+}
+
+.legacy-home__entry:hover .legacy-home__entry-icon {
+  background: var(--legacy-text);
+  color: var(--legacy-page);
+  border-color: var(--legacy-text);
+}
+
+html.dark .legacy-home__entry:hover .legacy-home__entry-icon {
+  background: #75b7ff;
+  color: #0d1728;
+  border-color: #75b7ff;
+}
+
+.legacy-home__entry-text {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.legacy-home__entry-text b {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--legacy-text);
+  letter-spacing: -0.01em;
+}
+
+.legacy-home__entry-text small {
+  font-size: 12px;
+  color: var(--legacy-muted);
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.legacy-home__entry-arrow {
+  flex-shrink: 0;
+  margin-left: auto;
+  color: var(--legacy-muted);
+  opacity: 0.5;
+  transition: all 0.18s ease;
+  transform: translateX(0);
+}
+
+.legacy-home__entry:hover .legacy-home__entry-arrow {
+  opacity: 1;
+  color: var(--legacy-primary);
+  transform: translateX(3px);
+}
+
+html.dark .legacy-home__entry:hover .legacy-home__entry-arrow {
+  color: #75b7ff;
+}
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+@container workspace (max-width: 900px) {
+  .legacy-home__entries {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container workspace (max-width: 580px) {
+  .legacy-home__entries {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@container workspace (max-width: 700px) {
+  .legacy-home__header {
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    padding: 24px;
+    gap: 20px;
+  }
+  .legacy-home__logo {
+    width: 80px;
+  }
+  .legacy-home__stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@container workspace (max-width: 420px) {
+  .legacy-home__stat-grid {
+    grid-template-columns: 1fr;
+  }
+}

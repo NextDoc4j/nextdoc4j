@@ -1,0 +1,116 @@
+.parameter-typescript__trigger {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 29px;
+  padding: 0;
+  color: #3178c6;
+  background: var(--legacy-panel);
+  border: 1px solid var(--legacy-line);
+  border-radius: 6px;
+  cursor: pointer;
+  transition:
+    background-color 0.16s ease,
+    border-color 0.16s ease;
+}
+.parameter-typescript__trigger:hover {
+  background: var(--legacy-primary-light);
+  border-color: var(--legacy-primary);
+}
+.parameter-typescript__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+.parameter-typescript__actions > span {
+  color: var(--legacy-muted);
+  font-size: 11px;
+}
+.parameter-typescript__actions button {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  color: var(--legacy-muted);
+  background: transparent;
+  border: 0;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.parameter-typescript__actions button:hover {
+  color: var(--legacy-text);
+  background: var(--legacy-primary-light);
+}
+.parameter-typescript__source {
+  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+  padding: 18px 22px;
+  margin: 0;
+  overflow: auto;
+  overscroll-behavior: auto;
+  scrollbar-width: thin;
+  tab-size: 2;
+  text-align: left;
+  font: 12px/1.8 var(--font-mono);
+}
+.parameter-typescript__source code {
+  font: inherit;
+}
+.parameter-typescript__comment {
+  color: #6b7b8a;
+}
+.parameter-typescript__keyword {
+  color: #9451a4;
+}
+.parameter-typescript__primitive {
+  color: #2875ae;
+}
+.parameter-typescript__string {
+  color: #35775b;
+}
+.parameter-typescript__number {
+  color: #a76a2d;
+}
+.parameter-typescript__type {
+  color: #247d84;
+}
+html.dark .parameter-typescript__trigger {
+  color: #83b9ec;
+}
+html.dark .parameter-typescript__comment {
+  color: #92a0b0;
+}
+html.dark .parameter-typescript__keyword {
+  color: #c7a0d8;
+}
+html.dark .parameter-typescript__primitive {
+  color: #82b9e6;
+}
+html.dark .parameter-typescript__string {
+  color: #96c9a5;
+}
+html.dark .parameter-typescript__number {
+  color: #d9b17c;
+}
+html.dark .parameter-typescript__type {
+  color: #88caca;
+}
+
+.ui-modal__body.parameter-typescript__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: calc(100dvh - 120px);
+  padding: 0;
+  overflow: hidden;
+}

@@ -1,0 +1,36 @@
+{
+  "name": "nextdoc4j-docs",
+  "version": "1.0.0",
+  "type": "module",
+  "devDependencies": {
+    "@iconify-json/simple-icons": "^1.2.54",
+    "@types/node": "^20.0.0",
+    "playwright-core": "^1.55.0",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "unplugin-icons": "^22.4.2",
+    "vitepress": "2.0.0-alpha.12"
+  },
+  "scripts": {
+    "docs:dev": "vitepress dev",
+    "docs:build": "pnpm run team:update && vitepress build",
+    "docs:preview": "vitepress preview",
+    "test:responsive": "pnpm exec vitepress build && node scripts/responsive-check.mjs",
+    "team:update": "tsx more/team/build-team-cache.ts",
+    "team:force-update": "tsx more/team/build-team-cache.ts --force",
+    "team:status": "tsx more/team/build-team-cache.ts --status",
+    "prebuild": "npm run team:update",
+    "build": "npm run docs:build",
+    "preview": "npm run docs:preview",
+    "type-check": "tsc --noEmit",
+    "build:ts": "tsc"
+  },
+  "dependencies": {
+    "badge-maker": "^5.0.2",
+    "medium-zoom": "^1.1.0",
+    "photoswipe": "^5.4.4",
+    "viewerjs": "^1.11.7",
+    "vitepress-plugin-image-viewer": "^1.1.6",
+    "vue": "^3.5.22"
+  }
+}
