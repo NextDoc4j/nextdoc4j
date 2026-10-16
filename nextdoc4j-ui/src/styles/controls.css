@@ -1,0 +1,448 @@
+/* Shared controls follow the global parameter table in both themes. */
+:root {
+  --ui-surface: #fff;
+  --ui-text: #1e293b;
+  --ui-muted: #84909e;
+  --ui-line: #d5dee9;
+  --ui-soft: #f5f7fa;
+  --ui-primary: #4f46e5;
+  --ui-danger: #c65268;
+  --ui-focus-line: color-mix(in srgb, var(--ui-primary) 50%, var(--ui-line));
+}
+
+html.dark {
+  --ui-surface: #202630;
+  --ui-text: #edf3fa;
+  --ui-muted: #8995a2;
+  --ui-line: rgb(239 244 249 / 13%);
+  --ui-soft: #262e39;
+  --ui-primary: #a991f7;
+  --ui-danger: #ee93a5;
+}
+
+.ui-input:where(:not(.ui-input--code)) {
+  width: 100%;
+  min-width: 0;
+  font-size: 13px;
+}
+
+:root .ui-input.ui-input:where(:not(.ui-input--code)),
+:root .ui-input-shell.ui-input-shell {
+  color: var(--ui-text);
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-line);
+  border-radius: 6px;
+  outline: none;
+  box-shadow: none;
+  transition:
+    border-color 0.16s ease,
+    background-color 0.16s ease;
+}
+
+:root .ui-input.ui-input--default {
+  min-height: 32px;
+  padding: 0 9px;
+}
+
+:root .ui-input.ui-input:where(:not(.ui-input--code)):hover:not(:disabled):not(:read-only),
+:root .ui-input-shell.ui-input-shell:hover,
+:root .ui-input.ui-input:where(:not(.ui-input--code)):focus,
+:root .ui-input-shell.ui-input-shell:focus-within {
+  border-color: var(--ui-focus-line);
+  outline: none;
+  box-shadow: none;
+}
+
+:root .ui-input.ui-input::placeholder {
+  color: var(--ui-muted);
+  opacity: 1;
+}
+
+:root .ui-input.ui-input:disabled {
+  color: var(--ui-muted);
+  background: var(--ui-soft);
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+:root .ui-input.ui-input:read-only:not(:disabled) {
+  background: var(--ui-soft);
+}
+
+:root .ui-input.ui-input[aria-invalid='true'],
+:root .ui-input.ui-input[aria-invalid='true']:is(:hover, :focus) {
+  border-color: var(--ui-danger);
+}
+
+:root .ui-textarea.ui-input--default {
+  min-height: 120px;
+  padding: 9px;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+:root .ui-input-shell.ui-input-shell {
+  min-height: 32px;
+}
+
+/* Compound inputs share one border with their search icon or credential action. */
+:root .ui-input.ui-input--embedded,
+:root .ui-input.ui-input--embedded:focus,
+:root .ui-input.ui-input--embedded:hover {
+  min-height: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* Code editors keep their syntax colors, sizing and scroll synchronization. */
+:root .ui-input.ui-input--code:focus-visible {
+  outline: 1px solid var(--ui-focus-line);
+  outline-offset: -1px;
+}
+
+:root .ui-input.ui-input--code[aria-invalid='true'] {
+  outline: 1px solid var(--ui-danger);
+  outline-offset: -1px;
+}
+
+.ui-modal {
+  width: min(660px, calc(100vw - 32px));
+  max-width: none;
+  max-height: calc(100dvh - 48px);
+  padding: 0;
+  margin: auto;
+  color: var(--ui-text);
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-line);
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgb(15 23 42 / 22%);
+  overflow: hidden;
+}
+
+.ui-modal[open] {
+  display: flex;
+  flex-direction: column;
+  animation: ui-modal-enter 0.16s ease;
+}
+
+.ui-modal[open].is-closing {
+  animation: ui-modal-exit 0.16s ease forwards;
+}
+
+.ui-modal::backdrop {
+  background: rgb(15 23 42 / 35%);
+}
+
+html.dark .ui-modal::backdrop {
+  background: rgb(0 0 0 / 50%);
+}
+
+.ui-modal[open]::backdrop {
+  animation: ui-backdrop-enter 0.2s ease;
+}
+
+.ui-modal[open].is-closing::backdrop {
+  animation: ui-backdrop-exit 0.18s ease forwards;
+}
+
+.ui-modal--small {
+  width: min(420px, calc(100vw - 32px));
+}
+
+.ui-modal--large {
+  width: min(820px, calc(100vw - 32px));
+}
+
+.ui-modal--wide {
+  width: min(1000px, calc(100vw - 32px));
+}
+
+.ui-modal.ui-modal--drawer {
+  inset: 0 0 0 auto;
+  width: min(440px, 100vw);
+  height: 100dvh;
+  max-height: 100dvh;
+  margin: 0 0 0 auto;
+  border-radius: 0;
+  border-width: 0 0 0 1px;
+  border-style: solid;
+  border-color: var(--ui-line);
+  box-shadow:
+    -20px 0 48px rgb(30 41 59 / 14%),
+    -3px 0 10px rgb(30 41 59 / 7%);
+}
+
+html.dark .ui-modal.ui-modal--drawer {
+  box-shadow:
+    -22px 0 54px rgb(0 0 0 / 36%),
+    -3px 0 10px rgb(0 0 0 / 20%);
+}
+
+.ui-modal.ui-modal--drawer[open] {
+  animation: ui-drawer-enter 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ui-modal.ui-modal--drawer[open].is-closing {
+  animation: ui-drawer-exit 0.18s cubic-bezier(0.32, 0, 0.67, 0) forwards;
+}
+
+.ui-modal__header {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--ui-line);
+}
+
+.ui-modal__heading {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.ui-modal__heading h2 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.ui-modal__heading p {
+  margin: 4px 0 0;
+  color: var(--ui-muted);
+  font-size: 12px;
+}
+
+.ui-modal__actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+}
+
+.ui-modal .ui-modal__close {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  color: var(--ui-muted);
+  background: transparent;
+  border: 0;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.ui-modal .ui-modal__close:hover:not(:disabled) {
+  color: var(--ui-text);
+  background: var(--ui-soft);
+}
+
+.ui-modal__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 18px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+.ui-modal__footer {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px 18px;
+  border-top: 1px solid var(--ui-line);
+}
+
+.ui-modal__footer-note {
+  margin-right: auto;
+  color: var(--ui-muted);
+  font-size: 12px;
+}
+
+.ui-modal__footer > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 5px 14px;
+  color: var(--ui-text);
+  font-size: 13px;
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-line);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.ui-modal__footer > button:hover:not(:disabled) {
+  background: var(--ui-soft);
+  border-color: var(--ui-focus-line);
+}
+
+.ui-modal__footer > button.is-primary {
+  color: #fff;
+  background: #4f46e5;
+  border-color: #4f46e5;
+}
+
+.ui-modal__footer > button.is-primary:hover:not(:disabled) {
+  background: #4338ca;
+  border-color: #4338ca;
+}
+
+.ui-modal button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.ui-modal :is(button, pre):focus-visible {
+  outline: 2px solid var(--ui-primary);
+  outline-offset: -2px;
+}
+
+@keyframes ui-modal-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes ui-modal-exit {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes ui-drawer-enter {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes ui-drawer-exit {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes ui-backdrop-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes ui-backdrop-exit {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-modal[open],
+  .ui-modal[open].is-closing,
+  .ui-modal.ui-modal--drawer[open],
+  .ui-modal.ui-modal--drawer[open].is-closing,
+  .ui-modal[open]::backdrop,
+  .ui-modal[open].is-closing::backdrop {
+    animation: none;
+  }
+  :root .ui-input.ui-input:where(:not(.ui-input--code)),
+  :root .ui-input-shell.ui-input-shell {
+    transition: none;
+  }
+}
+
+/* Shared schema type palette for documentation and JSON editor metadata. */
+:root {
+  /* Type Badges */
+  --type-string-bg: #ecfdf5;
+  --type-string-text: #059669;
+  --type-string-border: #a7f3d0;
+
+  --type-number-bg: #fffbeb;
+  --type-number-text: #d97706;
+  --type-number-border: #fde68a;
+
+  --type-bool-bg: #faf5ff;
+  --type-bool-text: #9333ea;
+  --type-bool-border: #e9d5ff;
+
+  --type-object-bg: #f0f9ff;
+  --type-object-text: #0284c7;
+  --type-object-border: #bae6fd;
+
+  --type-array-bg: #eef2ff;
+  --type-array-text: #4f46e5;
+  --type-array-border: #c7d2fe;
+}
+
+html.dark {
+  /* Type Badges */
+  --type-string-bg: #253832;
+  --type-string-text: #a3bdb0;
+  --type-string-border: #3b5147;
+
+  --type-number-bg: #383228;
+  --type-number-text: #c4b392;
+  --type-number-border: #514735;
+
+  --type-bool-bg: #322d3d;
+  --type-bool-text: #b8abc9;
+  --type-bool-border: #4c425a;
+
+  --type-object-bg: #28343e;
+  --type-object-text: #9fb8c9;
+  --type-object-border: #3b4e5c;
+
+  --type-array-bg: #2d3040;
+  --type-array-text: #aeb3cf;
+  --type-array-border: #444961;
+}
+
+.schema-type {
+  background: transparent;
+  border: 0;
+  color: var(--type-string-text);
+}
+
+.schema-type[data-type^='integer'],
+.schema-type[data-type^='number'] {
+  color: var(--type-number-text);
+}
+
+.schema-type[data-type^='boolean'] {
+  color: var(--type-bool-text);
+}
+
+.schema-type[data-type^='object'] {
+  color: var(--type-object-text);
+}
+
+.schema-type[data-type^='array'] {
+  color: var(--type-array-text);
+}

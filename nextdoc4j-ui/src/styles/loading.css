@@ -1,0 +1,169 @@
+/* Minimal ToC loading. The short entrance borrows Rare UI Family Drawer motion.
+   Copyright (c) 2026 Swami Malode; MIT + Commons Clause + Attribution.
+   See ../components/rare-ui/LICENSE. https://rareui.com */
+
+.workspace-loading-root,
+.workspace-loading-screen {
+  --loading-canvas: #fafbfc;
+  --loading-text: #28313e;
+  --loading-muted: #66748a;
+  --loading-line: #e7ebf0;
+  --loading-indicator: #69768a;
+}
+
+html.dark .workspace-loading-root,
+html.dark .workspace-loading-screen {
+  --loading-canvas: #181d25;
+  --loading-text: #e2e7ef;
+  --loading-muted: #8290a2;
+  --loading-line: #303946;
+  --loading-indicator: #a3afc0;
+}
+
+.workspace-loading-screen {
+  min-height: 100svh;
+  background: var(--loading-canvas);
+}
+
+.workspace-loading-root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  text-align: center;
+  animation: workspaceLoadingEnter 180ms ease-out both;
+}
+
+.workspace-loading-root.size-screen {
+  padding: 32px;
+}
+
+.workspace-loading-root.size-page {
+  padding: 24px;
+}
+
+.workspace-loading-card {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  padding: 9px;
+  border: 1px solid var(--loading-line);
+  border-radius: 13px;
+  background: #fff;
+}
+
+.workspace-loading-root.size-page .workspace-loading-card {
+  width: 44px;
+  height: 44px;
+  padding: 7px;
+  border-radius: 11px;
+}
+
+.workspace-loading-card img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  animation: workspaceLoadingBreathe 2.8s ease-in-out infinite;
+}
+
+.workspace-loading-title {
+  max-width: min(360px, 100%);
+  margin: 19px 0 0;
+  color: var(--loading-text);
+  font-size: 17px;
+  font-weight: 550;
+  line-height: 1.5;
+  letter-spacing: -0.03em;
+  overflow-wrap: anywhere;
+}
+
+.workspace-loading-root.size-page .workspace-loading-title {
+  margin-top: 16px;
+  font-size: 15px;
+}
+
+.workspace-loading-sub {
+  max-width: min(360px, 100%);
+  margin: 6px 0 0;
+  color: var(--loading-muted);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+
+.workspace-loading-root.size-page .workspace-loading-sub {
+  font-size: 11px;
+}
+
+.workspace-loading-track {
+  flex: none;
+  width: 88px;
+  height: 2px;
+  margin-top: 22px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--loading-line);
+}
+
+.workspace-loading-root.size-page .workspace-loading-track {
+  margin-top: 19px;
+}
+
+.workspace-loading-thumb {
+  width: 24px;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--loading-indicator);
+  animation: workspaceLoadingActivity 2.8s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+@keyframes workspaceLoadingEnter {
+  from {
+    opacity: 0.35;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes workspaceLoadingBreathe {
+  0%,
+  100% {
+    opacity: 0.76;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes workspaceLoadingActivity {
+  0%,
+  100% {
+    transform: translateX(0);
+    opacity: 0.55;
+  }
+  50% {
+    transform: translateX(64px);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workspace-loading-root,
+  .workspace-loading-card img,
+  .workspace-loading-thumb {
+    animation: none;
+  }
+  .workspace-loading-thumb {
+    transform: translateX(32px);
+    opacity: 0.85;
+  }
+}

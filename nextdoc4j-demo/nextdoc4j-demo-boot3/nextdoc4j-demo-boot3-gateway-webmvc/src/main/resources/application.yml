@@ -1,0 +1,123 @@
+server:
+  port: 9001
+
+project:
+  name: NextDoc4j-网关聚合服务-webmvc-springboot3
+  version: 1.2.0
+  description: 专为 SpringDoc 和 OpenAPI 3 设计的现代化文档界面，替代 Swagger UI，提供更美观、更强大的开发体验。让 API 文档焕然一新。这个演示项目展示了 Gateway Server WebMvc 场景下的多服务文档聚合能力。
+
+  contact:
+    name: echo
+    email: nextdoc4j@163.com
+    url: https://nextdoc4j.top/
+
+  license:
+    name: Apache License 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+
+spring:
+  application:
+    name: gateway-webmvc-server-sb3
+
+  config:
+    import:
+      - optional:nacos:${spring.application.name}.yml?group=NEXTDOC4J_SB3&refreshEnabled=true
+
+  cloud:
+    nacos:
+      server-addr: 192.168.10.41:50061
+      username: nacos
+      password: bdca2431
+      config:
+        enabled: true
+        namespace: public
+        group: NEXTDOC4J_SB3
+        file-extension: yml
+        import-check:
+          enabled: false
+      discovery:
+        namespace: public
+        group: NEXTDOC4J_SB3
+        service: gateway-webmvc-server-sb3
+        naming-load-cache-at-start: true
+        failure-tolerance-enabled: true
+        fail-fast: false
+
+    gateway:
+      server:
+        webmvc:
+          routes:
+            - id: user-service-sb3-webmvc
+              uri: lb://user-service-sb3
+              predicates:
+                - Path=/user/**,/role/**,/auth/**
+              filters:
+                - StripPrefix=1
+              metadata:
+                nextdoc4j:
+                  name: 用户管理
+
+            - id: system-service-sb3-webmvc
+              uri: lb://system-service-sb3
+              predicates:
+                - Path=/system/**,/notification/**,/robot/**
+              filters:
+                - StripPrefix=1
+              metadata:
+                nextdoc4j:
+                  name: 系统管理
+
+            - id: file-service-sb3-webmvc
+              uri: lb://file-service-sb3
+              predicates:
+                - Path=/file/**
+              filters:
+                - StripPrefix=1
+              metadata:
+                nextdoc4j:
+                  name: 文件服务
+
+logging:
+  level:
+    top.nextdoc4j.demo: DEBUG
+    org.springframework.web: debug
+    io.swagger.v3: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{50} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{50} - %msg%n"
+  file:
+    name: logs/nextdoc4j-demo-boot3-gateway-webmvc.log
+
+nextdoc4j:
+  enabled: true
+  production: false
+  auth:
+    enabled: false
+    password: nextdoc4j2025
+  extension:
+    enabled: true
+    brand:
+      logo: classpath:/static/favicon.ico
+      footer-text: "Copyright © 2025 - [NextDoc4j](https://nextdoc4j.top) All Rights Reserved."
+    markdown:
+      - group: 更新日志
+        location: classpath:/markdown/changelog/**
+      - group: 项目简介
+        location: classpath:/markdown/otherdoc/**
+  gateway:
+    auto-discovery: true
+    name-resolve-strategy: auto
+    doc-path-strategy: AUTO
+    security:
+      globalSchemes:
+        Authorization:
+          type: HTTP
+          in: HEADER
+          name: Authorization
+          scheme: Bearer
+          description: "请输入 Bearer Token，格式：Bearer {token}"
+      anonymous:
+        - service-id: user-service-sb3
+          paths:
+            - /api/auth/login
+            - /api/user/userAndRole

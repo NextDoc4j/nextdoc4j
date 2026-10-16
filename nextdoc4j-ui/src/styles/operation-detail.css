@@ -1,0 +1,1386 @@
+/* Operation detail */
+.legacy-operation {
+  --operation-detail-top-space: 32px;
+  --operation-detail-bottom-space: 48px;
+  position: relative;
+  min-height: 100%;
+  overflow: visible;
+}
+.legacy-operation__layout {
+  display: grid;
+  grid-template-columns: minmax(420px, 1fr) minmax(320px, 420px);
+  align-items: start;
+  gap: 36px;
+  max-width: 1280px;
+  min-height: 100%;
+  padding: var(--operation-detail-top-space) 24px var(--operation-detail-bottom-space);
+  margin: 0 auto;
+}
+.legacy-operation__main,
+.legacy-operation__aside-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  min-width: 0;
+}
+.legacy-operation__aside {
+  position: sticky;
+  top: var(--operation-detail-top-space);
+  height: var(--operation-json__rail-height, auto);
+  min-width: 0;
+  min-height: 0;
+}
+.legacy-operation__aside-stack {
+  position: sticky;
+  top: var(--operation-detail-top-space);
+  align-self: start;
+}
+.legacy-operation__section {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+.legacy-operation__section > header {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+}
+.legacy-operation__section > header > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+.legacy-operation__section h2 {
+  padding: 0;
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--legacy-text);
+}
+.legacy-operation__section > header span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 1px 10px;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--legacy-regular);
+  text-transform: uppercase;
+  background: #f4f4f5;
+  border: 1px solid var(--legacy-line);
+  border-radius: 999px;
+}
+.legacy-operation__section > header > small {
+  min-width: 0;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--legacy-regular);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.legacy-operation__card,
+.legacy-operation__response {
+  min-width: 0;
+  overflow: hidden;
+  background: var(--legacy-panel);
+  border: 1px solid var(--legacy-line);
+  border-radius: 13px;
+  box-shadow: var(--legacy-shadow-sm);
+}
+.legacy-operation__schema {
+  min-width: 0;
+  padding: 8px 16px;
+}
+.legacy-operation__schema .border-l {
+  border-color: var(--legacy-line);
+}
+.legacy-operation__schema .text-slate-800 {
+  color: var(--legacy-text);
+}
+.legacy-operation__schema .text-muted {
+  color: var(--legacy-regular);
+}
+.legacy-operation__response-stack {
+  display: grid;
+  gap: 12px;
+}
+.legacy-operation__response-summary {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 14px 16px;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+}
+.legacy-operation__response-summary:hover {
+  background: rgb(244 244 245 / 72%);
+}
+.legacy-operation__response.is-open .legacy-operation__response-summary {
+  background: var(--legacy-primary-light);
+}
+.legacy-operation__response-summary > span {
+  display: flex;
+  flex: 1;
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+}
+.legacy-operation__response-summary i {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  height: 24px;
+  padding: 0 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 800;
+  color: var(--legacy-primary);
+  background: var(--legacy-primary-light);
+  border: 1px solid #a0cfff;
+  border-radius: 999px;
+}
+.legacy-operation__response-summary i.is-success {
+  color: #059669;
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+}
+.legacy-operation__response-summary i.is-error {
+  color: #e11d48;
+  background: #fff1f2;
+  border-color: #fecdd3;
+}
+.legacy-operation__response-summary b {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--legacy-text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.legacy-operation__response-summary small {
+  flex: none;
+  max-width: 42%;
+  padding: 2px 7px;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--legacy-regular);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: #f4f4f5;
+  border: 1px solid var(--legacy-line);
+  border-radius: 999px;
+}
+.legacy-operation__response-content {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.2s ease;
+}
+.legacy-operation__response.is-open .legacy-operation__response-content {
+  grid-template-rows: 1fr;
+  border-top: 1px solid var(--legacy-line);
+}
+.legacy-operation__response-content > * {
+  min-height: 0;
+  overflow: hidden;
+}
+.legacy-operation__empty-hint {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 12px;
+  margin: 0;
+  font-size: 13px;
+  color: var(--legacy-regular);
+  background: #f4f4f5;
+  border-radius: 6px;
+}
+.legacy-example-card__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 12px;
+  background: color-mix(in srgb, var(--legacy-page) 58%, var(--legacy-panel) 42%);
+  border-bottom: 1px solid var(--legacy-line);
+}
+.legacy-example-card__tabs button {
+  padding: 3px 10px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--legacy-regular);
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 999px;
+}
+.legacy-example-card__tabs button:hover {
+  background: #f4f4f5;
+}
+.legacy-example-card__tabs button.is-active {
+  color: var(--legacy-primary);
+  background: var(--legacy-primary-light);
+  border-color: rgb(64 158 255 / 30%);
+  box-shadow: 0 0 0 2px rgb(64 158 255 / 10%);
+}
+.legacy-example-card__tabs button.is-active.is-success {
+  color: #059669;
+  border-color: #a7f3d0;
+}
+.legacy-example-card__tabs button.is-active.is-error {
+  color: #e11d48;
+  border-color: #fecdd3;
+}
+@container workspace (max-width: 900px) {
+  .legacy-operation__layout {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    padding: var(--operation-detail-top-space) 24px var(--operation-detail-bottom-space);
+  }
+
+  .legacy-operation__aside,
+  .legacy-operation__aside-stack {
+    position: static;
+    top: auto;
+    width: 100%;
+    max-width: 100%;
+    align-self: stretch;
+    height: auto;
+  }
+
+  .legacy-operation__aside .operation-json__card {
+    max-height: min(70dvh, 520px);
+  }
+}
+
+/* Interface detail hero: copied from data/ui/operation-hero-card/index.html. */
+.legacy-operation {
+  background: #f4f6f9;
+}
+html.dark .legacy-operation {
+  background: #0d1015;
+}
+.legacy-operation__hero {
+  /* 浅色模式：纯色差层级 (Tonal Surfaces) */
+  --legacy-page: #f4f6f9;
+  --legacy-panel: #ffffff;
+  --legacy-line: rgb(15 23 42 / 6%);
+  --legacy-text: #1e2530;
+  --legacy-regular: #525c6a;
+  --legacy-muted: #8892a0;
+  --legacy-primary: #2b7ec1;
+  --legacy-primary-text: #1f6feb;
+
+  /* 内部色差表面：用温和明度差代替生硬 1px 外框线 */
+  --surface-well: #f3f5f8; /* 内凹槽底色 (Endpoint 栏、认证方式槽、Sa-Token 规则槽) */
+  --surface-well-hover: #eceff4;
+  --surface-pill: #f3f5f8; /* 独立胶囊底色 (顶部模块面包屑、operationId) */
+  --surface-pill-hover: #e8ecf2;
+  --surface-pill-badge: #e5e9f0; /* 胶囊内部微标签底色 (HEADER / QUERY / OR / AND) */
+  --surface-chip: #ffffff; /* 规则槽内的白色可复制代码胶囊 */
+  --surface-chip-hover: #ffffff;
+  --surface-floating: #ffffff; /* 移动高亮滑块底色 */
+  --shadow-card: 0 1px 3px rgb(15 23 42 / 4%), 0 6px 20px rgb(15 23 42 / 3%);
+  --shadow-card-hover: 0 2px 6px rgb(15 23 42 / 5%), 0 10px 26px rgb(15 23 42 / 5%);
+  --shadow-floating: 0 1px 3px rgb(15 23 42 / 8%), 0 1px 1px rgb(15 23 42 / 4%);
+  --shadow-chip: 0 1px 2px rgb(15 23 42 / 5%);
+
+  /* HTTP Method 语义色 */
+  --method-get: #23804e;
+  --method-post: #2677b7;
+  --method-put: #7254aa;
+  --method-delete: #b94e64;
+  --method-patch: #a86a1f;
+
+  /* 无边框语义色差胶囊 (纯色差，border: 0) */
+  --tone-auth-text: #285d99;
+  --tone-auth-bg: rgb(38 119 183 / 9%);
+
+  --tone-perm-text: #1e66a8;
+  --tone-perm-bg: rgb(38 119 183 / 10%);
+  --tone-perm-hover: rgb(38 119 183 / 15%);
+
+  --tone-role-text: #64459c;
+  --tone-role-bg: rgb(114 84 170 / 10%);
+
+  --tone-success-text: #1c7447;
+  --tone-success-bg: rgb(35 128 78 / 10%);
+
+  --tone-warn-text: #945d18;
+  --tone-warn-bg: rgb(168 106 31 / 11%);
+}
+html.dark .legacy-operation__hero {
+  --legacy-page: #0d1015;
+  --legacy-panel: #151921;
+  --legacy-line: rgb(255 255 255 / 6%);
+  --legacy-text: #ecf0f6;
+  --legacy-regular: #9ba6b5;
+  --legacy-muted: #667282;
+  --legacy-primary: #6cb6ff;
+  --legacy-primary-text: #6cb6ff;
+
+  /* 深色内部色差层级：清晰冷冽的明度阶梯 */
+  --surface-well: #10131a; /* 比卡片更深一阶的内凹槽 */
+  --surface-well-hover: #1b202b;
+  --surface-pill: #1d232f; /* 比卡片亮一阶的悬浮胶囊 */
+  --surface-pill-hover: #252d3c;
+  --surface-pill-badge: rgb(255 255 255 / 7%);
+  --surface-chip: #1c222d; /* 规则槽内的代码块胶囊 */
+  --surface-chip-hover: #252d3b;
+  --surface-floating: #232a37; /* URL 移动高亮滑块 */
+  --shadow-card: 0 14px 32px rgb(0 0 0 / 32%), 0 2px 6px rgb(0 0 0 / 20%);
+  --shadow-card-hover: 0 18px 38px rgb(0 0 0 / 40%), 0 4px 10px rgb(0 0 0 / 26%);
+  --shadow-floating: 0 2px 5px rgb(0 0 0 / 32%);
+  --shadow-chip: 0 1px 2px rgb(0 0 0 / 22%);
+
+  /* 深色下的 HTTP 方法色 */
+  --method-get: #2a8a56;
+  --method-post: #2d7ec0;
+  --method-put: #7c5eb5;
+  --method-delete: #c2556b;
+  --method-patch: #b37324;
+
+  /* 深色半透明色差胶囊：通透冷调 */
+  --tone-auth-text: #79b8ff;
+  --tone-auth-bg: rgb(56 139 253 / 13%);
+
+  --tone-perm-text: #79b8ff;
+  --tone-perm-bg: rgb(56 139 253 / 14%);
+  --tone-perm-hover: rgb(56 139 253 / 22%);
+
+  --tone-role-text: #c29ffa;
+  --tone-role-bg: rgb(163 113 247 / 14%);
+
+  --tone-success-text: #56d39a;
+  --tone-success-bg: rgb(46 160 67 / 15%);
+
+  --tone-warn-text: #e3b341;
+  --tone-warn-bg: rgb(187 128 9 / 16%);
+}
+.legacy-operation__hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  padding: 22px 24px;
+  background: var(--legacy-panel);
+  border: 1px solid var(--legacy-line);
+  border-radius: 13px;
+  box-shadow: var(--shadow-card);
+  container-type: inline-size;
+  transition:
+    box-shadow 0.18s ease,
+    background-color 0.16s ease;
+}
+
+.legacy-operation__hero:hover {
+  box-shadow: var(--shadow-card-hover);
+}
+
+.legacy-operation__hero.is-transitioning {
+  animation: rareHeroContentEnter var(--rare-motion-collapse) var(--rare-motion-ease) both;
+}
+
+@keyframes rareHeroContentEnter {
+  from {
+    opacity: 0.42;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --------------------------------------------------------------------------
+         4.1 顶部元信息与标题区 (.hero-header)
+         重新设计：
+         - 左侧模块分类采用一体式色差面包屑胶囊 [ ● 用户管理 / 账号中心 ]，告别重复文件夹图标
+         - 右侧 operationId (createUser) 采用可点击复制的方法标识胶囊 [ ID | createUser ⧉ ]
+         -------------------------------------------------------------------------- */
+.legacy-operation__hero .hero-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  min-width: 0;
+}
+
+.legacy-operation__hero .hero-header__identity {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  min-width: 0;
+  flex: 1 1 260px;
+}
+
+.legacy-operation__hero .hero-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* 模块分类面包屑胶囊：单个语义圆点 + 模块层级路径 */
+.legacy-operation__hero .hero-meta__breadcrumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 9px;
+  font-size: 11.5px;
+  font-weight: 550;
+  color: var(--legacy-regular);
+  background: var(--surface-pill);
+  border: 0;
+  border-radius: 6px;
+  line-height: 1;
+  user-select: none;
+}
+
+.legacy-operation__hero .hero-meta__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--operation-method-color, var(--method-post));
+  flex: none;
+}
+
+.legacy-operation__hero .hero-meta__tag-item {
+  color: var(--legacy-regular);
+  white-space: nowrap;
+}
+
+.legacy-operation__hero .hero-meta__tag-item:last-child {
+  color: var(--legacy-text);
+}
+
+.legacy-operation__hero .hero-meta__slash {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--legacy-muted);
+  opacity: 0.65;
+}
+
+/* OperationId 方法名胶囊：支持一键复制 (方便开发者在 IDEA 中全局搜索方法名) */
+.legacy-operation__hero .hero-meta__opid {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 24px;
+  padding: 0 7px 0 5px;
+  font: 500 11.5px/1 var(--font-mono);
+  color: var(--legacy-regular);
+  background: var(--surface-pill);
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition:
+    color var(--rare-motion-feedback) ease,
+    background-color var(--rare-motion-feedback) ease,
+    transform var(--rare-motion-feedback) var(--rare-motion-ease);
+}
+
+.legacy-operation__hero .hero-meta__opid-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 16px;
+  padding: 0 4.5px;
+  font: 600 9.5px/1 var(--font-mono);
+  letter-spacing: 0.03em;
+  color: var(--legacy-muted);
+  background: var(--surface-pill-badge);
+  border-radius: 3.5px;
+  user-select: none;
+}
+
+.legacy-operation__hero .hero-meta__opid-code {
+  color: var(--legacy-text);
+  font-weight: 550;
+}
+
+.legacy-operation__hero .hero-meta__opid .rare-icon-swap {
+  width: 12px;
+  height: 12px;
+  color: var(--legacy-muted);
+  opacity: 0.55;
+  transition:
+    opacity 0.14s ease,
+    color 0.14s ease;
+}
+
+.legacy-operation__hero .hero-meta__opid .rare-icon-swap > svg {
+  width: 12px;
+  height: 12px;
+}
+
+.legacy-operation__hero .hero-meta__opid:hover {
+  background: var(--surface-pill-hover);
+}
+
+.legacy-operation__hero .hero-meta__opid:hover .hero-meta__opid-code,
+.legacy-operation__hero .hero-meta__opid:hover .rare-icon-swap {
+  color: var(--legacy-primary-text);
+  opacity: 1;
+}
+
+.legacy-operation__hero .hero-meta__opid:active {
+  transform: scale(0.97);
+}
+
+.legacy-operation__hero .hero-meta__opid.is-copied {
+  background: var(--tone-success-bg);
+}
+
+.legacy-operation__hero .hero-meta__opid.is-copied .hero-meta__opid-badge {
+  color: var(--tone-success-text);
+  background: transparent;
+}
+
+.legacy-operation__hero .hero-meta__opid.is-copied .hero-meta__opid-code,
+.legacy-operation__hero .hero-meta__opid.is-copied .rare-icon-swap {
+  color: var(--tone-success-text);
+  opacity: 1;
+}
+
+.legacy-operation__hero .hero-header__title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 650;
+  line-height: 1.35;
+  letter-spacing: -0.02em;
+  color: var(--legacy-text);
+  overflow-wrap: break-word;
+}
+
+/* 右侧操作按钮组：纯色差按钮，无外框线 */
+.legacy-operation__hero .hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+
+.legacy-operation__hero .hero-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 550;
+  color: var(--legacy-regular);
+  background: var(--surface-pill);
+  border: 0;
+  border-radius: 7px;
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  transition:
+    color var(--rare-motion-feedback) ease,
+    background-color var(--rare-motion-feedback) ease,
+    transform var(--rare-motion-feedback) var(--rare-motion-ease);
+}
+
+.legacy-operation__hero .hero-btn:hover {
+  color: var(--legacy-text);
+  background: var(--surface-pill-hover);
+}
+
+.legacy-operation__hero .hero-btn:active {
+  transform: scale(0.97);
+}
+
+.legacy-operation__hero .hero-btn.is-copied {
+  color: var(--tone-success-text);
+  background: var(--tone-success-bg);
+}
+
+.legacy-operation__hero .hero-btn--primary {
+  color: #ffffff;
+  background: var(--operation-method-color, var(--method-post));
+}
+
+.legacy-operation__hero .hero-btn--primary:hover {
+  color: #ffffff;
+  background: color-mix(in srgb, var(--operation-method-color, var(--method-post)) 88%, #000);
+}
+
+/* Rare UI 图标切换容器 (Copy <-> Check 路径绘制动画) */
+.legacy-operation__hero .rare-icon-swap {
+  position: relative;
+  display: inline-grid;
+  width: 14px;
+  height: 14px;
+  place-items: center;
+  flex: none;
+}
+
+.legacy-operation__hero .rare-icon-swap > svg {
+  grid-area: 1 / 1;
+  width: 14px;
+  height: 14px;
+  transition:
+    opacity 150ms var(--rare-motion-ease),
+    transform 150ms var(--rare-motion-ease);
+}
+
+.legacy-operation__hero .rare-icon-swap .icon-default {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.legacy-operation__hero .rare-icon-swap .icon-check {
+  opacity: 0;
+  transform: scale(0.5);
+}
+
+.legacy-operation__hero .rare-icon-swap .icon-error {
+  opacity: 0;
+  transform: scale(0.5);
+}
+
+.rare-check-path {
+  stroke-dasharray: 24;
+  stroke-dashoffset: 24;
+  transition: stroke-dashoffset 200ms var(--rare-motion-ease);
+}
+
+.legacy-operation__hero .is-copied .rare-icon-swap .icon-default {
+  opacity: 0;
+  transform: scale(0.5);
+}
+
+.legacy-operation__hero .is-copied .rare-icon-swap .icon-check {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.legacy-operation__hero .is-copy-error .rare-icon-swap .icon-default,
+.legacy-operation__hero .is-copy-error .rare-icon-swap .icon-check {
+  opacity: 0;
+  transform: scale(0.5);
+}
+
+.legacy-operation__hero .is-copy-error .rare-icon-swap .icon-error {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.legacy-operation__hero .is-copied .rare-icon-swap .rare-check-path {
+  stroke-dashoffset: 0;
+}
+
+/* --------------------------------------------------------------------------
+         4.2 HTTP 类型 + URL Path 端点命令栏 (.hero-endpoint)
+         交互逻辑：
+         1. 悬浮/点击左侧 URL (http://127.0.0.1:8080)：单独高亮并复制该前置 URL
+         2. 悬浮/点击右侧 Path (/api/user)：单独高亮并复制该接口 Path
+         3. 悬浮/点击最右侧复制图标按钮：高亮自动横跨整条 URL + Path，一键复制完整请求地址
+         -------------------------------------------------------------------------- */
+.legacy-operation__hero .hero-endpoint {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 5px 6px;
+  background: var(--surface-well);
+  border: 0;
+  border-radius: 9px;
+}
+
+.legacy-operation__hero .hero-endpoint__method {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  min-width: 52px;
+  height: 28px;
+  padding: 0 9px;
+  font: 700 11px/1 var(--font-mono);
+  letter-spacing: 0.04em;
+  color: #ffffff;
+  background: var(--operation-method-color, var(--method-post));
+  border-radius: 6px;
+  user-select: none;
+}
+
+/* 预留上下 3px 呼吸空间，防止 overflow-x: auto 裁切白色选中块底部与阴影 */
+.legacy-operation__hero .hero-endpoint__track {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  padding: 3px 2px;
+  margin: -3px 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  isolation: isolate;
+}
+
+.legacy-operation__hero .hero-endpoint__track::-webkit-scrollbar {
+  display: none;
+}
+
+/* Rare UI 移动高亮底板：无边框纯色浮层 + 柔和底阴影，支持单段或全段横跨 */
+.legacy-operation__hero .hero-endpoint__track::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  width: var(--url-hover-w, 0px);
+  height: var(--url-hover-h, 28px);
+  opacity: var(--url-hover-o, 0);
+  transform: translate3d(var(--url-hover-x, 0px), var(--url-hover-y, 3px), 0);
+  background: var(--surface-floating);
+  border: 0;
+  border-radius: 6px;
+  box-shadow: var(--shadow-floating);
+  pointer-events: none;
+  transition:
+    transform var(--rare-motion-move) var(--rare-motion-ease),
+    width var(--rare-motion-move) var(--rare-motion-ease),
+    height var(--rare-motion-move) var(--rare-motion-ease),
+    opacity var(--rare-motion-feedback) ease;
+}
+
+.legacy-operation__hero .hero-endpoint__segment {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 7px;
+  font: 13px/1 var(--font-mono);
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    color var(--rare-motion-feedback) ease,
+    transform var(--rare-motion-feedback) var(--rare-motion-ease);
+}
+
+.legacy-operation__hero .hero-endpoint__segment:active {
+  transform: scale(0.985);
+}
+
+.legacy-operation__hero .hero-endpoint__segment--origin {
+  color: var(--legacy-muted);
+}
+
+.legacy-operation__hero .hero-endpoint__segment--origin:hover,
+.legacy-operation__hero .hero-endpoint__segment--origin:focus-visible,
+.legacy-operation__hero .hero-endpoint__track.is-full-preview .hero-endpoint__segment--origin {
+  color: var(--legacy-regular);
+}
+
+.legacy-operation__hero .hero-endpoint__segment--path {
+  color: var(--legacy-text);
+  font-weight: 600;
+}
+
+.legacy-operation__hero .hero-endpoint__segment--path:hover,
+.legacy-operation__hero .hero-endpoint__segment--path:focus-visible,
+.legacy-operation__hero .hero-endpoint__track.is-full-preview .hero-endpoint__segment--path {
+  color: var(--legacy-primary-text);
+}
+
+.legacy-operation__hero .hero-endpoint__segment.is-copied {
+  color: var(--tone-success-text) !important;
+}
+
+/* Path 动态参数高亮胶囊 ({id}, {roleId})：无边框色差高亮 */
+.legacy-operation__hero .endpoint-path-param {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 5px;
+  margin: 0 1px;
+  font: 600 12px/1 var(--font-mono);
+  color: var(--tone-perm-text);
+  background: var(--tone-perm-bg);
+  border: 0;
+  border-radius: 4px;
+}
+
+/* 最右侧单一纯图标复制按钮：点击复制完整 URL + Path */
+.legacy-operation__hero .hero-endpoint__copy-btn {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  color: var(--legacy-muted);
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition:
+    color var(--rare-motion-feedback) ease,
+    background-color var(--rare-motion-feedback) ease,
+    transform var(--rare-motion-feedback) var(--rare-motion-ease);
+}
+
+.legacy-operation__hero .hero-endpoint__copy-btn:hover {
+  color: var(--legacy-primary-text);
+  background: var(--surface-floating);
+  box-shadow: var(--shadow-chip);
+}
+
+.legacy-operation__hero .hero-endpoint__copy-btn:active {
+  transform: scale(0.94);
+}
+
+.legacy-operation__hero .hero-endpoint__copy-btn.is-copied {
+  color: var(--tone-success-text);
+  background: var(--tone-success-bg);
+  box-shadow: none;
+}
+
+.legacy-operation__hero .hero-endpoint__copy-btn.is-copy-error {
+  color: var(--tone-warn-text);
+  background: var(--tone-warn-bg);
+  box-shadow: none;
+}
+
+/* --------------------------------------------------------------------------
+         4.3 接口描述区 (.hero-description)
+         -------------------------------------------------------------------------- */
+.legacy-operation__hero .hero-description {
+  position: relative;
+  min-width: 0;
+  padding: 0 2px;
+}
+
+.legacy-operation__hero .hero-description__viewport {
+  overflow: hidden;
+  transition:
+    height var(--rare-motion-collapse) var(--rare-motion-ease),
+    opacity var(--rare-motion-collapse) var(--rare-motion-ease);
+}
+
+.legacy-operation__hero .hero-description__content {
+  font-size: 13px;
+  line-height: 1.75;
+  color: var(--legacy-regular);
+}
+
+.legacy-operation__hero .hero-description__content p {
+  margin: 0 0 8px;
+}
+
+.legacy-operation__hero .hero-description__content p:last-child {
+  margin-bottom: 0;
+}
+
+.legacy-operation__hero .hero-description__content code {
+  padding: 2px 6px;
+  font-size: 11.5px;
+  color: var(--legacy-text);
+  background: var(--surface-pill);
+  border: 0;
+  border-radius: 4px;
+}
+
+.legacy-operation__hero .hero-description__content ul {
+  margin: 6px 0 0;
+  padding-left: 18px;
+}
+
+.legacy-operation__hero .hero-description__content li {
+  margin-bottom: 4px;
+}
+
+.legacy-operation__hero .hero-description__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  padding: 3px 7px;
+  margin-left: -7px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--legacy-primary-text);
+  background: transparent;
+  border: 0;
+  border-radius: 5px;
+  cursor: pointer;
+  transition:
+    background-color var(--rare-motion-feedback) ease,
+    color var(--rare-motion-feedback) ease;
+}
+
+.legacy-operation__hero .hero-description__toggle:hover {
+  background: var(--surface-pill);
+}
+
+.legacy-operation__hero .hero-description__toggle svg {
+  width: 13px;
+  height: 13px;
+  transition: transform var(--rare-motion-collapse) var(--rare-motion-ease);
+}
+
+.legacy-operation__hero .hero-description__toggle[aria-expanded='true'] svg {
+  transform: rotate(180deg);
+}
+
+/* --------------------------------------------------------------------------
+         4.4 认证方式 & Sa-Token 统一折叠与竖排列表区 (.hero-security)
+         核心重设计：
+         - 认证方式与 Sa-Token 采用完全一致的交互与视觉结构：
+           1. 顶部栏显示数量摘要胶囊（如“4 种认证方式”、“1 项权限 · 1 项备选角色”）+ 右侧收起/展开按钮
+           2. 默认全部展开 (defaultOpen)
+           3. 展开内容置于无边框内凹色差槽 (--surface-well) 中，竖排展示每一条认证方式或权限规则
+         -------------------------------------------------------------------------- */
+.legacy-operation__hero .hero-security {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.legacy-operation__hero .security-row {
+  display: grid;
+  grid-template-columns: 78px minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+  min-width: 0;
+}
+
+.legacy-operation__hero .security-row__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  font-size: 12px;
+  font-weight: 550;
+  color: var(--legacy-muted);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.legacy-operation__hero .security-row__label svg {
+  width: 13.5px;
+  height: 13.5px;
+  color: var(--legacy-muted);
+  opacity: 0.85;
+  flex: none;
+}
+
+.legacy-operation__hero .security-row__body {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+
+/* 顶部摘要与展开控制栏 */
+.legacy-operation__hero .security-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 26px;
+}
+
+.legacy-operation__hero .security-bar--toggle {
+  width: 100%;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  border-radius: 5px;
+}
+
+.legacy-operation__hero .security-bar--toggle > svg {
+  flex: none;
+  color: var(--legacy-muted);
+  transition: transform var(--rare-motion-collapse) var(--rare-motion-ease);
+}
+
+.legacy-operation__hero .security-bar--toggle[aria-expanded='true'] > svg {
+  transform: rotate(180deg);
+}
+
+.legacy-operation__hero .security-summary-list {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.legacy-operation__hero .security-summary-pill {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 9px;
+  font-size: 11.5px;
+  font-weight: 550;
+  border: 0;
+  border-radius: 5px;
+}
+
+.legacy-operation__hero .security-summary-pill--auth {
+  color: var(--tone-auth-text);
+  background: var(--tone-auth-bg);
+}
+
+.legacy-operation__hero .security-summary-pill--perm {
+  color: var(--tone-perm-text);
+  background: var(--tone-perm-bg);
+}
+
+.legacy-operation__hero .security-summary-pill--role {
+  color: var(--tone-role-text);
+  background: var(--tone-role-bg);
+}
+
+.legacy-operation__hero .security-summary-pill--open {
+  color: var(--tone-success-text);
+  background: var(--tone-success-bg);
+}
+
+.legacy-operation__hero .security-summary-pill--warn {
+  color: var(--tone-warn-text);
+  background: var(--tone-warn-bg);
+}
+
+.legacy-operation__hero .security-summary-hint {
+  font-size: 11.5px;
+  color: var(--legacy-muted);
+}
+
+.legacy-operation__hero .security-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 8px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--legacy-muted);
+  background: transparent;
+  border: 0;
+  border-radius: 5px;
+  cursor: pointer;
+  transition:
+    color 0.14s ease,
+    background-color 0.14s ease;
+}
+
+.legacy-operation__hero .security-toggle-btn:hover {
+  color: var(--legacy-text);
+  background: var(--surface-pill);
+}
+
+.legacy-operation__hero .security-toggle-btn svg {
+  width: 13px;
+  height: 13px;
+  transition: transform var(--rare-motion-collapse) var(--rare-motion-ease);
+}
+
+.legacy-operation__hero .security-toggle-btn[aria-expanded='true'] svg {
+  transform: rotate(180deg);
+}
+
+/* 折叠动画容器 */
+.legacy-operation__hero .security-body-wrap {
+  overflow: hidden;
+  transition:
+    height var(--rare-motion-collapse) var(--rare-motion-ease),
+    opacity var(--rare-motion-collapse) var(--rare-motion-ease);
+}
+
+/* 统一内凹色差槽：认证方式竖排列表 & Sa-Token 规则竖排列表共用 */
+.legacy-operation__hero .security-rules-well {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--surface-well);
+  border: 0;
+  border-radius: 8px;
+}
+
+/* 竖排单行：左侧类型/位置标识 + 右侧可复制参数与说明 */
+.legacy-operation__hero .security-rule-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  min-height: 26px;
+}
+
+.legacy-operation__hero .security-rule-row__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 136px;
+  flex: none;
+}
+
+.legacy-operation__hero .security-rule-kind {
+  display: inline-flex;
+  align-items: center;
+  height: 21px;
+  padding: 0 7px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 0;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.legacy-operation__hero .security-rule-kind--auth {
+  color: var(--tone-auth-text);
+  background: var(--tone-auth-bg);
+}
+
+.legacy-operation__hero .security-rule-kind--permission {
+  color: var(--tone-perm-text);
+  background: var(--tone-perm-bg);
+}
+
+.legacy-operation__hero .security-rule-kind--role {
+  color: var(--tone-role-text);
+  background: var(--tone-role-bg);
+}
+
+.legacy-operation__hero .security-rule-badge {
+  padding: 2px 5px;
+  font: 600 10px/1 var(--font-mono);
+  color: var(--legacy-muted);
+  background: var(--surface-pill-badge);
+  border: 0;
+  border-radius: 4px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.legacy-operation__hero .security-rule-values {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+/* 可点击复制的参数名 / 权限码胶囊：纯色浮层 (--surface-chip)，无外框线 */
+.legacy-operation__hero .security-code-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 25px;
+  padding: 0 9px;
+  font: 500 12px/1 var(--font-mono);
+  color: var(--legacy-text);
+  background: var(--surface-chip);
+  border: 0;
+  border-radius: 5px;
+  box-shadow: var(--shadow-chip);
+  cursor: pointer;
+  transition:
+    color var(--rare-motion-feedback) ease,
+    background-color var(--rare-motion-feedback) ease,
+    transform var(--rare-motion-feedback) var(--rare-motion-ease);
+}
+
+.legacy-operation__hero .security-code-chip .rare-icon-swap {
+  width: 12.5px;
+  height: 12.5px;
+  color: var(--legacy-muted);
+  opacity: 0.55;
+  transition:
+    opacity 0.14s ease,
+    color 0.14s ease;
+}
+
+.legacy-operation__hero .security-code-chip .rare-icon-swap > svg {
+  width: 12.5px;
+  height: 12.5px;
+}
+
+.legacy-operation__hero .security-code-chip:hover {
+  color: var(--legacy-primary-text);
+  background: var(--surface-chip-hover);
+}
+
+.legacy-operation__hero .security-code-chip:hover .rare-icon-swap {
+  opacity: 1;
+  color: var(--legacy-primary-text);
+}
+
+.legacy-operation__hero .security-code-chip:active {
+  transform: scale(0.96);
+}
+
+.legacy-operation__hero .security-code-chip.is-copied {
+  color: var(--tone-success-text);
+  background: var(--tone-success-bg);
+  box-shadow: none;
+}
+
+.legacy-operation__hero .security-code-chip.is-copied .rare-icon-swap {
+  opacity: 1;
+  color: var(--tone-success-text);
+}
+
+.legacy-operation__hero .security-rule-desc {
+  font-size: 12px;
+  color: var(--legacy-regular);
+  line-height: 1.45;
+}
+
+.legacy-operation__hero .security-connector {
+  padding: 0 1px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--legacy-muted);
+  user-select: none;
+}
+
+/* Markdown rendering adds a wrapper around the sanitized description. */
+.legacy-operation__hero .hero-description__content .markdown-content {
+  font: inherit;
+  line-height: inherit;
+  color: inherit;
+}
+.legacy-operation__hero .hero-description__content-full.is-collapsed {
+  position: absolute;
+  inset: 0 0 auto;
+  visibility: hidden;
+  pointer-events: none;
+}
+.legacy-operation__hero .hero-description__content-preview.is-truncated {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+.legacy-operation__hero .hero-description__content :is(h1, h2, h3, h4, h5, h6) {
+  margin: 16px 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.7;
+  color: var(--legacy-text);
+}
+.legacy-operation__hero .hero-description__content img {
+  max-width: 100%;
+  height: auto;
+}
+.legacy-operation__hero .hero-description__content :is(pre, table) {
+  max-width: 100%;
+  overflow-x: auto;
+}
+.legacy-operation__hero .hero-description__content pre code {
+  padding: 0;
+  background: transparent;
+}
+.legacy-operation__hero .hero-meta__tag-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.legacy-operation__hero .hero-meta__tag-group:last-child .hero-meta__tag-item {
+  color: var(--legacy-text);
+}
+.legacy-operation__hero .hero-btn .rare-icon-swap {
+  order: -1;
+}
+.legacy-operation__hero .hero-endpoint__segment .rare-icon-swap {
+  display: none;
+}
+.legacy-operation__hero .hero-endpoint__segment > code {
+  font: inherit;
+}
+.legacy-operation__hero .security-rule-value {
+  display: contents;
+}
+.legacy-operation__hero .security-body-wrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  min-height: 0;
+  opacity: 0;
+  transition:
+    grid-template-rows 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 180ms ease;
+}
+.legacy-operation__hero .security-body-wrap.is-open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+.legacy-operation__hero .security-body-wrap > .security-rules-well {
+  min-height: 0;
+  overflow: hidden;
+}
+.legacy-operation__hero button:focus-visible {
+  outline: 2px solid var(--legacy-primary-text);
+  outline-offset: 2px;
+}
+@container (max-width: 520px) {
+  .legacy-operation__hero .hero-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .legacy-operation__hero .hero-header__identity {
+    flex-basis: auto;
+  }
+  .legacy-operation__hero .hero-actions {
+    width: 100%;
+  }
+  .legacy-operation__hero .hero-actions > * {
+    min-width: 0;
+    flex: 1 1 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .legacy-operation__hero .hero-btn > svg {
+    flex: none;
+  }
+  .legacy-operation__hero .security-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
+  .legacy-operation__hero .security-rule-row__meta {
+    min-width: auto;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .legacy-operation__hero,
+  .legacy-operation__hero *,
+  .legacy-operation__hero *::before,
+  .legacy-operation__hero *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

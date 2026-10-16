@@ -1,0 +1,110 @@
+.global-notification-center {
+  position: fixed;
+  z-index: 20000;
+  inset: 16px 16px auto auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: min(360px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  margin: 0;
+  padding: 6px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  pointer-events: auto;
+}
+.global-notification-center::backdrop {
+  background: transparent;
+  pointer-events: none;
+}
+.global-notification-center .global-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 13px 12px;
+  color: var(--ui-text);
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-line);
+  border-radius: 9px;
+  box-shadow: none;
+  pointer-events: auto;
+  animation: global-notice-enter 240ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+html.dark .global-notification-center .global-notice {
+  box-shadow: 0 8px 28px rgb(0 0 0 / 24%);
+}
+.global-notice__icon {
+  flex: none;
+  margin-top: 1px;
+  color: var(--ui-primary);
+}
+.global-notice--success .global-notice__icon {
+  color: #32936f;
+}
+.global-notice--error .global-notice__icon {
+  color: var(--ui-danger);
+}
+.global-notice p {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font:
+    13px/1.6 system-ui,
+    sans-serif;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.global-notification-center .global-notice__close {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  color: var(--ui-muted);
+  background: transparent;
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.global-notification-center .global-notice__close:hover {
+  color: var(--ui-text);
+  background: var(--ui-soft);
+}
+.global-notification-center .global-notice__close:focus-visible {
+  outline: 2px solid var(--ui-primary);
+}
+.global-notification-center .global-notice.is-closing {
+  animation: global-notice-exit 240ms ease-in both;
+  pointer-events: none;
+}
+@keyframes global-notice-enter {
+  from {
+    opacity: 0;
+    transform: translateX(calc(100% + 24px));
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes global-notice-exit {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(calc(100% + 24px));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .global-notification-center .global-notice,
+  .global-notification-center .global-notice.is-closing {
+    animation-duration: 1ms;
+  }
+}

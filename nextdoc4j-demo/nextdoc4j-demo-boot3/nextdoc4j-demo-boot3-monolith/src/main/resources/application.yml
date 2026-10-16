@@ -1,0 +1,143 @@
+# 端口
+server:
+  port: 8000
+
+# 项目基础配置
+project:
+  name: NextDoc4j 演示 - springboot3
+  version: 1.0.1
+  description: 专为 SpringDoc 和 OpenAPI 3 设计的现代化文档界面，替代 Swagger UI，提供更美观、更强大的开发体验。让 API 文档焕然一新。这个演示项目展示了完整的 CRUD 操作、文件上传、SSE 推送、批量操作等各种场景。
+
+  contact:
+    name: echo
+    email: nextdoc4j@163.com
+    url: https://nextdoc4j.top/
+
+  license:
+    name: Apache License 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+
+# Spring 配置
+spring:
+  # 文件上传配置
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 5MB
+      enabled: true
+
+  # 数据源配置
+  datasource:
+    url: jdbc:h2:mem:nextdoc4j_demo
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  # H2 控制台配置
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  # Jackson 配置
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+    serialization:
+      write-dates-as-timestamps: false
+
+--- ### 接口文档配置
+springdoc:
+  # 设置对象型参数的展示形式
+  default-flat-param-object: true
+  cache.disabled: true
+
+  # API 文档路径配置
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+
+  # Swagger UI 配置
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+  ## 组件配置
+  components:
+    # 鉴权配置
+    security-schemes:
+      Authorization:
+        type: HTTP
+        in: HEADER
+        name: Authorization
+        scheme: Bearer
+        description: "请输入 Bearer Token,格式:Bearer {token}"
+#
+#      # 4. API Key 放在 Header
+#      ApiKeyHeader:
+#        type: APIKEY
+#        in: HEADER
+#        name: X-API-Key
+#        description: "请输入 API Key"
+#
+#      # 5. API Key 放在 Query 参数
+#      ApiKeyQuery:
+#        type: APIKEY
+#        in: QUERY
+#        name: api_key
+#        description: "在 URL 查询参数中携带 API Key,如 ?api_key=xxx"
+#
+#      # 6. API Key 放在 Cookie
+#      ApiKeyCookie:
+#        type: APIKEY
+#        in: COOKIE
+#        name: session_id
+#        description: "通过 Cookie 传递的会话标识"
+
+# nextdoc4j 配置
+nextdoc4j:
+  # 是否启用
+  enabled: true
+  # 生产环境配置
+  production: false
+  # 认证配置
+  auth:
+    enabled: false
+    password: nextdoc4j2025
+  # 扩展配置
+  extension:
+    # 是否启用
+    enabled: true
+    # 品牌信息
+    brand:
+#      title: NextDoc4j Demo
+      logo: classpath:/favicon.ico
+      footer-text: "Copyright © 2025 - [NextDoc4j](https://nextdoc4j.top) All Rights Reserved."
+
+    # markdown 配置 - 用于展示更新日志等文档
+    markdown:
+      - group: 更新日志
+        location: classpath:/markdown/changelog/**
+      - group: 项目简介
+        location: classpath:/markdown/otherdoc/**
+  # 插件
+  plugin:
+    # 枚举插件开关
+    enum:
+      enabled: true
+    # 全局认证 and sa-token 插件开关
+    security:
+      enabled: true
+#  doc-path: /bdca.html
+
+
+--- # 日志配置
+logging:
+  level:
+    top.nextdoc4j.demo: DEBUG
+    org.springframework.web: INFO
+    io.swagger.v3: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{50} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{50} - %msg%n"
+  file:
+    name: logs/nextdoc4j-demo.log

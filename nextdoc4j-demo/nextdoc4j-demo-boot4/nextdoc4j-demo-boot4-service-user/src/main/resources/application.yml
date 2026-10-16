@@ -1,0 +1,53 @@
+server:
+  port: 9102
+
+spring:
+  application:
+    name: user-service-sb4
+
+  config:
+    import:
+      - optional:nacos:${spring.application.name}.yml?group=NEXTDOC4J_SB4&refreshEnabled=true
+
+  cloud:
+    nacos:
+      # nacos 服务地址
+      server-addr: 192.168.10.41:50061
+      username: nacos
+      password: bdca2431
+      discovery:
+        # 注册组
+        group: NEXTDOC4J_SB4
+        namespace: public
+      config:
+        enabled: true
+        namespace: public
+        group: NEXTDOC4J_SB4
+        file-extension: yml
+        import-check:
+          enabled: false
+
+# SpringDoc 配置
+springdoc:
+  default-flat-param-object: true
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+
+
+# nextdoc4j 配置
+nextdoc4j:
+  plugin:
+    security:
+      enabled: true
+    enum:
+      enabled: true
+
+
+
+# 日志配置
+logging:
+  level:
+    top.nextdoc4j.demo: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{50} - %msg%n"

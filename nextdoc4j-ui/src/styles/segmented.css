@@ -1,0 +1,199 @@
+/* Shared segmented switch used by workspace pages after page-level legacy rules are loaded. */
+.workspace-segmented {
+  --workspace-segment-count: 2;
+  --workspace-segment-index: 0;
+  --workspace-segment-width: calc(
+    (100% - (var(--workspace-segment-count) + 1) * 3px) / var(--workspace-segment-count)
+  );
+  position: relative;
+  display: inline-flex;
+  width: var(--workspace-segment-control-width, auto);
+  gap: 3px;
+  padding: 3px;
+  isolation: isolate;
+  background: var(--workspace-segment-surface, #edf1f6);
+  border: 1px solid var(--workspace-segment-line, #cbd5e1);
+  border-radius: 8px;
+}
+
+.workspace-segmented--three {
+  --workspace-segment-count: 3;
+}
+
+.workspace-segmented::before {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  z-index: 0;
+  width: var(--workspace-segment-width);
+  pointer-events: none;
+  content: '';
+  background: var(--workspace-segment-active-surface, #fff);
+  border: 0;
+  border-radius: 6px;
+  box-shadow: var(--workspace-segment-shadow, 0 2px 6px rgb(30 41 59 / 15%));
+  transform: translateX(calc(var(--workspace-segment-index) * (100% + 3px)));
+  transition:
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.workspace-segmented--second {
+  --workspace-segment-index: 1;
+}
+
+.workspace-segmented--third {
+  --workspace-segment-index: 2;
+}
+
+.workspace-segmented > button {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 0;
+  min-width: var(--workspace-segment-min-width, 78px);
+  height: var(--workspace-segment-height, 28px);
+  padding: 0 var(--workspace-segment-padding-inline, 9px);
+  color: var(--workspace-segment-text, #64748b);
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  font-size: var(--workspace-segment-font-size, 12px);
+  font-weight: 400;
+  line-height: 1;
+  white-space: nowrap;
+  transition: color 0.18s ease;
+}
+
+.workspace-segmented > button:hover {
+  color: var(--workspace-segment-hover-text, #1e293b);
+}
+
+.workspace-segmented > .workspace-segmented__active {
+  color: var(--workspace-segment-active-text, #2b7ec1);
+  font-weight: 500;
+}
+
+.workspace-segmented--vertical {
+  flex-direction: column;
+}
+
+.workspace-segmented--vertical::before {
+  right: 3px;
+  bottom: auto;
+  width: auto;
+  height: var(--workspace-segment-height, 28px);
+  transform: translateY(calc(var(--workspace-segment-index) * (100% + 3px)));
+}
+
+.workspace-segmented--vertical > button {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--workspace-segment-icon-gap, 8px);
+  width: 100%;
+  text-align: left;
+}
+
+.workspace-segmented--vertical > button > svg {
+  flex: none;
+}
+
+/* Dynamic content-adaptive width mode */
+.workspace-segmented--auto-width::before {
+  left: 0;
+  width: var(--workspace-segment-active-width, var(--workspace-segment-width));
+  transform: translateX(var(--workspace-segment-active-left, 3px));
+  transition:
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    width 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.workspace-segmented--auto-width > button {
+  flex: 0 0 auto;
+  width: auto;
+  min-width: var(--workspace-segment-min-width, 0);
+}
+
+.workspace-segmented--auto-width.workspace-segmented--vertical::before {
+  top: 0;
+  right: 3px;
+  bottom: auto;
+  left: 3px;
+  width: auto;
+  height: var(--workspace-segment-active-height, var(--workspace-segment-height, 28px));
+  transform: translateY(var(--workspace-segment-active-top, 3px));
+  transition:
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    height 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.workspace-segmented--auto-width.workspace-segmented--vertical > button {
+  width: 100%;
+}
+
+.workspace-switch-control {
+  display: inline-flex;
+  flex: none;
+  gap: var(--workspace-switch-gap, 7px);
+  align-items: center;
+}
+
+.workspace-switch-control > span {
+  min-width: var(--workspace-switch-label-width, 22px);
+  font-size: var(--workspace-switch-label-size, 10px);
+  font-weight: 600;
+  color: var(--workspace-switch-label-color, #64748b);
+}
+
+.workspace-switch {
+  position: relative;
+  width: var(--workspace-switch-width, 34px);
+  height: var(--workspace-switch-height, 19px);
+  padding: 0;
+  cursor: pointer;
+  background: var(--workspace-switch-surface, #cbd5e1);
+  border: 0;
+  border-radius: 999px;
+  transition: background-color 0.18s ease;
+}
+
+.workspace-switch::before {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 13px;
+  height: 13px;
+  content: '';
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 22%);
+  transform: translateX(0);
+  transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.workspace-switch--checked {
+  background: var(--workspace-switch-active-surface, #4f46e5);
+}
+
+.workspace-switch--checked::before {
+  transform: translateX(15px);
+}
+
+.workspace-switch:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workspace-segmented::before,
+  .workspace-switch,
+  .workspace-switch::before {
+    transition: none;
+  }
+}

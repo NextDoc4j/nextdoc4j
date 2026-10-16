@@ -1,0 +1,15 @@
+{
+  "name": "nextdoc4j-release-tools",
+  "private": true,
+  "packageManager": "pnpm@10.12.4",
+  "engines": {
+    "node": ">=20.10.0",
+    "pnpm": ">=9.12.0"
+  },
+  "scripts": {
+    "build-ui": "node build-ui.mjs",
+    "test-dev": "node test-dev.mjs",
+    "test-preview": "node test-preview.mjs",
+    "publish": "node publish.mjs"
+  }
+}

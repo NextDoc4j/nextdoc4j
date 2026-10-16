@@ -1,0 +1,670 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* 全局统一字体规范：Inter (西文) + 思源黑体 (中文) + JetBrains Mono (代码) */
+  --font-sans:
+    'Inter Variable', 'Noto Sans SC Variable', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei',
+    ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif,
+    'Apple Color Emoji', 'Segoe UI Emoji';
+
+  --font-mono:
+    'JetBrains Mono Variable', ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Monaco, Consolas,
+    'Liberation Mono', 'PingFang SC', 'Microsoft YaHei', monospace;
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    background: #f7f8fc;
+  }
+
+  body {
+    min-width: 320px;
+    margin: 0;
+    color: #172033;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  button,
+  input,
+  textarea {
+    font: inherit;
+  }
+  button {
+    -webkit-tap-highlight-color: transparent;
+  }
+  code,
+  pre {
+    font-family: var(--font-mono);
+    font-feature-settings:
+      'calt' 1,
+      'liga' 1;
+  }
+}
+
+@layer components {
+  .panel {
+    @apply rounded-2xl border border-line bg-white shadow-panel;
+  }
+  .input {
+    @apply w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none transition focus:border-brand focus:ring-4 focus:ring-indigo-100;
+  }
+  .button {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition focus:outline-none focus:ring-4 focus:ring-indigo-100 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .button-primary {
+    @apply button bg-brand text-white hover:bg-indigo-700;
+  }
+  .button-secondary {
+    @apply button border border-slate-200 bg-white text-slate-700 hover:bg-slate-50;
+  }
+  .markdown-content {
+    @apply break-words text-sm leading-6 text-muted;
+  }
+  .markdown-content > :first-child {
+    @apply mt-0;
+  }
+  .markdown-content > :last-child {
+    @apply mb-0;
+  }
+  .markdown-content h1 {
+    @apply mb-4 mt-7 text-2xl font-bold text-ink;
+  }
+  .markdown-content h2 {
+    @apply mb-3 mt-6 text-xl font-semibold text-ink;
+  }
+  .markdown-content h3 {
+    @apply mb-2 mt-5 text-lg font-semibold text-ink;
+  }
+  .markdown-content p {
+    @apply my-3;
+  }
+  .markdown-content a {
+    @apply text-brand underline underline-offset-2 hover:text-indigo-700;
+  }
+  .markdown-content ul {
+    @apply my-3 list-disc space-y-1 pl-5;
+  }
+  .markdown-content ol {
+    @apply my-3 list-decimal space-y-1 pl-5;
+  }
+  .markdown-content blockquote {
+    @apply my-4 border-l-4 border-indigo-200 pl-4 text-slate-500;
+  }
+  .markdown-content code {
+    @apply rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-700;
+  }
+  .markdown-content pre {
+    @apply my-4 overflow-auto rounded-xl bg-slate-950 p-4 text-xs leading-6 text-slate-100;
+  }
+  .markdown-content pre code {
+    @apply bg-transparent p-0 text-inherit;
+  }
+  .markdown-content table {
+    @apply my-4 w-full border-collapse text-left text-sm;
+  }
+  .markdown-content th {
+    @apply border border-line bg-slate-50 px-3 py-2 font-semibold text-ink;
+  }
+  .markdown-content td {
+    @apply border border-line px-3 py-2 align-top;
+  }
+  .workspace-tabs {
+    @apply flex h-full items-center gap-1 overflow-x-auto px-1 py-1;
+    scrollbar-width: none;
+  }
+  .workspace-tabs-shell {
+    @apply relative overflow-hidden;
+  }
+  .workspace-tabs::-webkit-scrollbar {
+    display: none;
+  }
+  .workspace-tab {
+    display: inline-flex;
+    height: 30px;
+    width: auto;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 6px;
+    border-radius: 5px;
+    border: 1px solid transparent;
+    background: transparent;
+    padding: 0 8px;
+    font-size: 12px;
+    color: #64748b;
+    transition:
+      color 0.14s ease,
+      background-color 0.14s ease,
+      border-color 0.14s ease;
+  }
+  .workspace-tab:hover {
+    border-color: transparent;
+    background-color: #f1f6fc;
+    color: #172033;
+  }
+  .workspace-tab-active {
+    border-color: #d8e0e9;
+    background-color: #ffffff;
+    font-weight: 550;
+    color: #172033;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 4%);
+  }
+  .workspace-tab.workspace-tab-active:hover {
+    border-color: #d8e0e9;
+    background-color: #ffffff;
+    color: #172033;
+  }
+  .workspace-tab-close {
+    margin-right: -2px;
+    display: grid;
+    height: 20px;
+    width: 20px;
+    flex-shrink: 0;
+    place-items: center;
+    border-radius: 3px;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1;
+    color: inherit;
+    opacity: 0.65;
+  }
+  .workspace-tab-pin {
+    flex-shrink: 0;
+    color: #2563eb;
+  }
+  .workspace-tab-context-menu {
+    position: fixed;
+    z-index: 80;
+    width: 200px;
+    padding: 5px;
+    color: #334155;
+    background: #fff;
+    border: 1px solid rgb(148 163 184 / 24%);
+    border-radius: 10px;
+    box-shadow:
+      0 14px 32px rgb(15 23 42 / 16%),
+      0 3px 8px rgb(15 23 42 / 8%);
+    animation: workspace-tab-context-menu-enter 140ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .workspace-tab-context-menu button {
+    display: flex;
+    gap: 9px;
+    align-items: center;
+    width: 100%;
+    min-height: 31px;
+    padding: 0 9px;
+    font-size: 12px;
+    font-weight: 600;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    background: transparent;
+    border: 0;
+    border-radius: 7px;
+    transition:
+      background-color 0.16s ease,
+      color 0.16s ease;
+  }
+  .workspace-tab-context-menu button:hover:not(:disabled) {
+    color: #1d4ed8;
+    background: #eff6ff;
+  }
+  .workspace-tab-context-menu button:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+  }
+  .workspace-tab-context-divider {
+    height: 1px;
+    margin: 5px 4px;
+    background: rgb(148 163 184 / 20%);
+  }
+  .workspace-tab-method {
+    @apply rounded px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none;
+  }
+  .workspace-header-tools {
+    @apply flex shrink-0 items-center gap-1.5 border-l border-line px-2;
+  }
+  .workspace-topbar {
+    @apply flex min-w-0 items-center bg-canvas;
+  }
+  .workspace-header-action {
+    @apply grid h-8 w-8 place-items-center rounded-md text-sm text-muted transition hover:bg-slate-100 hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-200;
+  }
+  .workspace-header-action-active {
+    @apply bg-blue-50 text-blue-700;
+  }
+  .workspace-header-action.workspace-header-action-active:hover {
+    @apply bg-blue-50 text-blue-700;
+  }
+  .workspace-header-sidebar-toggle {
+    @apply absolute top-1/2 z-30 grid h-5 w-5 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-transparent text-muted transition-[left,color,background-color,box-shadow] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:bg-slate-50 hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-200 motion-reduce:transition-none;
+    box-shadow: none;
+  }
+  .workspace-theme-control {
+    position: relative;
+  }
+  .workspace-theme-menu {
+    @apply absolute right-0 top-10 z-50 w-36 rounded-xl border border-slate-200 bg-white p-1 shadow-panel;
+    animation: workspace-theme-menu-enter 160ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .workspace-theme-option {
+    @apply flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-xs font-medium text-slate-600 transition hover:bg-slate-50 hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-200;
+  }
+  .workspace-theme-option-active {
+    @apply bg-blue-50 text-blue-700;
+  }
+  .workspace-theme-option.workspace-theme-option-active:hover {
+    @apply bg-blue-100 text-blue-700;
+  }
+  .workspace-theme-option-check {
+    @apply ml-auto shrink-0 text-blue-600;
+  }
+  .workspace-global-search {
+    @apply relative w-64;
+  }
+  .workspace-global-search-control {
+    @apply relative flex h-8 overflow-hidden rounded-md border border-slate-200 bg-white;
+  }
+  .workspace-search-input {
+    @apply h-full w-full bg-transparent pl-12 pr-2 text-xs outline-none placeholder:text-slate-400;
+  }
+  .workspace-search-results {
+    @apply absolute right-0 top-10 z-30 w-80 overflow-hidden rounded-xl border border-line bg-white py-1 shadow-panel;
+  }
+  .workspace-search-result {
+    @apply flex w-full items-center gap-3 px-3 py-2.5 text-left hover:bg-slate-50;
+  }
+  .workspace-search-result-type {
+    @apply grid h-7 w-7 shrink-0 place-items-center rounded-md bg-indigo-50 text-[10px] font-semibold text-brand;
+  }
+  .workspace-sidebar {
+    @apply relative overflow-visible transition-[width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none;
+  }
+  .workspace-sidebar-expanded {
+    @apply w-64;
+  }
+  .workspace-sidebar-collapsed {
+    @apply w-[4.5rem];
+  }
+  .workspace-sidebar-resizing {
+    @apply transition-none;
+  }
+  .workspace-sidebar-resize-handle {
+    @apply absolute -right-1 top-0 z-30 h-full w-2 cursor-col-resize touch-none;
+  }
+  .workspace-sidebar-nav-layer {
+    @apply min-h-0 flex-1 transition-[opacity,transform] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none;
+  }
+  .workspace-sidebar-expanded-nav {
+    @apply overflow-y-scroll px-2 py-3;
+    scrollbar-gutter: stable;
+  }
+  .workspace-sidebar-collapsed-nav {
+    @apply overflow-visible px-1.5 py-3;
+  }
+  .workspace-sidebar-nav-visible {
+    @apply relative z-10 translate-x-0 opacity-100;
+    transition-delay: 100ms;
+  }
+  .workspace-sidebar-nav-hidden {
+    @apply pointer-events-none absolute inset-0 z-0 -translate-x-1 opacity-0;
+    transition-delay: 0ms;
+  }
+  .workspace-scrollbar,
+  .workspace-sidebar-scroll,
+  .workspace-sidebar-flyout {
+    scrollbar-color: rgb(148 163 184 / 45%) transparent;
+    scrollbar-width: thin;
+  }
+  .workspace-scrollbar::-webkit-scrollbar,
+  .workspace-sidebar-scroll::-webkit-scrollbar,
+  .workspace-sidebar-flyout::-webkit-scrollbar {
+    width: 10px;
+  }
+  .workspace-scrollbar::-webkit-scrollbar-track,
+  .workspace-sidebar-scroll::-webkit-scrollbar-track,
+  .workspace-sidebar-flyout::-webkit-scrollbar-track {
+    margin-block: 6px;
+    background: transparent;
+  }
+  .workspace-scrollbar::-webkit-scrollbar-thumb,
+  .workspace-sidebar-scroll::-webkit-scrollbar-thumb,
+  .workspace-sidebar-flyout::-webkit-scrollbar-thumb {
+    border: 3px solid transparent;
+    border-radius: 999px;
+    background-clip: padding-box;
+    background-color: rgb(148 163 184 / 45%);
+  }
+  .workspace-scrollbar::-webkit-scrollbar-thumb:hover,
+  .workspace-sidebar-scroll::-webkit-scrollbar-thumb:hover,
+  .workspace-sidebar-flyout::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(100 116 139 / 66%);
+  }
+  .workspace-menu-collapse {
+    display: grid;
+    grid-template-rows: 0fr;
+    min-width: 0;
+    opacity: 0;
+    transform: translate3d(0, -4px, 0);
+    transition:
+      grid-template-rows 180ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 150ms ease,
+      transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .workspace-menu-collapse-open {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+  .workspace-menu-collapse-content {
+    min-height: 0;
+    overflow: hidden;
+    contain: layout paint;
+  }
+  .workspace-menu-panel {
+    --workspace-menu-indent: 1rem;
+    @apply space-y-0.5 pb-1 pt-1;
+  }
+  .workspace-menu-panel-management {
+    --workspace-menu-indent: 2.25rem;
+  }
+  .workspace-menu-panel-deep {
+    --workspace-menu-indent: 2rem;
+  }
+  .workspace-menu-panel-leaf {
+    --workspace-menu-indent: 3.25rem;
+  }
+  .workspace-menu-panel-operation-leaf {
+    --workspace-menu-indent: 4.25rem;
+  }
+  .workspace-menu-empty {
+    @apply px-3 py-2 text-sm text-muted;
+  }
+  .workspace-menu-source-start {
+    @apply mt-2 pt-1;
+  }
+  .workspace-menu-branch {
+    @apply flex min-w-0 items-center rounded-lg text-sm font-medium text-slate-600;
+  }
+  .workspace-menu-branch.workspace-menu-branch-active,
+  .workspace-menu-leaf.workspace-menu-leaf-active,
+  .workspace-menu-operation.workspace-menu-operation-active {
+    @apply bg-indigo-50 text-brand;
+  }
+  .workspace-menu-leaf.workspace-menu-leaf-active,
+  .workspace-menu-operation.workspace-menu-operation-active {
+    animation: workspace-menu-selection-enter 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .workspace-menu-branch.workspace-menu-branch-text-active,
+  .workspace-menu-operation.workspace-menu-operation-text-active,
+  .workspace-collapsed-nav-item.workspace-collapsed-nav-item-text-active {
+    @apply bg-transparent font-semibold text-brand;
+  }
+  .workspace-menu-branch-primary,
+  .workspace-menu-leaf-primary {
+    @apply min-h-10;
+  }
+  .workspace-menu-leaf-primary {
+    padding-left: 0.25rem;
+  }
+  .workspace-menu-leaf-management {
+    @apply min-h-10;
+  }
+  .workspace-menu-leaf-primary::before {
+    width: 0.75rem;
+    flex: none;
+    content: '';
+  }
+  .workspace-menu-branch-secondary,
+  .workspace-menu-branch-tertiary {
+    @apply min-h-9 rounded-md;
+  }
+  .workspace-menu-branch-tertiary {
+    @apply text-slate-500;
+  }
+  .workspace-menu-branch-label {
+    @apply flex min-w-0 flex-1 items-center gap-2 py-2 pr-3 text-left text-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-200;
+    padding-left: 0.25rem;
+  }
+  .workspace-menu-branch-icon {
+    @apply grid h-5 w-5 shrink-0 place-items-center;
+  }
+  .workspace-menu-branch-name {
+    @apply min-w-0 truncate;
+    flex: 0 1 auto;
+  }
+  .workspace-menu-branch-count {
+    @apply shrink-0 rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[11px] font-medium leading-none text-muted;
+  }
+  .workspace-menu-branch-toggle {
+    @apply grid h-7 w-6 shrink-0 place-items-center rounded-md text-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-200;
+    margin-left: calc(0.25rem + var(--workspace-menu-indent, 0rem));
+  }
+  .workspace-menu-branch-chevron {
+    transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .workspace-menu-branch-open .workspace-menu-branch-chevron {
+    transform: rotate(90deg);
+  }
+  .workspace-menu-leaf {
+    @apply flex min-h-9 w-full min-w-0 items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium text-slate-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-200;
+    padding-left: calc(0.75rem + var(--workspace-menu-indent, 0rem));
+  }
+  .workspace-menu-operation {
+    position: absolute;
+    inset: 0 0 auto;
+    @apply flex min-h-9 w-full min-w-0 items-center gap-2 rounded-md px-3 py-1.5 text-left text-sm font-medium text-slate-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-200;
+    padding-left: calc(0.75rem + var(--workspace-menu-indent, 0rem));
+    content-visibility: auto;
+    contain-intrinsic-size: auto 2.25rem;
+  }
+  .workspace-menu-virtual-list {
+    position: relative;
+    contain: layout paint style;
+  }
+  .workspace-menu-virtual-row {
+    position: absolute;
+    inset: 0 0 auto;
+  }
+  .workspace-menu-virtual-row .workspace-menu-leaf {
+    height: 100%;
+  }
+  .workspace-collapsed-menu {
+    @apply relative mt-1;
+  }
+  .workspace-collapsed-nav-item {
+    @apply grid h-10 w-full place-items-center rounded-lg text-slate-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-200;
+  }
+  .workspace-collapsed-nav-item-active {
+    @apply bg-indigo-50 text-brand;
+  }
+  .workspace-sidebar-flyout {
+    @apply absolute left-full top-0 z-50 ml-3 max-h-[70vh] overflow-y-auto rounded-xl border border-line bg-white p-2 shadow-panel;
+    width: min(20rem, calc(100vw - 6rem));
+    scrollbar-gutter: stable;
+    animation: workspace-sidebar-flyout-enter 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .workspace-sidebar-flyout-header {
+    @apply flex items-center justify-between gap-3 border-b border-line px-2 pb-2 pt-1 text-sm font-semibold text-ink;
+  }
+  .workspace-sidebar-flyout-close {
+    @apply grid h-6 w-6 place-items-center rounded-md text-muted transition hover:bg-slate-100 hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-200;
+  }
+  .workspace-sidebar-flyout .workspace-menu-panel {
+    --workspace-menu-indent: 0.5rem;
+  }
+  .workspace-sidebar-flyout .workspace-menu-panel-deep {
+    --workspace-menu-indent: 1.5rem;
+  }
+  .workspace-sidebar-flyout .workspace-menu-panel-leaf {
+    --workspace-menu-indent: 2.75rem;
+  }
+  .workspace-sidebar-flyout .workspace-menu-panel-operation-leaf {
+    --workspace-menu-indent: 3.75rem;
+  }
+}
+
+@keyframes workspace-sidebar-flyout-enter {
+  from {
+    opacity: 0;
+    transform: translateX(-8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes workspace-theme-menu-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes workspace-tab-context-menu-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes workspace-menu-selection-enter {
+  from {
+    opacity: 0.65;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workspace-sidebar-flyout,
+  .workspace-theme-menu,
+  .workspace-tab-context-menu,
+  .workspace-menu-leaf.workspace-menu-leaf-active,
+  .workspace-menu-operation.workspace-menu-operation-active {
+    animation: none;
+  }
+  .workspace-menu-collapse,
+  .workspace-menu-branch-chevron {
+    transition: none;
+  }
+}
+
+html.dark {
+  background: #0f172a;
+  color-scheme: dark;
+}
+
+html.dark body,
+html.dark .bg-canvas {
+  background-color: #0f172a;
+  color: #dbe4f0;
+}
+
+html.dark .bg-white,
+html.dark .panel,
+html.dark .workspace-search-results,
+html.dark .workspace-sidebar-flyout,
+html.dark .workspace-header-sidebar-toggle {
+  background-color: #111827;
+}
+
+html.dark .border-line,
+html.dark .workspace-tab-active,
+html.dark .workspace-header-tools {
+  border-color: #263449;
+}
+
+html.dark .workspace-tabs-shell::after {
+  background: linear-gradient(90deg, transparent, #0f172a);
+}
+
+html.dark .workspace-tab {
+  background-color: #1e293b;
+  color: #cbd5e1;
+}
+
+html.dark .workspace-tab-active {
+  border-color: #3730a3;
+  background-color: rgb(49 46 129 / 45%);
+  color: #c7d2fe;
+}
+
+html.dark .text-ink,
+html.dark .text-slate-800,
+html.dark .text-slate-700,
+html.dark .text-slate-600 {
+  color: #e2e8f0;
+}
+
+html.dark .text-muted,
+html.dark .text-slate-500,
+html.dark .text-slate-400 {
+  color: #94a3b8;
+}
+
+html.dark .bg-slate-50,
+html.dark .bg-slate-100,
+html.dark .workspace-search-result:hover,
+html.dark .workspace-header-action:hover,
+html.dark .workspace-header-sidebar-toggle:hover,
+html.dark .workspace-sidebar-flyout-close:hover {
+  background-color: #1e293b;
+}
+
+html.dark .workspace-scrollbar,
+html.dark .workspace-sidebar-scroll,
+html.dark .workspace-sidebar-flyout {
+  scrollbar-color: rgb(100 116 139 / 66%) transparent;
+}
+
+html.dark .workspace-scrollbar::-webkit-scrollbar-thumb,
+html.dark .workspace-sidebar-scroll::-webkit-scrollbar-thumb,
+html.dark .workspace-sidebar-flyout::-webkit-scrollbar-thumb {
+  background-color: rgb(100 116 139 / 66%);
+}
+
+html.dark .workspace-scrollbar::-webkit-scrollbar-thumb:hover,
+html.dark .workspace-sidebar-scroll::-webkit-scrollbar-thumb:hover,
+html.dark .workspace-sidebar-flyout::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(148 163 184 / 82%);
+}
+
+html.dark .workspace-menu-branch-count {
+  border-color: #334155;
+  background-color: #1e293b;
+  color: #94a3b8;
+}
+
+html.dark .input,
+html.dark input,
+html.dark select,
+html.dark textarea {
+  border-color: #334155;
+  background-color: #111827;
+  color: #e2e8f0;
+}
+
+html.dark .workspace-tab-active {
+  border-bottom-color: #111827;
+}
