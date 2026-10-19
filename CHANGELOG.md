@@ -21,8 +21,18 @@
   * 新增 `release` 工具集，支持前端开发联调、前端构建同步、打包预览、Demo 启动和 Maven 发布流程。
   * 开发联调支持自动复用已由 IDEA 启动的 Demo 服务，也支持脚本自动构建和启动 Demo。
   * 增加前端构建产物同步到后端资源目录的标准流程，保证 `doc.html` 与前端静态资源保持一致。
+  * 新增 Profile 驱动的 Demo 测试入口，覆盖 Spring Boot 3/4、WebMvc/WebFlux、单体和 Gateway 组合，并支持网关微服务选择、Nacos gRPC 端口偏移和矩阵测试。
+  * 重整 `release` 目录为 `buildui`、`test`、`publish` 三个脚本目录，统一 `.env` 配置和 Preview 启动流程。
+  * Preview 支持通过 `--build-ui=true|false` 选择是否构建前端资源，检查通过后默认保持服务运行，便于直接访问预览地址。
 
 ### 功能优化
+
+* **Gateway**
+
+  * OpenAPI 重写增加字节级 JSON 读写路径，Jackson 2 / Jackson 3 适配器直接处理字节，减少无效的字符串复制。
+  * 增加有界的重写结果缓存，限制缓存条目数和总大小，重复请求命中时避免重复构造 JSON 树。
+  * WebMvc / WebFlux 响应重写统一更新 `Content-Length`，并保持现有 Gateway servers、Security 和 swagger-config 改写行为。
+  * 路由刷新增加单飞和防抖机制，服务 `context-path` 增加正结果与空结果 TTL 缓存，减少重复注册中心访问。
 
 * **前端**
 
@@ -35,6 +45,13 @@
   * 统一根目录开源协议与忽略规则，补充模块职责、目录结构、开发、测试和发布说明。
 
 ### BUG 修复
+
+* **认证**
+
+  * 修复登录页对密码进行 `trim` 导致前后空格密码无法登录的问题。
+  * 修复中文、emoji 等非 ASCII 密码经过浏览器 `btoa` 时抛出异常的问题，改为 UTF-8 Basic Authentication 编码。
+  * 修复 Basic 认证方案大小写敏感、空认证内容处理不明确，以及浏览器认证失败未明确返回 HTTP 401 的问题。
+  * Servlet / WebFlux 认证成功后更新 Session ID，降低会话固定风险。
 
 * **构建与资源**
 
