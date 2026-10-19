@@ -107,11 +107,14 @@ public final class NextDoc4jBasicAuthUtils {
      * 校验 Basic Authentication 头（仅校验密码）。
      */
     public static boolean validateBasicAuthentication(String authHeader, String expectedPassword) {
-        if (!hasText(authHeader) || !authHeader.startsWith(BASIC_AUTH_PREFIX)) {
+        if (!isBasicAuthenticationHeader(authHeader)) {
             return false;
         }
         try {
-            String base64Credentials = authHeader.substring(BASIC_AUTH_PREFIX.length());
+            String base64Credentials = authHeader.substring(BASIC_AUTH_PREFIX.length()).trim();
+            if (base64Credentials.isEmpty()) {
+                return false;
+            }
             String credentials = new String(Base64.getDecoder().decode(base64Credentials), StandardCharsets.UTF_8);
             int colonIndex = credentials.indexOf(':');
             String password = colonIndex != -1 ? credentials.substring(colonIndex + 1) : credentials;
@@ -119,6 +122,14 @@ public final class NextDoc4jBasicAuthUtils {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    /**
+     * 判断认证方案是否为 Basic（方案名大小写不敏感）。
+     */
+    public static boolean isBasicAuthenticationHeader(String authHeader) {
+        return hasText(authHeader) && authHeader.length() >= BASIC_AUTH_PREFIX.length()
+            && authHeader.regionMatches(true, 0, BASIC_AUTH_PREFIX, 0, BASIC_AUTH_PREFIX.length());
     }
 
     /**

@@ -505,7 +505,7 @@
     document.getElementById('loginForm').addEventListener('submit', function(e) {
         e.preventDefault();
 
-        const password = document.getElementById('password').value.trim();
+        const password = document.getElementById('password').value;
         const loginBtn = document.getElementById('loginBtn');
         const btnText = document.getElementById('btnText');
         const messageEl = document.getElementById('message');
@@ -522,7 +522,7 @@
         hideMessage();
 
         // 构造认证信息（用户名为空，只使用密码）
-        const credentials = btoa(':' + password);
+        const credentials = encodeBasicCredentials(password);
 
         // 发送认证请求
         fetch(window.location.href, {
@@ -574,6 +574,19 @@
     });
 
     // ==================== 辅助函数 ====================
+
+    /**
+     * 使用 UTF-8 编码构建 Basic Authentication 凭据。
+     * btoa 只接受 Latin-1 字符，直接处理中文或 emoji 会抛出异常。
+     */
+    function encodeBasicCredentials(password) {
+        const bytes = new TextEncoder().encode(':' + password);
+        let binary = '';
+        for (const byte of bytes) {
+            binary += String.fromCharCode(byte);
+        }
+        return btoa(binary);
+    }
 
     /**
      * 设置按钮加载状态

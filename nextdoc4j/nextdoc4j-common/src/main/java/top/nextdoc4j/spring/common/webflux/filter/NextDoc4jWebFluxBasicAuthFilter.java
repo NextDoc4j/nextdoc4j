@@ -91,10 +91,9 @@ public class NextDoc4jWebFluxBasicAuthFilter implements WebFilter {
             }
 
             String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-            if (authHeader != null && authHeader.startsWith(NextDoc4jBasicAuthUtils.BASIC_AUTH_PREFIX)) {
+            if (NextDoc4jBasicAuthUtils.isBasicAuthenticationHeader(authHeader)) {
                 if (validateBasicAuthentication(authHeader)) {
-                    createAuthenticatedSession(session);
-                    return handleAuthenticationSuccess(exchange);
+                    return createAuthenticatedSession(session).then(handleAuthenticationSuccess(exchange));
                 }
                 return handleAuthenticationFailure(exchange);
             }
@@ -133,9 +132,11 @@ public class NextDoc4jWebFluxBasicAuthFilter implements WebFilter {
         return NextDoc4jBasicAuthUtils.validateBasicAuthentication(authHeader, basicAuth.getPassword());
     }
 
-    private void createAuthenticatedSession(WebSession session) {
-        session.getAttributes().put(NextDoc4jBasicAuthUtils.AUTH_SESSION_KEY, true);
-        session.setMaxIdleTime(SESSION_TIMEOUT);
+    private Mono<Void> createAuthenticatedSession(WebSession session) {
+        return session.changeSessionId().then(Mono.fromRunnable(() -> {
+            session.getAttributes().put(NextDoc4jBasicAuthUtils.AUTH_SESSION_KEY, true);
+            session.setMaxIdleTime(SESSION_TIMEOUT);
+        }));
     }
 
     private Mono<Void> handleAuthenticationSuccess(ServerWebExchange exchange) {
@@ -150,6 +151,7 @@ public class NextDoc4jWebFluxBasicAuthFilter implements WebFilter {
         if (isAjaxRequest(exchange.getRequest())) {
             return sendJsonResponse(exchange.getResponse(), HttpStatus.UNAUTHORIZED, false, "认证失败");
         }
+        exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
         clearBrowserAuthCache(exchange.getResponse());
         return exchange.getResponse().setComplete();
     }

@@ -162,7 +162,7 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
 
         // 4. 尝试基本认证
         final String authHeader = request.getHeader("Authorization");
-        if (authHeader != null && authHeader.startsWith(NextDoc4jBasicAuthUtils.BASIC_AUTH_PREFIX)) {
+        if (NextDoc4jBasicAuthUtils.isBasicAuthenticationHeader(authHeader)) {
 
             if (validateBasicAuthentication(authHeader)) {
                 // 认证成功
@@ -244,6 +244,7 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
      */
     private void createAuthenticatedSession(HttpServletRequest request) {
         final HttpSession session = request.getSession(true);
+        request.changeSessionId();
         session.setAttribute(NextDoc4jBasicAuthUtils.AUTH_SESSION_KEY, true);
         session.setMaxInactiveInterval(SESSION_TIMEOUT_SECONDS);
     }
@@ -281,6 +282,7 @@ public class NextDoc4jBasicAuthFilter extends OncePerRequestFilter {
             sendJsonResponse(response, HttpServletResponse.SC_UNAUTHORIZED, false, "认证失败");
         } else {
             // 浏览器请求清除认证缓存
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             clearBrowserAuthCache(response);
         }
     }
