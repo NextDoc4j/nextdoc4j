@@ -26,6 +26,7 @@ import top.nextdoc4j.core.json.DocJsonNode;
 import top.nextdoc4j.core.json.DocObjectNode;
 import top.nextdoc4j.plugin.gateway.configuration.GatewayDocProperties;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -85,6 +86,21 @@ class GatewayDocOpenApiRewriterTest {
             """);
 
         assertEquals(List.of("/v3/api-docs/auth"), extractUrls(result, jackson3Mapper));
+    }
+
+    @Test
+    void shouldRewriteByteBodyAndReuseEquivalentResult() throws Exception {
+        GatewayDocOpenApiRewriter rewriter = createRewriter(new GatewayDocProperties());
+        byte[] source = "{\"urls\":[{\"name\":\"登录管理\",\"url\":\"/api/admin/v3/api-docs/auth\"}]}"
+            .getBytes(StandardCharsets.UTF_8);
+
+        byte[] first = rewriter.rewriteBody("/api/admin/v3/api-docs/swagger-config", source,
+            StandardCharsets.UTF_8);
+        byte[] second = rewriter.rewriteBody("/api/admin/v3/api-docs/swagger-config", source,
+            StandardCharsets.UTF_8);
+
+        assertEquals("/v3/api-docs/auth", extractUrls(new String(first, StandardCharsets.UTF_8), jsonMapper).get(0));
+        assertEquals(new String(first, StandardCharsets.UTF_8), new String(second, StandardCharsets.UTF_8));
     }
 
     /**

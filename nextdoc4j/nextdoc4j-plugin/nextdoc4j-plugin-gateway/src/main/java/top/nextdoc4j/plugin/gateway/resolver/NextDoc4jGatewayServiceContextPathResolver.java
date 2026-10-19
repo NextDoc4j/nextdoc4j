@@ -42,11 +42,13 @@ import java.util.concurrent.ConcurrentHashMap;
 public class NextDoc4jGatewayServiceContextPathResolver {
 
     private static final Duration DISCOVERY_TIMEOUT = Duration.ofMillis(1200);
+    private static final long POSITIVE_CACHE_MILLIS = 30_000L;
+    private static final long NEGATIVE_CACHE_MILLIS = 5_000L;
 
     private final GatewayDocProperties properties;
     private final ReactiveDiscoveryClient reactiveDiscoveryClient;
     private final DiscoveryClient discoveryClient;
-    private final Map<String, String> contextPathCache = new ConcurrentHashMap<>();
+    private final Map<String, ContextPathCacheEntry> contextPathCache = new ConcurrentHashMap<>();
 
     /**
      * 创建 context-path 解析器。
@@ -76,17 +78,20 @@ public class NextDoc4jGatewayServiceContextPathResolver {
             return StringUtils.hasText(metadataContextPath) ? metadataContextPath : "";
         }
 
-        String cachedContextPath = contextPathCache.get(serviceId);
-        String resolvedContextPath = resolveFromDiscovery(serviceId);
-        String latestContextPath = pickLatestContextPath(resolvedContextPath, metadataContextPath, cachedContextPath);
-        if (StringUtils.hasText(latestContextPath)) {
-            if (!latestContextPath.equals(cachedContextPath)) {
-                contextPathCache.put(serviceId, latestContextPath);
-            }
-            return latestContextPath;
+        ContextPathCacheEntry cached = contextPathCache.get(serviceId);
+        if (cached != null && !cached.isExpired()) {
+            return cached.found ? cached.contextPath : firstText(metadataContextPath, cached.fallback);
         }
 
-        return cachedContextPath != null ? cachedContextPath : "";
+        String resolvedContextPath = resolveFromDiscovery(serviceId);
+        if (StringUtils.hasText(resolvedContextPath)) {
+            contextPathCache.put(serviceId, ContextPathCacheEntry.found(resolvedContextPath));
+            return resolvedContextPath;
+        }
+
+        String fallback = cached != null && cached.found ? cached.contextPath : "";
+        contextPathCache.put(serviceId, ContextPathCacheEntry.empty(fallback));
+        return firstText(metadataContextPath, fallback);
     }
 
     /**
@@ -262,24 +267,6 @@ public class NextDoc4jGatewayServiceContextPathResolver {
     }
 
     /**
-     * 选择最新可用的 context-path（注册中心 > 路由 metadata > 本地缓存）。
-     */
-    private String pickLatestContextPath(String discoveredContextPath,
-                                         String metadataContextPath,
-                                         String cachedContextPath) {
-        if (StringUtils.hasText(discoveredContextPath)) {
-            return discoveredContextPath;
-        }
-        if (StringUtils.hasText(metadataContextPath)) {
-            return metadataContextPath;
-        }
-        if (StringUtils.hasText(cachedContextPath)) {
-            return cachedContextPath;
-        }
-        return "";
-    }
-
-    /**
      * 从服务实例 metadata 中提取 context-path。
      */
     private String extractContextPathFromMetadata(Map<String, String> metadata) {
@@ -348,5 +335,36 @@ public class NextDoc4jGatewayServiceContextPathResolver {
      */
     private String toStringValue(Object value) {
         return value == null ? null : value.toString();
+    }
+
+    private String firstText(String primary, String fallback) {
+        return StringUtils.hasText(primary) ? primary : (fallback == null ? "" : fallback);
+    }
+
+    private static final class ContextPathCacheEntry {
+
+        private final String contextPath;
+        private final String fallback;
+        private final boolean found;
+        private final long expiresAt;
+
+        private ContextPathCacheEntry(String contextPath, String fallback, boolean found, long ttlMillis) {
+            this.contextPath = contextPath;
+            this.fallback = fallback;
+            this.found = found;
+            this.expiresAt = System.currentTimeMillis() + ttlMillis;
+        }
+
+        private static ContextPathCacheEntry found(String contextPath) {
+            return new ContextPathCacheEntry(contextPath, "", true, POSITIVE_CACHE_MILLIS);
+        }
+
+        private static ContextPathCacheEntry empty(String fallback) {
+            return new ContextPathCacheEntry("", fallback, false, NEGATIVE_CACHE_MILLIS);
+        }
+
+        private boolean isExpired() {
+            return System.currentTimeMillis() >= expiresAt;
+        }
     }
 }

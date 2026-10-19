@@ -49,6 +49,9 @@ class Jackson3DocJsonMapperLoaderTest {
         assertNotNull(object);
         String json = mapper.writeValueAsString(object);
         assertTrue(json.contains("hello") && json.contains("world"));
+
+        byte[] bytes = mapper.writeValueAsBytes(object);
+        assertEquals("world", mapper.readTree(bytes).asObject().get("hello").asText());
     }
 
     @Test

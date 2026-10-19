@@ -39,6 +39,10 @@ import top.nextdoc4j.core.util.NextDoc4jPathMatcherUtils;
 import top.nextdoc4j.plugin.gateway.configuration.GatewayDocProperties;
 import top.nextdoc4j.plugin.gateway.constant.GatewayMetadataConstants;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -60,6 +64,7 @@ public class GatewayDocOpenApiRewriter {
     private final DocJsonMapper jsonMapper;
     private final Function<String, String> serviceIdResolver;
     private final Set<String> warnedMessages = ConcurrentHashMap.newKeySet();
+    private final RewriteCache rewriteCache = new RewriteCache(32, 32 * 1024 * 1024);
 
     public GatewayDocOpenApiRewriter(GatewayDocProperties properties,
                                      DocJsonMapper jsonMapper,
@@ -90,8 +95,40 @@ public class GatewayDocOpenApiRewriter {
         if (!StringUtils.hasText(sourceBody)) {
             return sourceBody;
         }
+        byte[] rewritten = rewriteBody(path, sourceBody.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
+        return new String(rewritten, StandardCharsets.UTF_8);
+    }
+
+    /**
+     * 改写 OpenAPI 文档 JSON 字节；失败时返回原文。
+     * <p>
+     * UTF-8 响应直接走 JSON mapper 的字节 API；其他字符集仅在输入/输出边界转换，避免正常路径的
+     * byte[]/String 往返复制。
+     *
+     * @param path            请求路径
+     * @param sourceBody      原始 JSON 响应字节
+     * @param responseCharset 响应字符集，为 null 时使用 UTF-8
+     * @return 改写后的 JSON 字节，失败或非对象 JSON 时返回原字节
+     */
+    public byte[] rewriteBody(String path, byte[] sourceBody, Charset responseCharset) {
+        if (sourceBody == null || sourceBody.length == 0 || !StringUtils.hasText(path)) {
+            return sourceBody;
+        }
+
+        Charset charset = responseCharset == null ? StandardCharsets.UTF_8 : responseCharset;
+        String cacheKey = buildCacheKey(path, sourceBody, charset);
+        byte[] cached = rewriteCache.get(cacheKey);
+        if (cached != null) {
+            return cached;
+        }
+
+        byte[] jsonBytes = sourceBody;
+        if (!StandardCharsets.UTF_8.equals(charset)) {
+            jsonBytes = new String(sourceBody, charset).getBytes(StandardCharsets.UTF_8);
+        }
+
         try {
-            DocJsonNode jsonNode = jsonMapper.readTree(sourceBody);
+            DocJsonNode jsonNode = jsonMapper.readTree(jsonBytes);
             DocObjectNode objectNode = jsonNode != null ? jsonNode.asObject() : null;
             if (objectNode == null) {
                 return sourceBody;
@@ -101,9 +138,27 @@ public class GatewayDocOpenApiRewriter {
             } else {
                 rewriteApiDocs(path, objectNode);
             }
-            return jsonMapper.writeValueAsString(objectNode);
+            byte[] rewrittenUtf8 = jsonMapper.writeValueAsBytes(objectNode);
+            byte[] rewritten = StandardCharsets.UTF_8.equals(charset)
+                ? rewrittenUtf8
+                : new String(rewrittenUtf8, StandardCharsets.UTF_8).getBytes(charset);
+            rewriteCache.put(cacheKey, rewritten);
+            return rewritten;
         } catch (Exception e) {
             return sourceBody;
+        }
+    }
+
+    private String buildCacheKey(String path, byte[] sourceBody, Charset charset) {
+        try {
+            byte[] digest = MessageDigest.getInstance("SHA-256").digest(sourceBody);
+            StringBuilder hex = new StringBuilder(digest.length * 2);
+            for (byte value : digest) {
+                hex.append(String.format("%02x", value));
+            }
+            return path + "|" + charset.name() + "|" + hex;
+        } catch (NoSuchAlgorithmException ex) {
+            return null;
         }
     }
 
@@ -530,5 +585,50 @@ public class GatewayDocOpenApiRewriter {
             normalized = normalized.substring(0, normalized.length() - 1);
         }
         return normalized.replaceAll(GatewayMetadataConstants.MULTIPLE_SLASH_PATTERN, "/");
+    }
+
+    /**
+     * 有界、线程安全的重写结果缓存。缓存只保存成功重写后的字节，不缓存失败结果。
+     */
+    private static final class RewriteCache {
+
+        private final int maxEntries;
+        private final long maxBytes;
+        private final LinkedHashMap<String, byte[]> entries = new LinkedHashMap<>(16, 0.75f, true);
+        private long totalBytes;
+
+        private RewriteCache(int maxEntries, long maxBytes) {
+            this.maxEntries = maxEntries;
+            this.maxBytes = maxBytes;
+        }
+
+        private synchronized byte[] get(String key) {
+            if (key == null) {
+                return null;
+            }
+            byte[] value = entries.get(key);
+            return value == null ? null : value.clone();
+        }
+
+        private synchronized void put(String key, byte[] value) {
+            if (key == null || value == null || value.length == 0 || value.length > maxBytes) {
+                return;
+            }
+
+            byte[] previous = entries.remove(key);
+            if (previous != null) {
+                totalBytes -= previous.length;
+            }
+
+            while (!entries.isEmpty() && (entries.size() >= maxEntries || totalBytes + value.length > maxBytes)) {
+                Map.Entry<String, byte[]> eldest = entries.entrySet().iterator().next();
+                totalBytes -= eldest.getValue().length;
+                entries.remove(eldest.getKey());
+            }
+
+            byte[] copy = value.clone();
+            entries.put(key, copy);
+            totalBytes += copy.length;
+        }
     }
 }

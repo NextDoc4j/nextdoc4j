@@ -49,6 +49,9 @@ class Jackson2DocJsonMapperLoaderTest {
         DocObjectNode object = root.asObject();
         assertNotNull(object);
         assertEquals("{\"hello\":\"world\"}", mapper.writeValueAsString(object).replace(" ", ""));
+
+        byte[] bytes = mapper.writeValueAsBytes(object);
+        assertEquals("world", mapper.readTree(bytes).asObject().get("hello").asText());
     }
 
     @Test

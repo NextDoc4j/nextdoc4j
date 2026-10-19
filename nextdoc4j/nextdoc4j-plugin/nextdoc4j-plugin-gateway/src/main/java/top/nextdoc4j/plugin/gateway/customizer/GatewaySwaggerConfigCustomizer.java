@@ -31,12 +31,14 @@ import reactor.core.scheduler.Schedulers;
 import top.nextdoc4j.plugin.gateway.model.GatewayDocRouteEntry;
 import top.nextdoc4j.plugin.gateway.provider.GatewayRouteDocProvider;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Gateway Swagger 配置定制器
@@ -51,10 +53,15 @@ public class GatewaySwaggerConfigCustomizer {
 
     private static final Logger log = LoggerFactory.getLogger(GatewaySwaggerConfigCustomizer.class);
     private static final String REFRESH_ROUTES_EVENT_CLASS_NAME = "org.springframework.cloud.gateway.event.RefreshRoutesEvent";
+    private static final Duration REFRESH_DEBOUNCE = Duration.ofMillis(500);
 
     private final SwaggerUiConfigProperties swaggerUiConfigProperties;
     private final GatewayRouteDocProvider routeDocProvider;
     private volatile List<GatewayDocRouteEntry> routeEntries = Collections.emptyList();
+    private final AtomicReference<Mono<Void>> inFlightRefresh = new AtomicReference<>();
+    private final Object scheduleMonitor = new Object();
+    private boolean refreshScheduled;
+    private boolean refreshPending;
 
     public GatewaySwaggerConfigCustomizer(SwaggerUiConfigProperties swaggerUiConfigProperties,
                                           GatewayRouteDocProvider routeDocProvider) {
@@ -67,7 +74,7 @@ public class GatewaySwaggerConfigCustomizer {
      */
     @PostConstruct
     public void init() {
-        refreshUrlsAsync().subscribe();
+        scheduleRefresh();
     }
 
     /**
@@ -79,7 +86,7 @@ public class GatewaySwaggerConfigCustomizer {
         if (event == null || !REFRESH_ROUTES_EVENT_CLASS_NAME.equals(event.getClass().getName())) {
             return;
         }
-        refreshUrlsAsync().subscribe();
+        scheduleRefresh();
     }
 
     /**
@@ -88,29 +95,83 @@ public class GatewaySwaggerConfigCustomizer {
     @Async
     @EventListener(HeartbeatEvent.class)
     public void onHeartbeat(HeartbeatEvent event) {
-        refreshUrlsAsync().subscribe();
+        scheduleRefresh();
     }
 
     /**
-     * 非阻塞刷新 URL 列表
+     * 请求一次后台刷新。连续请求会在 500ms 窗口内合并。
+     */
+    public void scheduleRefresh() {
+        synchronized (scheduleMonitor) {
+            refreshPending = true;
+            if (refreshScheduled) {
+                return;
+            }
+            refreshScheduled = true;
+        }
+
+        Mono.delay(REFRESH_DEBOUNCE).subscribe(ignored -> runScheduledRefresh(), error -> {
+            synchronized (scheduleMonitor) {
+                refreshScheduled = false;
+            }
+            log.debug("Failed to schedule gateway swagger refresh", error);
+        });
+    }
+
+    private void runScheduledRefresh() {
+        synchronized (scheduleMonitor) {
+            refreshScheduled = false;
+            refreshPending = false;
+        }
+
+        refreshUrlsAsync().doFinally(signal -> schedulePendingRefresh()).subscribe();
+    }
+
+    private void schedulePendingRefresh() {
+        boolean pending;
+        synchronized (scheduleMonitor) {
+            pending = refreshPending;
+            refreshPending = false;
+        }
+        if (pending) {
+            scheduleRefresh();
+        }
+    }
+
+    /**
+     * 非阻塞刷新 URL 列表；同一时间只保留一个实际刷新任务。
      */
     public Mono<Void> refreshUrlsAsync() {
-        return routeDocProvider.getAutoDiscoveredDocEntries()
-            .subscribeOn(Schedulers.boundedElastic())
-            .collectList()
-            .doOnNext(this::applyUrls)
-            .then()
-            .onErrorResume(e -> {
-                log.error("Failed to refresh swagger urls", e);
-                return Mono.empty();
-            });
+        for (;;) {
+            Mono<Void> current = inFlightRefresh.get();
+            if (current != null) {
+                return current;
+            }
+
+            AtomicReference<Mono<Void>> taskReference = new AtomicReference<>();
+            Mono<Void> task = Mono.defer(() -> routeDocProvider.getAutoDiscoveredDocEntries()
+                    .subscribeOn(Schedulers.boundedElastic())
+                    .collectList()
+                    .doOnNext(this::applyUrls)
+                    .then()
+                    .onErrorResume(e -> {
+                        log.error("Failed to refresh swagger urls", e);
+                        return Mono.empty();
+                    }))
+                .doFinally(signal -> inFlightRefresh.compareAndSet(taskReference.get(), null))
+                .cache();
+            taskReference.set(task);
+            if (inFlightRefresh.compareAndSet(null, task)) {
+                return task;
+            }
+        }
     }
 
     /**
      * 同步入口，保持向后兼容
      */
     public void refreshUrls() {
-        refreshUrlsAsync().subscribe();
+        scheduleRefresh();
     }
 
     /**

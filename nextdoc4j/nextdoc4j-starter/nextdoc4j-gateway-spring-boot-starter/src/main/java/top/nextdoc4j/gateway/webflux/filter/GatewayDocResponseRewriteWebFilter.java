@@ -64,14 +64,15 @@ public class GatewayDocResponseRewriteWebFilter implements WebFilter {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         String path = exchange.getRequest().getURI().getPath();
-        Mono<Void> refreshMono = Mono.empty();
         if (rewriter.isSwaggerConfig(path)) {
             GatewaySwaggerConfigCustomizer customizer = swaggerConfigCustomizerProvider.getIfAvailable();
-            refreshMono = customizer != null ? customizer.refreshUrlsAsync() : Mono.empty();
+            if (customizer != null) {
+                customizer.scheduleRefresh();
+            }
         }
 
         if (!rewriter.shouldRewrite(path)) {
-            return refreshMono.then(chain.filter(exchange));
+            return chain.filter(exchange);
         }
 
         ServerHttpResponse originalResponse = exchange.getResponse();
@@ -90,9 +91,7 @@ public class GatewayDocResponseRewriteWebFilter implements WebFilter {
                     dataBuffer.read(content);
                     DataBufferUtils.release(dataBuffer);
 
-                    String sourceBody = new String(content, StandardCharsets.UTF_8);
-                    String rewrittenBody = rewriter.rewriteBody(path, sourceBody);
-                    byte[] rewrittenBytes = rewrittenBody.getBytes(StandardCharsets.UTF_8);
+                    byte[] rewrittenBytes = rewriter.rewriteBody(path, content, StandardCharsets.UTF_8);
                     getHeaders().setContentLength(rewrittenBytes.length);
                     return super.writeWith(Mono.just(dataBufferFactory.wrap(rewrittenBytes)));
                 });
@@ -104,7 +103,7 @@ public class GatewayDocResponseRewriteWebFilter implements WebFilter {
             }
         };
 
-        return refreshMono.then(chain.filter(exchange.mutate().response(decoratedResponse).build()));
+        return chain.filter(exchange.mutate().response(decoratedResponse).build());
     }
 
     /**

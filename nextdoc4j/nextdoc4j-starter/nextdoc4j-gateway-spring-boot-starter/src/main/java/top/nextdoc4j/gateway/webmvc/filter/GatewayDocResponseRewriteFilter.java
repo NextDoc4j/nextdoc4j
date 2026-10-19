@@ -68,7 +68,7 @@ public class GatewayDocResponseRewriteFilter extends OncePerRequestFilter {
         if (rewriter.isSwaggerConfig(path)) {
             GatewaySwaggerConfigCustomizer customizer = swaggerConfigCustomizerProvider.getIfAvailable();
             if (customizer != null) {
-                customizer.refreshUrls();
+                customizer.scheduleRefresh();
             }
         }
 
@@ -92,9 +92,7 @@ public class GatewayDocResponseRewriteFilter extends OncePerRequestFilter {
         }
 
         Charset charset = resolveCharset(responseWrapper.getCharacterEncoding());
-        String sourceBody = new String(responseBody, charset);
-        String rewrittenBody = rewriter.rewriteBody(path, sourceBody);
-        byte[] rewrittenBytes = rewrittenBody.getBytes(charset);
+        byte[] rewrittenBytes = rewriter.rewriteBody(path, responseBody, charset);
 
         responseWrapper.resetBuffer();
         responseWrapper.setContentLength(rewrittenBytes.length);

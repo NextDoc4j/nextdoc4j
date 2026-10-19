@@ -50,8 +50,18 @@ public class Jackson2DocJsonMapper implements DocJsonMapper {
     }
 
     @Override
+    public DocJsonNode readTree(byte[] json) throws Exception {
+        return wrap(objectMapper.readTree(json));
+    }
+
+    @Override
     public String writeValueAsString(DocJsonNode node) throws Exception {
         return objectMapper.writeValueAsString(unwrap(node));
+    }
+
+    @Override
+    public byte[] writeValueAsBytes(DocJsonNode node) throws Exception {
+        return objectMapper.writeValueAsBytes(unwrap(node));
     }
 
     @Override
