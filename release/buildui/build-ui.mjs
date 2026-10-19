@@ -5,7 +5,7 @@ import {
   assertFile,
   backendResources,
   runPnpm,
-} from './common.mjs';
+} from '../common.mjs';
 
 const staticRoot = path.join(backendResources, 'nextdoc');
 const docHtml = path.join(backendResources, 'doc.html');

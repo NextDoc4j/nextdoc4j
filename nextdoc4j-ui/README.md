@@ -65,7 +65,20 @@ pnpm --dir nextdoc4j-ui run dev
 默认 Vite 地址是 `http://localhost:5777`。开发服务器的 `/api` 请求会代理到 `.env.development` 配置的后端地址；使用统一联调脚本时，代理会自动指向本地 Demo 或 IDEA 中已经运行的 Demo：
 
 ```bash
-pnpm --dir release run test-dev
+# 单体：启动 UI + 单体服务
+pnpm --dir release run test-dev-single
+
+# 网关：启动 UI + 网关 + 微服务
+pnpm --dir release run test-dev-gateway
+```
+
+网关模式默认启动用户、系统、文件服务，也可以通过 `NEXTDOC4J_DEMO_GATEWAY_SERVICES=user,system` 指定服务列表。联调脚本会根据启动场景自动设置 Vite 代理，不需要修改 `.env.development`。
+
+也可以用 Profile 选择 Spring Boot 3/4、单体/网关、WebMvc/WebFlux 组合，例如：
+
+```bash
+pnpm --dir release run test-dev -- --profile=sb4-single-webflux
+pnpm --dir release run test-dev -- --profile=sb4-gateway-webmvc --services=user,system
 ```
 
 完整检查包括 TypeScript、ESLint、Vitest 和 Prettier：

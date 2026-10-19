@@ -7,7 +7,7 @@ import {
   rootPom,
   runMaven,
   runPnpm,
-} from './common.mjs';
+} from '../common.mjs';
 
 const args = [...process.argv.slice(2)];
 if (args[0] === '--') {
@@ -26,8 +26,9 @@ if (settingsIndex >= 0) {
 const skipChecks =
   args.includes('--skip-checks') ||
   /^(1|true|yes)$/i.test(process.env.NEXTDOC4J_PUBLISH_SKIP_CHECKS || '');
-if (skipChecks) {
-  args.splice(args.indexOf('--skip-checks'), 1);
+const skipChecksIndex = args.indexOf('--skip-checks');
+if (skipChecksIndex >= 0) {
+  args.splice(skipChecksIndex, 1);
 }
 
 if (args.length > 0) {
@@ -38,7 +39,11 @@ if (!skipChecks) {
   await runPnpm(['run', 'check']);
   await runPnpm(['run', 'build:backend']);
   await runMaven(['-f', rootPom, 'test']);
-  await run(process.execPath, [path.join(repoRoot, 'release', 'test-preview.mjs'), '--skip-ui-build']);
+  await run(process.execPath, [
+    path.join(repoRoot, 'release', 'test', 'test-preview.mjs'),
+    '--build-ui=false',
+    '--keep-alive=false',
+  ]);
 }
 
 const settingsArgs = mavenSettingsArgs(settingsPath);

@@ -45,14 +45,6 @@ export const rootPom = path.join(repoRoot, 'pom.xml');
 export const backendRoot = path.join(repoRoot, 'nextdoc4j');
 export const backendPom = path.join(backendRoot, 'pom.xml');
 export const uiRoot = path.join(repoRoot, 'nextdoc4j-ui');
-export const demoMonolithModule =
-  'nextdoc4j-demo/nextdoc4j-demo-boot3/nextdoc4j-demo-boot3-monolith';
-export const demoMonolithRoot = path.join(repoRoot, demoMonolithModule);
-export const demoJar = path.join(
-  demoMonolithRoot,
-  'target',
-  'nextdoc4j-demo-boot3-monolith.jar',
-);
 export const backendResources = path.join(
   backendRoot,
   'nextdoc4j-ui',
@@ -258,6 +250,6 @@ export async function assertHttp(url, label = url) {
 }
 
 export function mavenSettingsArgs(settingsPath) {
-  const configuredSettings = settingsPath || process.env.NEXTDOC4J_MAVEN_SETTINGS || process.env.MAVEN_SETTINGS;
+  const configuredSettings = settingsPath || process.env.NEXTDOC4J_MAVEN_SETTINGS;
   return configuredSettings ? ['-s', configuredSettings] : [];
 }

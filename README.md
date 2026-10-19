@@ -178,8 +178,14 @@ mvn test
 # React UI 构建并同步到后端资源
 pnpm --dir release run build-ui
 
-# 前端开发联调（启动 UI + Spring Boot 3 Demo）
-pnpm --dir release run test-dev
+# 前端开发联调（启动 UI + 单体服务）
+pnpm --dir release run test-dev-single
+
+# 前端开发联调（启动 UI + 网关 + 指定微服务）
+pnpm --dir release run test-dev-gateway
+
+# 任意 Demo 场景
+pnpm --dir release run test-dev -- --profile=sb4-single-webflux
 
 # 打包后的 Demo 预览测试
 pnpm --dir release run test-preview

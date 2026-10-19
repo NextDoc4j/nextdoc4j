@@ -7,9 +7,12 @@
     "pnpm": ">=9.12.0"
   },
   "scripts": {
-    "build-ui": "node build-ui.mjs",
-    "test-dev": "node test-dev.mjs",
-    "test-preview": "node test-preview.mjs",
-    "publish": "node publish.mjs"
+    "build-ui": "node buildui/build-ui.mjs",
+    "test-dev": "node test/test-dev.mjs",
+    "test-dev-single": "node test/test-dev.mjs --profile=sb3-single-webmvc",
+    "test-dev-gateway": "node test/test-dev.mjs --profile=sb3-gateway-webflux",
+    "test-matrix": "node test/test-matrix.mjs",
+    "test-preview": "node test/test-preview.mjs",
+    "publish": "node publish/publish.mjs"
   }
 }
