@@ -49,29 +49,29 @@ html > body[data-scroll-locked] {
   display: flex;
   flex: 0 0 auto;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.25rem;
   min-width: max-content;
   white-space: nowrap;
 }
 
 .nd-platform-control {
   --nd-platform-accent: var(--color-fd-primary);
-  --nd-platform-trigger-size: calc(2.25rem - 2px);
+  --nd-platform-trigger-size: calc(2rem - 2px);
+  position: relative;
   display: flex;
   box-sizing: border-box;
   flex: 0 0 auto;
   flex-direction: row;
   align-items: center;
-  width: 2.25rem;
+  width: 2rem;
   height: 2rem;
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--nd-platform-accent) 28%, var(--color-fd-border));
+  border: 0;
   border-radius: 9999px;
-  background: var(--color-fd-secondary);
-  color: var(--color-fd-muted-foreground);
+  color: var(--color-fd-foreground);
+  background: transparent;
   transition:
     width 320ms cubic-bezier(0.22, 1, 0.36, 1),
-    border-color 180ms ease,
     background-color 180ms ease,
     box-shadow 180ms ease;
 }
@@ -94,12 +94,18 @@ html > body[data-scroll-locked] {
 
 .nd-platform-control[data-expanded='true'] {
   width: 6.5rem;
-  background: var(--color-fd-card);
-  border-color: var(--color-fd-border);
+  background: color-mix(in srgb, var(--color-fd-primary) 16%, var(--color-fd-secondary));
   box-shadow: 0 5px 18px color-mix(in srgb, var(--color-fd-foreground) 10%, transparent);
+  z-index: 10;
+}
+
+html:not(.dark) .nd-platform-control[data-expanded='true'] {
+  background: #fff;
 }
 
 .nd-platform-trigger {
+  position: relative;
+  z-index: 2;
   display: inline-flex;
   flex: 0 0 var(--nd-platform-trigger-size);
   align-items: center;
@@ -113,7 +119,7 @@ html > body[data-scroll-locked] {
   color: var(--nd-platform-accent);
   cursor: pointer;
   line-height: 0;
-  order: 2;
+  order: 1;
   transition: background-color 160ms ease, transform 160ms ease;
 }
 
@@ -121,9 +127,14 @@ html > body[data-scroll-locked] {
   background: color-mix(in srgb, var(--nd-platform-accent) 12%, transparent);
 }
 
+.nd-platform-control[data-expanded='true'] .nd-platform-trigger {
+  background: transparent;
+  color: var(--nd-platform-accent);
+}
+
 .nd-platform-trigger:focus-visible,
 .nd-platform-visit:focus-visible {
-  outline: 2px solid var(--nd-platform-accent);
+  outline: 2px solid var(--color-fd-ring, var(--color-fd-primary));
   outline-offset: -2px;
 }
 
@@ -151,18 +162,23 @@ html > body[data-scroll-locked] {
   display: flex;
   flex: 0 0 0;
   align-items: center;
+  order: 2;
   width: 0;
+  height: 100%;
   min-width: 0;
   overflow: hidden;
   gap: 0.55rem;
   padding-inline: 0;
-  color: #000;
-  order: 1;
+  border-radius: 9999px;
+  color: var(--color-fd-muted-foreground);
+  background: transparent;
   opacity: 0;
-  transform: translateX(0.5rem);
+  transform: translateX(-0.35rem);
   transition:
+    flex-basis 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    width 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
     opacity 150ms ease,
-    transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+    transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
   pointer-events: none;
 }
 
@@ -171,13 +187,8 @@ html > body[data-scroll-locked] {
   width: auto;
   padding-inline: 0.55rem 0.15rem;
   opacity: 1;
-  transform: translateX(0);
-  transition-delay: 55ms;
   pointer-events: auto;
-}
-
-.dark .nd-platform-details {
-  color: #fff;
+  transform: translateX(0);
 }
 
 .nd-platform-stars {
@@ -205,16 +216,16 @@ html > body[data-scroll-locked] {
   height: 1.45rem;
   padding: 0;
   border-radius: 9999px;
-  background: var(--color-fd-secondary);
-  color: inherit;
+  background: var(--color-fd-accent);
+  color: var(--color-fd-accent-foreground);
   text-decoration: none;
   transition: background-color 150ms ease, color 150ms ease;
   white-space: nowrap;
 }
 
 .nd-platform-visit:hover {
-  background: var(--color-fd-accent);
-  color: inherit;
+  background: var(--color-fd-primary);
+  color: var(--color-fd-primary-foreground);
 }
 
 .nd-platform-visit svg {
