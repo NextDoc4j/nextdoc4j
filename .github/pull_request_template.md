@@ -32,7 +32,7 @@
 
 - [ ] `mvn test`
 - [ ] `(cd nextdoc4j-ui && pnpm check)`
-- [ ] `(cd nextdoc4j-doc && pnpm type-check && pnpm docs:build)`
+- [ ] `(cd nextdoc4j-doc && pnpm type-check && pnpm build)`
 - [ ] `pnpm --dir release run test-preview`
 - [ ] 已执行其他验证，见上方说明
 - [ ] 未执行验证，已说明原因

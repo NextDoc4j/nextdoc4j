@@ -48,7 +48,7 @@ mvn test
 官网验证：
 
 ```bash
-(cd nextdoc4j-doc && pnpm type-check && pnpm docs:build)
+(cd nextdoc4j-doc && pnpm type-check && pnpm build)
 ```
 
 前后端开发联调和打包预览：

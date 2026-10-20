@@ -1,0 +1,35 @@
+---
+title: 品牌配置
+description: 自定义 NextDoc4j 文档界面的 Logo、标题和页脚信息。
+---
+
+品牌配置位于 `nextdoc4j.extension.brand`。
+
+## 配置项
+
+| 配置项 | 类型 | 说明 |
+| --- | --- | --- |
+| `logo` | `string` | Logo 路径，支持 classpath 资源。 |
+| `title` | `string` | 登录页和文档导航显示的主标题。 |
+| `footer-text` | `string` | 页脚文本，支持 Markdown 链接和环境变量。 |
+
+## YAML 示例
+
+```yaml title="application.yml"
+nextdoc4j:
+  extension:
+    brand:
+      logo: classpath:brand/logo/logo.png
+      title: 企业级开放平台 API 文档
+      footer-text: 'Copyright © 2025 [NextDoc4j](https://nextdoc4j.top)'
+```
+
+## Properties 示例
+
+```properties title="application.properties"
+nextdoc4j.extension.brand.logo=classpath:brand/logo/logo.png
+nextdoc4j.extension.brand.title=企业级开放平台 API 文档
+nextdoc4j.extension.brand.footer-text=Copyright © 2025 NextDoc4j
+```
+
+品牌资源放在宿主项目的 `src/main/resources` 下，并确保路径可被 Spring Boot classpath 访问。

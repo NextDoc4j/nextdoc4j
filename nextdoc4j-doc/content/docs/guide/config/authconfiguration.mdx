@@ -1,0 +1,31 @@
+---
+title: 简单认证配置
+description: 为 API 文档增加轻量密码保护，支持动态生成凭据和自定义静态密码。
+---
+
+简单认证配置位于 `nextdoc4j.auth`。
+
+## 参数速查
+
+| 配置项 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `nextdoc4j.auth.enabled` | `boolean` | `false` | 是否开启文档密码拦截。 |
+| `nextdoc4j.auth.password` | `string` | 自动生成 UUID | 自定义访问密码。 |
+
+## 配置示例
+
+```yaml title="application.yml"
+nextdoc4j:
+  enabled: true
+  auth:
+    enabled: true
+    password: change-me
+```
+
+未配置 `password` 时，应用启动会在控制台输出临时密码。认证只保护文档入口和相关资源，不替代业务接口鉴权。
+
+## 使用建议
+
+- 生产环境使用随机密码或由部署系统注入环境变量。
+- 结合 `nextdoc4j.production=true` 控制生产环境是否暴露文档。
+- 认证失败会返回明确的 HTTP 401，前端会保留用户输入的空格和 UTF-8 字符。

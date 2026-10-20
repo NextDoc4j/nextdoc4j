@@ -1,0 +1,68 @@
+---
+title: NextDoc4j 前端开发指南
+description: NextDoc4j UI 使用 React、TypeScript 和 Vite 构建，提供 API 文档浏览、在线调试和导出能力。
+---
+
+`nextdoc4j-ui` 是独立的 React 前端应用，官网 `nextdoc4j-doc` 使用 Fumadocs 构建，两个项目分别维护和发布。
+
+## 技术栈
+
+| 技术 | 用途 |
+| --- | --- |
+| React | 页面与交互组件 |
+| TypeScript | 类型安全 |
+| Vite | 开发服务器和生产构建 |
+| Tailwind CSS | 样式基础 |
+| CodeMirror | JSON、XML 和脚本编辑 |
+| Vitest | 单元与组件测试 |
+
+## 目录结构
+
+```text
+nextdoc4j-ui/
+├── src/
+│   ├── components/       # 通用交互组件
+│   ├── features/         # 首页、文档、调试、导出等功能
+│   ├── lib/              # HTTP、路由、存储和工具
+│   └── styles/           # 功能模块样式
+├── scripts/              # 后端资源同步和兼容性夹具
+└── tests/                # 单元、组件和功能测试
+```
+
+## 本地开发
+
+```bash
+cd nextdoc4j-ui
+pnpm install
+pnpm dev
+```
+
+常用检查命令：
+
+```bash
+pnpm typecheck
+pnpm lint
+pnpm test
+pnpm format:check
+pnpm check
+```
+
+## 构建后端资源
+
+将前端构建结果同步到后端静态资源目录：
+
+```bash
+pnpm build:backend
+```
+
+发布工具会检查 `doc.html` 和 `nextdoc/assets` 是否生成，并在 Demo 预览中验证 OpenAPI 请求和网关聚合能力。
+
+## API 文档数据
+
+前端通过宿主应用提供的接口读取：
+
+- `/v3/api-docs`
+- `/v3/api-docs/swagger-config`
+- 聚合场景下的下游服务 OpenAPI 地址
+
+调试、认证、模型展示、Markdown 文档和导出功能都围绕这些 OpenAPI 数据构建。

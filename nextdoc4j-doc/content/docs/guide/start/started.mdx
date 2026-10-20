@@ -1,0 +1,133 @@
+---
+title: 快速开始
+description: NextDoc4j 快速开始集成指南：完成依赖引入、配置启用并访问在线调试工作台。
+---
+
+NextDoc4j 以单套 Starter 坐标适配 Spring Boot 3 / 4，以及 WebMvc、WebFlux 和 Spring Cloud Gateway 场景。
+
+<Callout title="版本说明" type="info">
+从 1.4.0 起，宿主项目使用统一的 `nextdoc4j-spring-boot-starter` 或 `nextdoc4j-gateway-spring-boot-starter`，不再区分 Boot 3 / Boot 4 后缀。
+</Callout>
+
+## 三步集成单体服务
+
+### 1. 添加 Maven 依赖
+
+WebMvc 和 WebFlux 选择与项目 Web 栈匹配的 SpringDoc UI：
+
+```xml title="Spring Boot 3 + WebMvc"
+<dependency>
+    <groupId>top.nextdoc4j</groupId>
+    <artifactId>nextdoc4j-spring-boot-starter</artifactId>
+    <version>1.5.0</version>
+</dependency>
+<dependency>
+    <groupId>org.springdoc</groupId>
+    <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+    <version>2.8.17</version>
+</dependency>
+```
+
+```xml title="Spring Boot 3 + WebFlux"
+<dependency>
+    <groupId>top.nextdoc4j</groupId>
+    <artifactId>nextdoc4j-spring-boot-starter</artifactId>
+    <version>1.5.0</version>
+</dependency>
+<dependency>
+    <groupId>org.springdoc</groupId>
+    <artifactId>springdoc-openapi-starter-webflux-ui</artifactId>
+    <version>2.8.17</version>
+</dependency>
+```
+
+Spring Boot 4 使用 SpringDoc 3.x，对应坐标保持不变，只需使用兼容版本。
+
+### 2. 启用配置
+
+```yaml title="application.yml"
+nextdoc4j:
+  enabled: true
+  # 可选：自定义文档入口，默认 /doc.html
+  # doc-path: /docs
+```
+
+```properties title="application.properties"
+nextdoc4j.enabled=true
+# nextdoc4j.doc-path=/docs
+```
+
+### 3. 启动并访问
+
+启动应用后打开：
+
+```text
+http://localhost:8080/doc.html
+```
+
+配置了 `nextdoc4j.doc-path` 后，请使用对应的自定义路径。默认端口由宿主 Spring Boot 应用决定。
+
+## 微服务网关场景
+
+网关聚合服务引入统一网关 Starter，并根据网关运行时选择 Spring Cloud Gateway 依赖：
+
+```xml title="Gateway WebFlux"
+<dependency>
+    <groupId>top.nextdoc4j</groupId>
+    <artifactId>nextdoc4j-gateway-spring-boot-starter</artifactId>
+    <version>1.5.0</version>
+</dependency>
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-gateway-server-webflux</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.springdoc</groupId>
+    <artifactId>springdoc-openapi-starter-webflux-ui</artifactId>
+    <version>2.8.17</version>
+</dependency>
+```
+
+```xml title="Gateway WebMvc"
+<dependency>
+    <groupId>top.nextdoc4j</groupId>
+    <artifactId>nextdoc4j-gateway-spring-boot-starter</artifactId>
+    <version>1.5.0</version>
+</dependency>
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-gateway-server-webmvc</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.springdoc</groupId>
+    <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+    <version>2.8.17</version>
+</dependency>
+```
+
+网关和下游服务都需要提供有效的 SpringDoc OpenAPI 文档，NextDoc4j 会在工作台中按服务维度聚合和切换。
+
+## 最小 Controller 示例
+
+```java
+@RestController
+@RequestMapping("/users")
+@Tag(name = "用户管理")
+public class UserController {
+
+    @GetMapping("/{id}")
+    @Operation(summary = "查询用户")
+    public UserView get(@PathVariable Long id) {
+        return new UserView(id, "NextDoc4j User");
+    }
+}
+```
+
+使用 `@Tag`、`@Operation`、`@Parameter` 等标准 OpenAPI 注解即可生成可浏览、可调试的接口文档。
+
+## 常见问题排查
+
+- Spring Boot 低于 3.4.0 时可能缺少 `LiteWebJarsResourceResolver`，建议升级到 3.5.x 或 4.x。
+- 自定义入参对象没有展开时，检查 `springdoc.default-flat-param-object` 是否开启。
+- 参数显示为 `arg0` 时，在 Maven 编译插件中增加 `-parameters`。
+- 登录页使用中文或 emoji 密码时，请使用 1.5.0 及以上版本，UTF-8 Basic Authentication 已修复相关编码问题。

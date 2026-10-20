@@ -1,0 +1,28 @@
+---
+title: Sa-Token 权限码插件
+description: 解析 Sa-Token 权限和角色注解，在接口调试时展示权限元数据。
+---
+
+Sa-Token 插件支持 `@SaCheckPermission`、`@SaCheckRole` 和 `@SaIgnore`。
+
+## 引入依赖
+
+```xml
+<dependency>
+  <groupId>top.nextdoc4j</groupId>
+  <artifactId>nextdoc4j-plugin-security-satoken</artifactId>
+  <version>1.5.0</version>
+</dependency>
+```
+
+## 支持的注解
+
+| 注解 | 作用 |
+| --- | --- |
+| `@SaCheckPermission` | 展示权限码和匹配模式。 |
+| `@SaCheckRole` | 展示角色要求。 |
+| `@SaIgnore` | 标记免鉴权接口。 |
+
+## 自定义权限解析器
+
+非 Sa-Token 鉴权框架可以实现 `NextDoc4jSecurityMetadataResolver`，将权限信息写入统一元数据模型。

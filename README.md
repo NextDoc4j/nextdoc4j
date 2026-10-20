@@ -17,7 +17,7 @@ nextdoc4j/
 ├── nextdoc4j/          # Java 后端、Starter、插件
 ├── nextdoc4j-tests/     # 集中单元测试与契约测试（不发布）
 ├── nextdoc4j-ui/       # React 前端源码
-├── nextdoc4j-doc/      # VitePress 官网与使用文档
+├── nextdoc4j-doc/      # Fumadocs 官网与使用文档
 ├── nextdoc4j-demo/     # MVC、WebFlux、Gateway 集成示例
 ├── static/             # README 图片、Logo、截图
 └── README.md
@@ -190,8 +190,8 @@ pnpm --dir release run test-dev -- --profile=sb4-single-webflux
 # 打包后的 Demo 预览测试
 pnpm --dir release run test-preview
 
-# 官网
-(cd nextdoc4j-doc && pnpm install && pnpm docs:dev)
+# 官网开发服务
+(cd nextdoc4j-doc && pnpm install && pnpm dev)
 
 # 集成示例
 (cd nextdoc4j-demo && mvn verify)

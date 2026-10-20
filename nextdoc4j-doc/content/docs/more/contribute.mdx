@@ -1,0 +1,33 @@
+---
+title: 贡献指南
+description: 参与 NextDoc4j 的 Issue 排查、新特性开发、文档编写和测试验证。
+---
+
+欢迎通过代码、文档、测试和问题反馈参与 NextDoc4j。
+
+## 代码托管平台
+
+- [Gitee 主仓库](https://gitee.com/nextdoc4j/nextdoc4j)
+- [GitHub 同步仓库](https://github.com/NextDoc4j/nextdoc4j)
+- [GitCode 同步入口](https://gitcode.com/NextDoc4j)
+
+## 分支模型
+
+长期主线为 `master`，短期分支完成验证后提交 PR：
+
+| 分支 | 用途 |
+| --- | --- |
+| `feat/<name>` | 新功能 |
+| `fix/<name>` | 缺陷修复 |
+| `docs/<name>` | 文档和官网 |
+| `demo/<name>` | 集成示例 |
+
+## 提交前检查
+
+```bash
+mvn test
+(cd nextdoc4j-ui && pnpm check)
+(cd nextdoc4j-doc && pnpm type-check && pnpm build)
+```
+
+提交内容请遵循 Angular Commit 规范，并同步更新相关文档和变更日志。

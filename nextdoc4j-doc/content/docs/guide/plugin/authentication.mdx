@@ -1,0 +1,39 @@
+---
+title: 认证展示插件
+description: 读取 SpringDoc security schemes，生成全局认证配置页并在在线调试时自动注入认证信息。
+---
+
+认证展示插件读取 `springdoc.components.security-schemes`，在 NextDoc4j 中生成独立的全局认证配置页。
+
+## 引入依赖
+
+1.4.0 起使用统一坐标：
+
+```xml
+<dependency>
+  <groupId>top.nextdoc4j</groupId>
+  <artifactId>nextdoc4j-plugin-security-schemes</artifactId>
+  <version>1.5.0</version>
+</dependency>
+```
+
+建议通过 `nextdoc4j-bom` 管理版本。
+
+## 路径排除
+
+公开接口可以实现 `NextDoc4jPathExcluder`，避免在线调试自动挂载认证：
+
+```java
+@Component
+public class CustomPathExcluder implements NextDoc4jPathExcluder {
+    @Override
+    public Set<String> getExcludedPaths() {
+        return Set.of("/actuator/**", "/public/**", "/api/auth/login");
+    }
+
+    @Override
+    public int getOrder() {
+        return 200;
+    }
+}
+```

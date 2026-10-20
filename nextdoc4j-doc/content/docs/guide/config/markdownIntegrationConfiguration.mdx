@@ -1,0 +1,37 @@
+---
+title: Markdown 文档配置
+description: 将离线 Markdown 文档、验签规范、部署手册和架构说明集成到 NextDoc4j 工作台。
+---
+
+NextDoc4j 可以将宿主项目中的 Markdown 文件加入文档导航。
+
+## 配置项
+
+| 配置项 | 类型 | 说明 |
+| --- | --- | --- |
+| `nextdoc4j.extension.enabled` | `boolean` | 是否启用扩展能力。 |
+| `nextdoc4j.extension.markdown[].group` | `string` | 文档分组名称。 |
+| `nextdoc4j.extension.markdown[].location` | `string` | 文档路径，支持 `classpath:` 和 `**` 通配符。 |
+
+## YAML 示例
+
+```yaml title="application.yml"
+nextdoc4j:
+  extension:
+    enabled: true
+    markdown:
+      - group: openapi
+        location: classpath:markdown/openapi/*.md
+      - group: docker-deploy
+        location: classpath:markdown/deploy/*.md
+```
+
+## Properties 示例
+
+```properties title="application.properties"
+nextdoc4j.extension.enabled=true
+nextdoc4j.extension.markdown[0].group=openapi
+nextdoc4j.extension.markdown[0].location=classpath:markdown/openapi/*.md
+```
+
+建议按主题拆分 Markdown 文件，并使用稳定的分组名称，避免部署后导航结构发生变化。

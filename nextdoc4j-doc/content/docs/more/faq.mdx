@@ -1,0 +1,52 @@
+---
+title: 常见问题 FAQ
+description: NextDoc4j 接入、兼容性和参数展示问题的排查指南。
+---
+
+先确认宿主项目满足 JDK 17、Spring Boot 3.4.0+ 或 4.x，以及匹配的 SpringDoc 版本。
+
+## Spring Boot 版本兼容
+
+如果启动时报 `LiteWebJarsResourceResolver` 找不到：
+
+- Spring Boot 低于 3.4.0，缺少该资源解析器。
+- Boot 3 建议使用 3.5.x，Boot 4 使用对应的 4.x 版本。
+- SpringDoc 2.8.x 适配 Boot 3，SpringDoc 3.x 适配 Boot 4。
+
+## 实体参数没有展开
+
+SpringDoc 默认可能只显示 DTO 类型名称。可以开启对象参数平铺：
+
+```yaml title="application.yml"
+springdoc:
+  default-flat-param-object: true
+```
+
+```properties title="application.properties"
+springdoc.default-flat-param-object=true
+```
+
+## 参数名称显示为 arg0
+
+Java 编译器默认不保留方法形参名，请在 Maven 编译插件中启用 `-parameters`：
+
+```xml title="pom.xml"
+<plugin>
+  <groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-compiler-plugin</artifactId>
+  <configuration>
+    <compilerArgument>-parameters</compilerArgument>
+  </configuration>
+</plugin>
+```
+
+## 文档页面无法访问
+
+- 检查 `nextdoc4j.enabled` 是否为 `true`。
+- 检查访问路径是否包含自定义的 `nextdoc4j.doc-path`。
+- 网关场景检查路由是否把文档入口和 `/v3/api-docs` 转发到正确服务。
+- 生产环境开启 `nextdoc4j.production` 后，文档入口会被隐藏。
+
+## 继续获得帮助
+
+欢迎加入[官方讨论群](/more/join-group)，或在 [GitHub Issues](https://github.com/NextDoc4j/nextdoc4j/issues) 提交可复现的问题。

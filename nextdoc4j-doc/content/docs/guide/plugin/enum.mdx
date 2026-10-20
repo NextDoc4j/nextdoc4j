@@ -1,0 +1,48 @@
+---
+title: 枚举展示插件
+description: 解析枚举值与说明，并在接口详情和在线调试中增强枚举展示。
+---
+
+枚举展示插件会把枚举的值和说明写入 `x-nextdoc4j-enum` OpenAPI 扩展。
+
+## 引入依赖
+
+```xml
+<dependency>
+  <groupId>top.nextdoc4j</groupId>
+  <artifactId>nextdoc4j-plugin-enum</artifactId>
+  <version>1.5.0</version>
+</dependency>
+```
+
+## 自定义解析器
+
+实现 `EnumMetadataResolver` 可以适配团队已有的枚举基类：
+
+```java
+@Component
+public class BusinessEnumResolver implements EnumMetadataResolver {
+    @Override
+    public boolean supports(Class<?> enumClass) {
+        return enumClass != null && enumClass.isEnum()
+            && BusinessEnum.class.isAssignableFrom(enumClass);
+    }
+
+    @Override
+    public Class<?> getEnumInterfaceType() {
+        return BusinessEnum.class;
+    }
+
+    @Override
+    public String getValueMethodName() {
+        return "getCode";
+    }
+
+    @Override
+    public String getDescriptionMethodName() {
+        return "getLabel";
+    }
+}
+```
+
+解析结果会以枚举下拉选项和说明形式出现在 NextDoc4j UI 中。

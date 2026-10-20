@@ -29,8 +29,6 @@ node_modules/
 dist/
 coverage/
 .vite/
-.vitepress/dist/
-.vitepress/cache/
 *.tsbuildinfo
 .env
 .env.local
@@ -53,8 +51,7 @@ coverage/
 # nextdoc4j-doc：官网本地和构建输出
 # ============================================================================
 /nextdoc4j-doc/node_modules/
-/nextdoc4j-doc/.vitepress/dist/
-/nextdoc4j-doc/.vitepress/cache/
+/nextdoc4j-doc/.next/
 /nextdoc4j-doc/coverage/
 /nextdoc4j-doc/*.tsbuildinfo
 /nextdoc4j-doc/data/
@@ -78,3 +75,4 @@ coverage/
 # 个人工具和本地临时目录。
 .codex/
 .claude/
+tmp/
