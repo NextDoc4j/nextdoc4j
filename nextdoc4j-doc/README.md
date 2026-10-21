@@ -60,3 +60,7 @@ pnpm --dir nextdoc4j-doc start
 - 图片放在 `public/images`，正文使用 `/images/...` 路径。
 - 团队信息在构建阶段写入 `public/team-cache.json`。
 - 发布前执行类型检查和静态构建，确认内部链接、搜索和移动端布局。
+
+## UI 动效来源
+
+平台链接的悬浮提示复用仓库内 [Rare UI](https://rareui.com) 适配组件的短内容过渡。Copyright (c) 2026 Swami Malode；许可证见 [components/rare-ui/LICENSE](components/rare-ui/LICENSE)。

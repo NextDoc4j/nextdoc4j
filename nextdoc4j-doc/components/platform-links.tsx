@@ -1,7 +1,7 @@
 'use client';
 
-import { platformLinks, type PlatformId, type PlatformLink as PlatformLinkData } from '@/lib/platforms';
-import { useEffect, useId, useState } from 'react';
+import { Tooltip } from '@/components/rare-ui/tooltip';
+import { platformLinks, type PlatformLink as PlatformLinkData } from '@/lib/platforms';
 
 function GithubMark() {
   return (
@@ -31,100 +31,44 @@ function StarMark() {
   );
 }
 
-function ExternalMark() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M14 3h7v7" />
-      <path d="M10 14 21 3" />
-      <path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5" />
-    </svg>
-  );
-}
-
 function PlatformMark({ platform }: { platform: PlatformLinkData }) {
   if (platform.id === 'github') return <GithubMark />;
   if (platform.id === 'gitee') return <GiteeMark />;
   return <GitCodeMark />;
 }
 
-function PlatformLink({
-  platform,
-  expanded,
-  onToggle,
-}: {
-  platform: PlatformLinkData;
-  expanded: boolean;
-  onToggle: () => void;
-}) {
-  const panelId = useId();
-
+function PlatformLink({ platform }: { platform: PlatformLinkData }) {
   return (
-    <div className="nd-platform-control" data-platform={platform.id} data-expanded={expanded}>
-      <button
-        type="button"
-        className="nd-platform-trigger"
-        aria-expanded={expanded}
-        aria-controls={panelId}
-        aria-label={`${expanded ? '收起' : '展开'} ${platform.name} Star 信息`}
-        title={platform.name}
-        onClick={onToggle}
+    <Tooltip
+      content={
+        <span className="nd-platform-stars">
+          <span>{platform.name}</span>
+          <StarMark />
+          <span>{platform.stars}</span>
+        </span>
+      }
+    >
+      <a
+        className="nd-platform-control"
+        data-platform={platform.id}
+        href={platform.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`打开 ${platform.name} 仓库`}
       >
         <span className="nd-platform-mark">
           <PlatformMark platform={platform} />
         </span>
-        <span className="sr-only">{platform.name}</span>
-      </button>
-
-      <div id={panelId} className="nd-platform-details" aria-hidden={!expanded}>
-        <span className="nd-platform-stars" title={`${platform.stars} Stars`}>
-          <StarMark />
-          <span>{platform.stars}</span>
-        </span>
-        <a
-          className="nd-platform-visit"
-          href={platform.href}
-          target="_blank"
-          rel="noopener noreferrer"
-          tabIndex={expanded ? 0 : -1}
-          aria-label={`打开 ${platform.name} 仓库`}
-        >
-          <ExternalMark />
-        </a>
-      </div>
-    </div>
+      </a>
+    </Tooltip>
   );
 }
 
 export function PlatformLinks({ standalone = false }: { standalone?: boolean }) {
-  const [expandedId, setExpandedId] = useState<PlatformId | null>(null);
-
-  useEffect(() => {
-    const closeOnOutsidePointer = (event: PointerEvent) => {
-      if (!(event.target instanceof Element) || !event.target.closest('.nd-platform-group')) {
-        setExpandedId(null);
-      }
-    };
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setExpandedId(null);
-    };
-
-    document.addEventListener('pointerdown', closeOnOutsidePointer);
-    document.addEventListener('keydown', closeOnEscape);
-    return () => {
-      document.removeEventListener('pointerdown', closeOnOutsidePointer);
-      document.removeEventListener('keydown', closeOnEscape);
-    };
-  }, []);
-
   const links = (
     <div className="nd-platform-links">
       {platformLinks.map((platform) => (
-        <PlatformLink
-          key={platform.id}
-          platform={platform}
-          expanded={expandedId === platform.id}
-          onToggle={() => setExpandedId((current) => (current === platform.id ? null : platform.id))}
-        />
+        <PlatformLink key={platform.id} platform={platform} />
       ))}
     </div>
   );
