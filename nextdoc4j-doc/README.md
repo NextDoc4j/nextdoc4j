@@ -83,4 +83,4 @@ NEXTDOC4J_CHANGELOG_PATH=/path/to/CHANGELOG.md pnpm --dir nextdoc4j-doc build
 
 ## UI 动效来源
 
-平台链接的悬浮提示复用仓库内 [Rare UI](https://rareui.com) 适配组件的短内容过渡。Copyright (c) 2026 Swami Malode；许可证见 [components/rare-ui/LICENSE](components/rare-ui/LICENSE)。
+首页选项切换与步骤指示复用 [Rare UI Animated Tabs](https://rareui.com) 的弹簧滑块；内容切换参考 Toast Tabs，并适配内容高度动画。平台链接的悬浮提示也使用仓库内的 Rare UI 适配组件。Copyright (c) 2026 Swami Malode；许可证见 [components/rare-ui/LICENSE](components/rare-ui/LICENSE)。

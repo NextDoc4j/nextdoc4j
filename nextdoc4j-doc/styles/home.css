@@ -1,5 +1,5 @@
 /* ==========================================================================
-   NextDoc4j Soft macOS & Fluid ToC Design System for Home Landing Page
+   NextDoc4j homepage hero and shared responsive styles
    ========================================================================== */
 
 :root {
@@ -192,6 +192,24 @@ html.dark {
   margin: 0 auto 44px;
   position: relative;
   z-index: 2;
+}
+
+@keyframes home-enter {
+  from { opacity: 0; transform: translateY(-16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .home-landing-page .hero-intro-box > *,
+  .home-landing-page .stage-canvas {
+    animation: home-enter 560ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  }
+
+  .home-landing-page .hero-intro-box > :nth-child(2) { animation-delay: 60ms; }
+  .home-landing-page .hero-intro-box > :nth-child(3) { animation-delay: 120ms; }
+  .home-landing-page .hero-intro-box > :nth-child(4) { animation-delay: 180ms; }
+  .home-landing-page .hero-intro-box > :nth-child(5) { animation-delay: 240ms; }
+  .home-landing-page .stage-canvas { animation-delay: 300ms; }
 }
 
 .home-landing-page .hero-pill-badge {
@@ -566,7 +584,7 @@ html.dark {
   cursor: pointer !important;
   user-select: none;
   -webkit-user-select: none;
-  transition: all 0.2s cubic-bezier(0.2, 0, 0.3, 1);
+  transition: color 0.2s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -574,13 +592,14 @@ html.dark {
 
 .home-landing-page .macos-segment-item:hover {
   color: var(--home-text-main) !important;
-  background: rgba(5, 150, 105, 0.08) !important;
 }
 
-.home-landing-page .macos-segment-item.active {
-  background: var(--home-brand) !important;
-  color: #ffffff !important;
-  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.35) !important;
+.home-landing-page .macos-segment-item[aria-pressed='true'] {
+  color: var(--home-text-on-brand) !important;
+}
+.home-landing-page .macos-segment-item:focus-visible {
+  outline: 2px solid var(--home-brand);
+  outline-offset: 3px;
 }
 
 .home-landing-page .macos-address-pill {
@@ -606,10 +625,11 @@ html.dark {
 .home-landing-page .macos-window-viewport {
   position: relative;
   background: var(--home-bg-window);
-  aspect-ratio: 1692 / 968;
+  aspect-ratio: 3 / 2;
   overflow: hidden;
 }
 
+.home-landing-page .macos-view-content,
 .home-landing-page .macos-view-panel {
   width: 100%;
   height: 100%;
@@ -623,635 +643,16 @@ html.dark {
   display: block;
 }
 
-.home-landing-page .macos-view-panel.panel-detail img {
-  object-fit: cover;
-  object-position: top left;
-}
-
-.home-landing-page .macos-view-panel.panel-overview .overview-theme-dark {
+.home-landing-page .macos-view-panel .studio-theme-dark {
   display: none;
 }
 
-.dark .home-landing-page .macos-view-panel.panel-overview .overview-theme-light {
+.dark .home-landing-page .macos-view-panel .studio-theme-light {
   display: none;
 }
 
-.dark .home-landing-page .macos-view-panel.panel-overview .overview-theme-dark {
+.dark .home-landing-page .macos-view-panel .studio-theme-dark {
   display: block;
-}
-
-/* ==========================================================================
-   2. ToC Flow: Dynamic Architectural Explorer
-   ========================================================================== */
-.home-landing-page .toc-flow-section {
-  padding: 80px 0;
-  position: relative;
-}
-
-.home-landing-page .flow-header {
-  text-align: center;
-  max-width: 620px;
-  margin: 0 auto 48px;
-}
-
-.home-landing-page .flow-title {
-  font-size: clamp(1.85rem, 3.2vw, 2.4rem);
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  color: var(--home-text-main);
-  margin-bottom: 12px;
-}
-
-.home-landing-page .flow-subtitle {
-  font-size: 15.5px;
-  color: var(--home-text-secondary);
-  line-height: 1.65;
-}
-
-.home-landing-page .toc-explorer-box {
-  display: grid;
-  grid-template-columns: 340px 1fr;
-  gap: 28px;
-  background: var(--home-bg-surface);
-  border-radius: var(--home-r-xl);
-  box-shadow: var(--home-shadow-soft-card);
-  padding: 24px;
-}
-
-@media (max-width: 900px) {
-  .home-landing-page .toc-explorer-box {
-    grid-template-columns: 1fr;
-  }
-}
-
-.home-landing-page .toc-index-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.home-landing-page .toc-nav-item {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  gap: 14px;
-  padding: 14px 16px;
-  border: 0;
-  border-radius: var(--home-r-md);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-}
-
-.home-landing-page .toc-nav-item:hover {
-  background: var(--home-bg-subtle);
-}
-
-.home-landing-page .toc-nav-item.active {
-  background: var(--home-brand-soft);
-  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.06);
-}
-
-.home-landing-page .toc-nav-index-num {
-  font-family: ui-monospace, "SF Mono", monospace;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--home-text-faint);
-}
-
-.home-landing-page .toc-nav-item.active .toc-nav-index-num {
-  color: var(--home-brand);
-}
-
-.home-landing-page .toc-nav-info h4 {
-  font-size: 14.5px;
-  font-weight: 700;
-  color: var(--home-text-main);
-  margin: 0 0 2px;
-}
-
-.home-landing-page .toc-nav-item.active .toc-nav-info h4 {
-  color: var(--home-brand);
-}
-
-.home-landing-page .toc-nav-info p {
-  font-size: 12.5px;
-  color: var(--home-text-muted);
-  line-height: 1.4;
-  margin: 0;
-}
-
-.home-landing-page .toc-nav-arrow {
-  margin-left: auto;
-  color: var(--home-text-faint);
-  opacity: 0;
-  transform: translateX(-4px);
-  transition: all 0.2s ease;
-  flex-shrink: 0;
-}
-
-.home-landing-page .toc-nav-item.active .toc-nav-arrow {
-  opacity: 1;
-  transform: translateX(0);
-  color: var(--home-brand);
-}
-
-.home-landing-page .toc-display-pane {
-  background: var(--home-bg-page);
-  border-radius: var(--home-r-lg);
-  padding: 32px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.home-landing-page .toc-display-top {
-  margin-bottom: 28px;
-}
-
-.home-landing-page .toc-display-tag-strip {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 14px;
-}
-
-.home-landing-page .toc-tag-badge {
-  padding: 3px 10px;
-  border-radius: var(--home-r-pill);
-  background: var(--home-brand-soft);
-  color: var(--home-brand);
-  font-size: 11.5px;
-  font-weight: 600;
-  font-family: ui-monospace, "SF Mono", monospace;
-}
-
-.home-landing-page .toc-tag-badge.sub-badge {
-  background: var(--home-bg-subtle);
-  color: var(--home-text-secondary);
-}
-
-.home-landing-page .toc-display-title {
-  font-size: 24px;
-  font-weight: 800;
-  color: var(--home-text-main);
-  letter-spacing: -0.02em;
-  margin: 0 0 12px;
-}
-
-.home-landing-page .toc-display-desc {
-  font-size: 15px;
-  line-height: 1.7;
-  color: var(--home-text-secondary);
-  margin: 0 0 24px;
-}
-
-.home-landing-page .toc-features-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 28px;
-}
-
-@media (max-width: 600px) {
-  .home-landing-page .toc-features-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.home-landing-page .toc-feature-chip {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 12px 14px;
-  border-radius: var(--home-r-md);
-  background: var(--home-bg-surface);
-  box-shadow: var(--home-shadow-ambient);
-}
-
-.home-landing-page .chip-icon {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--home-brand-soft);
-  color: var(--home-brand);
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-
-.home-landing-page .chip-icon svg {
-  width: 10px;
-  height: 10px;
-}
-
-.home-landing-page .chip-text-title {
-  font-size: 13px;
-  font-weight: 650;
-  color: var(--home-text-main);
-  margin-bottom: 1px;
-}
-
-.home-landing-page .chip-text-desc {
-  font-size: 11.5px;
-  color: var(--home-text-muted);
-  line-height: 1.4;
-}
-
-.home-landing-page .toc-display-action-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-top: 20px;
-  border-top: 1px solid var(--home-border-subtle);
-}
-
-.home-landing-page .toc-learn-more-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13.5px;
-  font-weight: 600;
-  color: var(--home-brand);
-  text-decoration: none;
-  transition: gap 0.15s ease;
-}
-
-.home-landing-page .toc-learn-more-link:hover {
-  gap: 10px;
-  color: var(--home-brand-hover);
-}
-
-/* ==========================================================================
-   3. Soft Bento Capabilities Grid
-   ========================================================================== */
-.home-landing-page .bento-fluid-section {
-  padding: 30px 0 80px;
-}
-
-.home-landing-page .bento-fluid-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-}
-
-@media (max-width: 900px) {
-  .home-landing-page .bento-fluid-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.home-landing-page .bento-soft-card {
-  background: var(--home-bg-surface);
-  border-radius: var(--home-r-xl);
-  padding: 32px 28px;
-  box-shadow: var(--home-shadow-soft-card);
-  display: flex;
-  flex-direction: column;
-  transition: transform 0.22s ease, box-shadow 0.22s ease;
-}
-
-.home-landing-page .bento-soft-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 24px 48px -12px rgba(15, 23, 42, 0.08);
-}
-
-.home-landing-page .bento-card-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: var(--home-r-md);
-  background: var(--home-brand-soft);
-  color: var(--home-brand);
-  display: grid;
-  place-items: center;
-  margin-bottom: 20px;
-}
-
-.home-landing-page .bento-card-icon svg {
-  width: 22px;
-  height: 22px;
-}
-
-.home-landing-page .bento-card-title {
-  font-size: 18px;
-  font-weight: 750;
-  letter-spacing: -0.02em;
-  color: var(--home-text-main);
-  margin: 0 0 10px;
-}
-
-.home-landing-page .bento-card-desc {
-  font-size: 14px;
-  line-height: 1.65;
-  color: var(--home-text-secondary);
-  margin: 0 0 24px;
-  flex-grow: 1;
-}
-
-.home-landing-page .bento-card-pill-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: auto;
-}
-
-.home-landing-page .bento-pill-item {
-  padding: 3px 9px;
-  border-radius: var(--home-r-pill);
-  background: var(--home-bg-page);
-  font-size: 11.5px;
-  font-weight: 600;
-  color: var(--home-text-muted);
-  font-family: ui-monospace, "SF Mono", monospace;
-}
-
-/* ==========================================================================
-   4. Adaptive Code Terminal
-   ========================================================================== */
-.home-landing-page .terminal-section {
-  padding: 72px 0 88px;
-  background: var(--home-bg-surface);
-}
-
-.home-landing-page .terminal-header {
-  margin-bottom: 36px;
-}
-
-.home-landing-page .terminal-shell-box {
-  max-width: 900px;
-  margin: 0 auto;
-  background: var(--home-bg-terminal);
-  border: 1px solid var(--home-terminal-border);
-  border-radius: var(--home-r-xl);
-  box-shadow: var(--home-shadow-macos-window);
-  overflow: hidden;
-  transition: background-color 0.28s ease, border-color 0.28s ease;
-}
-
-.home-landing-page .terminal-titlebar {
-  height: 46px;
-  background: var(--home-bg-terminal-bar);
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  gap: 12px;
-  border-bottom: 1px solid var(--home-terminal-border);
-  transition: background-color 0.28s ease, border-color 0.28s ease;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-
-.home-landing-page .terminal-titlebar::-webkit-scrollbar {
-  display: none;
-}
-
-.home-landing-page .terminal-segmented-tabs {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-left: 8px;
-  flex-shrink: 0;
-}
-
-.home-landing-page .terminal-tab-btn {
-  padding: 4px 12px;
-  border-radius: var(--home-r-pill);
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--home-terminal-tab-color);
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.15s ease;
-  font-family: ui-monospace, "SF Mono", monospace;
-}
-
-.home-landing-page .terminal-tab-btn:hover {
-  color: var(--home-terminal-tab-hover);
-}
-
-.home-landing-page .terminal-tab-btn.active {
-  color: var(--home-terminal-tab-active-color);
-  background: var(--home-terminal-tab-active-bg);
-}
-
-.home-landing-page .terminal-copy-action {
-  margin-left: auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 12px;
-  border-radius: var(--home-r-pill);
-  background: var(--home-terminal-copy-bg);
-  color: var(--home-terminal-copy-text);
-  font-size: 12px;
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
-  white-space: nowrap;
-  flex-shrink: 0;
-  transition: all 0.15s ease;
-}
-
-.home-landing-page .terminal-copy-action:hover {
-  background: var(--home-terminal-copy-hover);
-}
-
-.home-landing-page .terminal-copy-action.copied {
-  background: var(--home-brand-soft);
-  color: var(--home-brand);
-}
-
-.home-landing-page .terminal-code-body {
-  padding: 20px 24px;
-  overflow-x: auto;
-}
-
-.home-landing-page .terminal-meta-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding-bottom: 12px;
-  margin-bottom: 16px;
-  border-bottom: 1px dashed var(--home-terminal-border);
-}
-
-.home-landing-page .terminal-meta-tag {
-  font-size: 11.5px;
-  font-weight: 700;
-  padding: 2px 9px;
-  border-radius: var(--home-r-pill);
-  background: var(--home-brand-soft);
-  color: var(--home-brand);
-  font-family: ui-monospace, "SF Mono", monospace;
-}
-
-.home-landing-page .terminal-meta-hint {
-  font-size: 12px;
-  color: var(--home-terminal-tab-color);
-}
-
-.home-landing-page .terminal-code-body pre {
-  margin: 0;
-  font-size: 13.5px;
-  line-height: 1.8;
-  color: var(--home-terminal-text);
-  font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  transition: color 0.28s ease;
-}
-
-/* Syntax Tokens */
-.home-landing-page .syn-tag { color: var(--home-syn-tag); }
-.home-landing-page .syn-txt { color: var(--home-syn-txt); }
-.home-landing-page .syn-attr { color: var(--home-syn-attr); }
-.home-landing-page .syn-cmt { color: var(--home-syn-cmt); font-style: italic; }
-.home-landing-page .syn-key { color: var(--home-syn-key); }
-.home-landing-page .syn-val { color: var(--home-syn-val); }
-.home-landing-page .syn-str { color: var(--home-syn-str); }
-
-/* ==========================================================================
-   5. High-Contrast Spec Matrix Table
-   ========================================================================== */
-.home-landing-page .spec-matrix-section {
-  padding: 80px 0 96px;
-}
-
-.home-landing-page .spec-table-box {
-  max-width: 900px;
-  margin: 0 auto;
-  background: var(--home-bg-surface);
-  border-radius: var(--home-r-xl);
-  box-shadow: var(--home-shadow-soft-card);
-  overflow: hidden;
-  border: 1px solid var(--home-border-subtle);
-}
-
-.home-landing-page .spec-table-row {
-  display: grid;
-  grid-template-columns: 1.3fr 1.6fr 1.5fr;
-  padding: 18px 24px;
-  align-items: center;
-  border-bottom: 1px solid var(--home-border-subtle);
-  font-size: 14px;
-  transition: background-color 0.15s ease;
-}
-
-.home-landing-page .spec-table-row:not(.head):hover {
-  background-color: var(--home-bg-subtle);
-}
-
-.home-landing-page .spec-table-row.head {
-  background-color: var(--home-bg-table-head);
-  color: var(--home-table-head-text);
-  font-weight: 750;
-  font-size: 13.5px;
-  letter-spacing: -0.01em;
-  border-bottom: 1px solid var(--home-table-head-border);
-}
-
-.home-landing-page .spec-head-brand-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 3px 10px;
-  border-radius: var(--home-r-pill);
-  background: var(--home-brand-soft);
-  color: var(--home-brand);
-  font-size: 12.5px;
-  font-weight: 700;
-}
-
-.home-landing-page .spec-table-row:last-child {
-  border-bottom: none;
-}
-
-.home-landing-page .spec-cell-brand {
-  color: var(--home-brand);
-  font-weight: 650;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.home-landing-page .spec-cell-dim {
-  color: var(--home-text-muted);
-}
-
-/* ==========================================================================
-   6. Community & Quick Links Section
-   ========================================================================== */
-.home-landing-page .community-nav-section {
-  padding: 72px 0 80px;
-  background: var(--home-bg-surface);
-  border-top: 1px solid var(--home-border-subtle);
-}
-
-.home-landing-page .community-header {
-  text-align: center;
-  max-width: 620px;
-  margin: 0 auto 36px;
-}
-
-.home-landing-page .community-platforms-wrap {
-  max-width: 800px;
-  margin: 0 auto 48px;
-}
-
-.home-landing-page .home-quick-links-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 32px;
-  padding-top: 36px;
-  border-top: 1px solid var(--home-border-subtle);
-}
-
-@media (max-width: 860px) {
-  .home-landing-page .home-quick-links-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 28px;
-  }
-}
-
-@media (max-width: 500px) {
-  .home-landing-page .home-quick-links-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.home-landing-page .quick-link-col h4 {
-  font-size: 13px;
-  font-weight: 750;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--home-text-muted);
-  margin: 0 0 14px;
-}
-
-.home-landing-page .quick-link-col ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.home-landing-page .quick-link-col a {
-  font-size: 14px;
-  color: var(--home-text-secondary);
-  text-decoration: none;
-  transition: color 0.15s ease;
-}
-
-.home-landing-page .quick-link-col a:hover {
-  color: var(--home-brand);
 }
 
 @media (max-width: 768px) {
@@ -1263,15 +664,6 @@ html.dark {
     flex-direction: column;
     gap: 8px;
     border-radius: var(--home-r-md);
-  }
-
-  .home-landing-page .spec-table-row {
-    grid-template-columns: 1fr;
-    gap: 6px;
-  }
-
-  .home-landing-page .spec-table-row.head {
-    display: none;
   }
 }
 
@@ -1471,11 +863,7 @@ html.dark {
 }
 
 .home-landing-page .hero-pill-badge > span:last-child,
-.home-landing-page .hero-tagline,
-.home-landing-page .flow-subtitle,
-.home-landing-page .toc-nav-info,
-.home-landing-page .toc-display-pane,
-.home-landing-page .terminal-meta-hint {
+.home-landing-page .hero-tagline {
     min-width: 0;
     overflow-wrap: anywhere;
 }
@@ -1513,45 +901,6 @@ html.dark {
     white-space: nowrap;
 }
 
-.home-landing-page .toc-nav-info,
-.home-landing-page .toc-display-pane,
-.home-landing-page .toc-feature-chip,
-.home-landing-page .bento-soft-card,
-.home-landing-page .quick-link-col {
-    min-width: 0;
-}
-
-.home-landing-page .toc-display-action-row {
-    flex-wrap: wrap;
-    gap: 12px;
-}
-
-.home-landing-page .terminal-segmented-tabs {
-    min-width: 0;
-    flex: 1 1 auto;
-    overflow-x: auto;
-    scrollbar-width: none;
-}
-
-.home-landing-page .terminal-segmented-tabs::-webkit-scrollbar {
-    display: none;
-}
-
-.home-landing-page .terminal-tab-btn {
-    flex: 0 0 auto;
-}
-
-.home-landing-page .terminal-code-body {
-    min-width: 0;
-    max-width: 100%;
-}
-
-.home-landing-page .terminal-code-body pre {
-    width: max-content;
-    min-width: 100%;
-    max-width: none;
-}
-
 @media (max-width: 900px) {
     .home-landing-page .macos-window-titlebar {
         gap: 8px;
@@ -1561,11 +910,6 @@ html.dark {
     .home-landing-page .macos-segmented-pill {
         flex: 1 1 auto;
         margin-left: 0;
-    }
-
-    .home-landing-page .toc-explorer-box {
-        gap: 18px;
-        padding: 18px;
     }
 }
 
@@ -1623,79 +967,6 @@ html.dark {
         height: auto;
         padding-block: 6px;
     }
-
-    .home-landing-page .toc-flow-section {
-        padding: 56px 0;
-    }
-
-    .home-landing-page .toc-explorer-box {
-        padding: 14px;
-    }
-
-    .home-landing-page .toc-display-pane {
-        padding: clamp(18px, 5vw, 28px);
-    }
-
-    .home-landing-page .toc-display-title {
-        font-size: clamp(1.35rem, 5.8vw, 1.5rem);
-    }
-
-    .home-landing-page .bento-fluid-section {
-        padding-bottom: 56px;
-    }
-
-    .home-landing-page .bento-soft-card {
-        padding: 24px 20px;
-    }
-
-    .home-landing-page .terminal-titlebar {
-        min-height: 46px;
-        height: auto;
-        padding: 8px 10px;
-    }
-
-    .home-landing-page .terminal-copy-action {
-        margin-left: 0;
-    }
-
-    .home-landing-page .terminal-code-body {
-        padding: 16px;
-    }
-
-    .home-landing-page .terminal-meta-bar {
-        align-items: flex-start;
-    }
-
-    .home-landing-page .terminal-meta-hint {
-        flex: 1 1 100%;
-    }
-
-    .home-landing-page .spec-matrix-section {
-        padding: 56px 0 64px;
-    }
-
-    .home-landing-page .spec-table-row {
-        padding: 14px 16px;
-    }
-
-    .home-landing-page .spec-table-row:not(.head) > div {
-        min-width: 0;
-    }
-
-    .home-landing-page .spec-table-row:not(.head) > div::before {
-        content: attr(data-label);
-        display: inline-block;
-        min-width: 4.5em;
-        margin-right: 8px;
-        color: var(--home-text-muted);
-        font-size: 11px;
-        font-weight: 600;
-        vertical-align: top;
-    }
-
-    .home-landing-page .community-nav-section {
-        padding: 56px 0 64px;
-    }
 }
 
 @media (max-width: 640px) {
@@ -1715,14 +986,6 @@ html.dark {
     .home-landing-page .macos-segment-item {
         padding-inline: 9px;
         font-size: 11px;
-    }
-
-    .home-landing-page .toc-features-grid {
-        gap: 10px;
-    }
-
-    .home-landing-page .toc-feature-chip {
-        padding: 11px 12px;
     }
 }
 
@@ -1747,203 +1010,6 @@ html.dark {
     .home-landing-page .hero-meta-strip {
         padding-inline: 14px;
     }
-
-    .home-landing-page .flow-header {
-        margin-bottom: 32px;
-    }
-
-    .home-landing-page .flow-subtitle {
-        font-size: 14px;
-    }
-
-    .home-landing-page .toc-nav-item {
-        gap: 10px;
-        padding: 12px;
-    }
-
-    .home-landing-page .toc-nav-info h4 {
-        font-size: 14px;
-    }
-
-    .home-landing-page .toc-nav-info p {
-        font-size: 12px;
-    }
-
-    .home-landing-page .quick-link-col a {
-        font-size: 13.5px;
-    }
-}
-
-/* Homepage community platform cards migrated from the old VitePress component. */
-.home-landing-page .community-cards-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-}
-
-.home-landing-page .platform-interactive-card {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding: 22px;
-  border: 1px solid var(--home-border-subtle);
-  border-radius: 16px;
-  background: var(--home-bg-surface);
-  box-shadow: var(--home-shadow-ambient);
-  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
-}
-
-.home-landing-page .platform-interactive-card:hover {
-  transform: translateY(-3px);
-  border-color: var(--home-border-brand);
-  box-shadow: var(--home-shadow-soft-card);
-}
-
-.home-landing-page .platform-card-header,
-.home-landing-page .platform-identity,
-.home-landing-page .platform-cta-row {
-  display: flex;
-  align-items: center;
-}
-
-.home-landing-page .platform-card-header {
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.home-landing-page .platform-identity {
-  min-width: 0;
-  gap: 8px;
-}
-
-.home-landing-page .platform-symbol-icon {
-  display: grid;
-  flex: 0 0 36px;
-  place-items: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-}
-
-.home-landing-page .platform-symbol-icon svg,
-.home-landing-page .platform-symbol-icon img {
-  width: 22px;
-  height: 22px;
-}
-
-.home-landing-page .platform-symbol-icon.gitee {
-  color: #c71d23;
-  background: rgba(199, 29, 35, 0.08);
-}
-
-.home-landing-page .platform-symbol-icon.github {
-  color: var(--home-text-main);
-  background: rgba(15, 23, 42, 0.08);
-}
-
-.dark .home-landing-page .platform-symbol-icon.github {
-  color: #f8fafc;
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.home-landing-page .platform-symbol-icon.gitcode {
-  background: rgba(37, 99, 235, 0.08);
-}
-
-.home-landing-page .platform-symbol-icon.gitcode img {
-  border-radius: 6px;
-}
-
-.home-landing-page .platform-title-text {
-  overflow: hidden;
-  color: var(--home-text-main);
-  font-size: 15px;
-  font-weight: 750;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.home-landing-page .platform-role-tag {
-  flex-shrink: 0;
-  padding: 2px 7px;
-  border-radius: 9999px;
-  color: var(--home-text-muted);
-  background: var(--home-bg-subtle);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 11px;
-  font-weight: 700;
-  line-height: 1.4;
-  white-space: nowrap;
-}
-
-.home-landing-page .platform-card-desc {
-  flex-grow: 1;
-  margin: 0;
-  color: var(--home-text-secondary);
-  font-size: 13px;
-  line-height: 1.6;
-}
-
-.home-landing-page .platform-cta-row {
-  gap: 8px;
-  padding-top: 14px;
-  border-top: 1px solid var(--home-border-subtle);
-}
-
-.home-landing-page .btn-star-primary {
-  display: inline-flex;
-  flex: 1;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  height: 34px;
-  padding: 0 12px;
-  border-radius: 9999px;
-  color: var(--home-brand) !important;
-  background: var(--home-brand-soft);
-  font-size: 12.5px;
-  font-weight: 700;
-  text-decoration: none !important;
-  transition: all 0.16s ease;
-  white-space: nowrap;
-}
-
-.home-landing-page .btn-star-primary:hover {
-  color: var(--home-text-on-brand) !important;
-  background: var(--home-brand);
-  box-shadow: var(--home-shadow-brand-glow);
-  transform: translateY(-1px);
-}
-
-.home-landing-page .btn-star-primary svg {
-  width: 14px;
-  height: 14px;
-}
-
-.home-landing-page .toc-nav-info {
-  display: block;
-}
-
-.home-landing-page .toc-nav-info-title,
-.home-landing-page .toc-nav-info-desc {
-  display: block;
-}
-
-.home-landing-page .toc-nav-info-title {
-  margin-bottom: 2px;
-  color: var(--home-text-main);
-  font-size: 14.5px;
-  font-weight: 700;
-}
-
-.home-landing-page .toc-nav-item.active .toc-nav-info-title {
-  color: var(--home-brand);
-}
-
-.home-landing-page .toc-nav-info-desc {
-  color: var(--home-text-muted);
-  font-size: 12.5px;
-  line-height: 1.4;
 }
 
 .home-footer {
@@ -1966,12 +1032,6 @@ html.dark {
 
 .home-footer a:hover {
   color: var(--home-brand);
-}
-
-@media (max-width: 860px) {
-  .home-landing-page .community-cards-grid {
-    grid-template-columns: 1fr;
-  }
 }
 
 /* Compact demo rail: follows the same expanding capsule interaction as the

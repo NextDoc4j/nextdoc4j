@@ -14,6 +14,7 @@
     "team:status": "tsx scripts/team/build-team-cache.ts --status"
   },
   "dependencies": {
+    "framer-motion": "14.4.0",
     "fumadocs-core": "16.17.6",
     "fumadocs-mdx": "15.4.7",
     "fumadocs-ui": "npm:@fumadocs/base-ui@16.17.6",

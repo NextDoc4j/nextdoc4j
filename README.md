@@ -71,15 +71,15 @@ NextDoc4j 帮助开发团队提高 API 文档的管理和调试效率，使文�
 
 ### 主界面
 
-![主界面截图](static/readme/screenshot/home.png)
+![主界面截图](nextdoc4j-doc/public/images/screenshots/features/workspace-light.webp)
 *直观的API文档首页，集成项目概览、业务分组和快速定位功能*
 
 ### 文档详情界面
 
-![文档详情界面效果](static/readme/screenshot/detail.png)
+![文档详情界面效果](nextdoc4j-doc/public/images/screenshots/features/api-detail-light.webp)
 *接口详情页面，集成在线调试工具，支持参数输入、响应预览和JSON数据结构化展示*
 
-![在线调试效果](static/readme/screenshot/test.png)
+![在线调试效果](nextdoc4j-doc/public/images/screenshots/features/debug-request-light.webp)
 *接口在线调试页面，支持请求方法选择、参数输入、请求头编辑、实时响应预览及 JSON 结构化展示，可直接发起 API 调用并查看返回数据详情*
 
 ### 登录界面
