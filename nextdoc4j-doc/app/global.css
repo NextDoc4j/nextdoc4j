@@ -165,6 +165,136 @@ html > body[data-scroll-locked] {
   height: 0.75rem;
 }
 
+/* Header platform accordion; sidebar and home footer keep their tooltips. */
+.nd-platform-accordion .nd-platform-control {
+  --nd-platform-trigger-size: calc(2rem - 2px);
+  position: relative;
+  display: flex;
+  box-sizing: border-box;
+  justify-content: flex-start;
+  overflow: hidden;
+  color: var(--color-fd-foreground);
+  background: transparent;
+  transition:
+    width 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.nd-platform-accordion .nd-platform-control[data-expanded='true'] {
+  width: 6.5rem;
+  background: color-mix(in srgb, var(--color-fd-primary) 16%, var(--color-fd-secondary));
+  box-shadow: 0 5px 18px color-mix(in srgb, var(--color-fd-foreground) 10%, transparent);
+  z-index: 10;
+}
+
+html:not(.dark) .nd-platform-accordion .nd-platform-control[data-expanded='true'] {
+  background: #fff;
+}
+
+.nd-platform-accordion .nd-platform-trigger {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  flex: 0 0 var(--nd-platform-trigger-size);
+  align-items: center;
+  justify-content: center;
+  width: var(--nd-platform-trigger-size);
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  color: var(--nd-platform-accent);
+  cursor: pointer;
+  line-height: 0;
+  order: 1;
+  transition: background-color 160ms ease, transform 160ms ease;
+}
+
+.nd-platform-accordion .nd-platform-trigger:hover {
+  background: color-mix(in srgb, var(--nd-platform-accent) 12%, transparent);
+}
+
+.nd-platform-accordion .nd-platform-control[data-expanded='true'] .nd-platform-trigger {
+  background: transparent;
+  color: var(--nd-platform-accent);
+}
+
+.nd-platform-accordion .nd-platform-trigger:focus-visible,
+.nd-platform-accordion .nd-platform-visit:focus-visible {
+  outline: 2px solid var(--color-fd-ring, var(--color-fd-primary));
+  outline-offset: -2px;
+}
+
+.nd-platform-accordion .nd-platform-details {
+  display: flex;
+  flex: 0 0 0;
+  align-items: center;
+  order: 2;
+  width: 0;
+  height: 100%;
+  min-width: 0;
+  overflow: hidden;
+  gap: 0.55rem;
+  padding-inline: 0;
+  border-radius: 9999px;
+  color: var(--color-fd-muted-foreground);
+  background: transparent;
+  opacity: 0;
+  transform: translateX(-0.35rem);
+  transition:
+    flex-basis 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    width 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 150ms ease,
+    transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  pointer-events: none;
+}
+
+.nd-platform-accordion .nd-platform-control[data-expanded='true'] .nd-platform-details {
+  flex: 1 1 auto;
+  width: auto;
+  padding-inline: 0.55rem 0.15rem;
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(0);
+}
+
+.nd-platform-accordion .nd-platform-visit {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 1.45rem;
+  height: 1.45rem;
+  padding: 0;
+  border-radius: 9999px;
+  background: var(--color-fd-accent);
+  color: var(--color-fd-accent-foreground);
+  text-decoration: none;
+  transition: background-color 150ms ease, color 150ms ease;
+  white-space: nowrap;
+}
+
+.nd-platform-accordion .nd-platform-visit:hover {
+  background: var(--color-fd-primary);
+  color: var(--color-fd-primary-foreground);
+}
+
+.nd-platform-accordion .nd-platform-visit svg {
+  width: 0.7rem;
+  height: 0.7rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nd-platform-accordion .nd-platform-control,
+  .nd-platform-accordion .nd-platform-details,
+  .nd-platform-accordion .nd-platform-trigger,
+  .nd-platform-accordion .nd-platform-visit {
+    transition-duration: 0.01ms;
+  }
+}
+
 .nd-tooltip-trigger {
   display: inline-flex;
 }
