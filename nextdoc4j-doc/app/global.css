@@ -28,6 +28,41 @@ html > body[data-scroll-locked] {
   object-fit: contain;
 }
 
+/* Keep prose spacing outside image frames, with no inset around the image itself. */
+.nd-doc-image {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  margin-block: 1.5rem;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-fd-border);
+  border-radius: 0.75rem;
+  background: var(--color-fd-card);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 4%);
+  line-height: 0;
+}
+
+.nd-doc-image [data-rmiz],
+.nd-doc-image [data-rmiz-content] {
+  display: block;
+}
+
+.nd-doc-image img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+}
+
+.nd-doc-image--wide,
+.nd-doc-image--wide img {
+  width: 100%;
+}
+
 .nd-platform-group {
   display: flex;
   flex: 0 0 auto;

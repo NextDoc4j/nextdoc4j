@@ -1,37 +1,236 @@
 ---
 title: Markdown 文档配置
-description: 将离线 Markdown 文档、验签规范、部署手册和架构说明集成到 NextDoc4j 工作台。
+description: 将接入说明、错误码和变更记录加入工作台，配置分组、资源路径与展示顺序。
 ---
 
-NextDoc4j 可以将宿主项目中的 Markdown 文件加入文档导航。
+把接口之外的说明放到宿主资源目录，工作台就能在“其他文档”中提供阅读入口。适合调用约定、签名说明、错误码、版本变更记录等与接口配套的内容。
 
-## 配置项
+附加文档使用 `nextdoc4j.extension.markdown` 配置，需启用 **`nextdoc4j.enabled` 与 `nextdoc4j.extension.enabled`**，不需要额外插件。
 
-| 配置项 | 类型 | 说明 |
-| --- | --- | --- |
-| `nextdoc4j.extension.enabled` | `boolean` | 是否启用扩展能力。 |
-| `nextdoc4j.extension.markdown[].group` | `string` | 文档分组名称。 |
-| `nextdoc4j.extension.markdown[].location` | `string` | 文档路径，支持 `classpath:` 和 `**` 通配符。 |
+## 从一篇文档开始
 
-## YAML 示例
+### 1. 准备 Markdown 文件
+
+在宿主项目中添加资源：
+
+```text title="资源目录"
+src/main/resources/
+└── markdown/
+    └── help/
+        └── 01-调用约定.md
+```
+
+文件使用 UTF-8 编码。例如：
+
+````markdown title="01-调用约定.md"
+# 调用约定
+
+## 请求格式
+
+业务接口默认使用 JSON，请在文档调试页选择实际的 Content-Type。
+
+## 常用状态码
+
+| 状态码 | 含义 |
+| --- | --- |
+| 200 | 请求成功 |
+| 400 | 参数不符合要求 |
+| 401 | 需要业务认证 |
+
+## 请求示例
+
+```http
+GET /api/user/1 HTTP/1.1
+Accept: application/json
+```
+````
+
+### 2. 配置文档位置
+
+<Tabs items={['YAML', 'Properties']}>
+  <Tab value="YAML">
 
 ```yaml title="application.yml"
 nextdoc4j:
+  enabled: true
   extension:
     enabled: true
     markdown:
-      - group: openapi
-        location: classpath:markdown/openapi/*.md
-      - group: docker-deploy
-        location: classpath:markdown/deploy/*.md
+      - group: 接入说明
+        location: classpath:/markdown/help/01-调用约定.md
 ```
 
-## Properties 示例
+  </Tab>
+  <Tab value="Properties">
 
 ```properties title="application.properties"
+nextdoc4j.enabled=true
 nextdoc4j.extension.enabled=true
-nextdoc4j.extension.markdown[0].group=openapi
-nextdoc4j.extension.markdown[0].location=classpath:markdown/openapi/*.md
+nextdoc4j.extension.markdown[0].group=\u63a5\u5165\u8bf4\u660e
+nextdoc4j.extension.markdown[0].location=classpath:/markdown/help/01-\u8c03\u7528\u7ea6\u5b9a.md
 ```
 
-建议按主题拆分 Markdown 文件，并使用稳定的分组名称，避免部署后导航结构发生变化。
+  </Tab>
+</Tabs>
+
+Properties 示例中的中文使用 Unicode 转义，加载后的分组名和文件路径与 YAML 示例相同；Markdown 文件本身仍使用 UTF-8 编码。
+
+### 3. 在工作台阅读
+
+重新启动宿主并打开文档工作台，在“其他文档”下找到“接入说明”分组，再选择 `01-调用约定`。正文根据标题生成阅读目录，并提供更新时间、文件大小及文档导出入口。
+
+## 配置项速查
+
+| 配置项 | 类型 | 默认值 / 未配置行为 | 作用 |
+| --- | --- | --- | --- |
+| `nextdoc4j.extension.enabled` | Boolean | `false` | 启用品牌和附加 Markdown 扩展解析 |
+| `nextdoc4j.extension.markdown` | List | `[]` | 附加文档的资源配置列表 |
+| `nextdoc4j.extension.markdown[].group` | String | 未配置 | 文档所属分组；前端未获取到有效分组时使用“其它文档” |
+| `nextdoc4j.extension.markdown[].location` | String | 未配置 | 单个资源地址或 Spring Ant 风格资源模式 |
+
+每项配置只有 `group` 和 `location`。显示名称由文件名推导，当前没有单独的 `title`、`order` 或每篇文档权限配置项。
+
+## 管理多个分组与文件
+
+例如，将调用说明和版本记录分别组织：
+
+```text title="资源目录"
+src/main/resources/
+└── markdown/
+    ├── help/
+    │   ├── 01-调用约定.md
+    │   ├── 02-签名规则.md
+    │   └── 03-错误码.md
+    └── changelog/
+        ├── 2026-09.md
+        └── 2026-10.md
+```
+
+```yaml title="application.yml"
+nextdoc4j:
+  enabled: true
+  extension:
+    enabled: true
+    markdown:
+      - group: 接入说明
+        location: classpath:/markdown/help/*.md
+      - group: 更新日志
+        location: classpath:/markdown/changelog/*.md
+```
+
+<details>
+<summary>使用 Properties 配置多个分组</summary>
+
+```properties title="application.properties"
+nextdoc4j.enabled=true
+nextdoc4j.extension.enabled=true
+nextdoc4j.extension.markdown[0].group=\u63a5\u5165\u8bf4\u660e
+nextdoc4j.extension.markdown[0].location=classpath:/markdown/help/*.md
+nextdoc4j.extension.markdown[1].group=\u66f4\u65b0\u65e5\u5fd7
+nextdoc4j.extension.markdown[1].location=classpath:/markdown/changelog/*.md
+```
+
+</details>
+
+### 路径模式如何选择
+
+| `location` 示例 | 匹配范围 |
+| --- | --- |
+| `classpath:/markdown/help/01-调用约定.md` | 一个确定的文件 |
+| `classpath:/markdown/help/*.md` | 当前目录下的 Markdown 文件 |
+| `classpath:/markdown/help/**/*.md` | 当前目录及其子目录下的 Markdown 文件 |
+| `classpath*:/markdown/shared/*.md` | 从多个 classpath 位置查找匹配资源，可用于依赖 JAR 中的共享说明 |
+| `file:/opt/app/docs/*.md` | 从宿主进程可读取的外部文件目录匹配文档 |
+
+`*` 匹配当前路径段中的字符，`**` 可以跨目录。建议在模式中明确 `.md` 后缀：宽泛的 `/**` 会尝试处理其他匹配到的可读资源，不会自动只保留 Markdown 文件。
+
+`classpath:` 从资源根目录读取，配置中不写 `src/main/resources`。`file:` 使用宿主运行环境的路径；部署到容器后，要以容器内的实际挂载位置为准。
+
+## 名称、排序与元数据
+
+| 展示信息 | 来源与行为 |
+| --- | --- |
+| 分组名称 | `group`；未提供有效名称时，前端使用“其它文档” |
+| 文档名称 | 文件名去掉扩展名，例如 `01-调用约定.md` → `01-调用约定` |
+| 正文一级标题 | Markdown 中的 `# 标题`，不负责覆盖导航名称 |
+| 展示顺序 | 前端按分组名、文档显示名使用中文区域规则排序；不保证与 YAML 列表顺序一致 |
+| 更新时间 | 后端读取的资源修改时间，不等同于 Git 最后提交时间 |
+| 文件大小 | 后端提供的资源长度信息，前端格式化展示 |
+
+希望导航顺序稳定时，可以使用 `01-`、`02-` 这样的等宽数字前缀。当前实现不会读取 YAML Front Matter 中的 `title` / `order` 来重命名或排序，也没有把多级文件目录自动映射成多层导航。
+
+同一分组中应使用不同的显示名称。来自不同目录的同名文件，以及互相重叠的资源模式，可能产生重复条目；前端按“分组 + 显示名称”定位文档。
+
+## 阅读与内容支持
+
+| 内容形式 | 当前行为 |
+| --- | --- |
+| 标题、段落、列表、引用 | 按 Markdown 渲染，标题用于生成阅读目录 |
+| Markdown 表格 | 作为说明表格展示 |
+| 围栏代码块 | 交给代码组件展示，支持复制；注明语言有助于高亮 |
+| 普通链接与图片 | 由浏览器访问链接地址；图片地址需要在浏览器中可达 |
+| HTML 片段 | 附加文档阅读器允许部分 HTML，经清理后展示；脚本、iframe、表单等不会按普通页面执行 |
+| MDX / React 组件、Mermaid | 当前没有对应的编译或图表渲染流程；不应按官网 MDX 页面来编写宿主 Markdown |
+
+### 图片与相对链接
+
+附加 Markdown 的文本通过 OpenAPI 传给前端，浏览器不会直接读取你的 classpath。`![流程图](./flow.png)` 这样的相对地址，以工作台页面 URL 为基础解析，而不是以 Markdown 文件所在目录解析。
+
+需要展示图片时，可以把图片放入宿主可公开访问的静态资源目录，并使用正确的访问地址。例如应用上下文为 `/order`：
+
+```text title="宿主静态资源"
+src/main/resources/static/doc-images/flow.png
+```
+
+```markdown title="Markdown 中引用宿主图片"
+![调用流程](/order/doc-images/flow.png)
+```
+
+也可以使用你自己的完整 HTTPS 图片地址。静态资源是否可访问，还取决于宿主和代理配置；`location` 只负责查找 Markdown，不会自动公开相邻目录中的其他文件。
+
+### 文档导出
+
+阅读页提供 Markdown、HTML、Word 导出，以及通过浏览器打印另存 PDF 的入口。需要导出多篇说明时，按文档分别选择；这与接口文档的 OpenAPI 规范导出是两个入口。
+
+## 数据生效与宿主边界
+
+后端读取 UTF-8 内容，将其加入 OpenAPI 的 `x-nextdoc4j.markdown`，前端再构建分组和阅读页。可以在有权访问文档的前提下，查看 `/v3/api-docs` 中是否存在相应内容：
+
+```json title="OpenAPI 扩展片段"
+{
+  "x-nextdoc4j": {
+    "markdown": [
+      {
+        "group": "接入说明",
+        "filename": "01-调用约定.md",
+        "displayName": "01-调用约定",
+        "content": "# 调用约定\n\n接口调用说明。"
+      }
+    ]
+  }
+}
+```
+
+正文与接口描述一起下发，访问权限跟随文档资源。当前没有为每篇 Markdown 单独设置认证或权限的配置。
+
+classpath 资源修改后需要重新打包宿主；外部文件变更也应结合 SpringDoc 与浏览器文档缓存检查。需要确定地发布新内容时，重启宿主后刷新工作台，不将这项功能当成文件热更新服务。
+
+仓库的[单体 Demo](https://github.com/NextDoc4j/nextdoc4j/tree/master/nextdoc4j-demo/nextdoc4j-demo-boot3/nextdoc4j-demo-boot3-monolith/src/main/resources/markdown)提供了 `changelog/CHANGELOG.md` 和 `otherdoc/README.md`，可以对照其资源目录与 `application.yml` 阅读接入方式。
+
+## 常见问题
+
+| 现象 | 排查方向 |
+| --- | --- |
+| 看不到“其他文档”中的条目 | 确认两个开关都已启用，并查看当前加载文档中的 `x-nextdoc4j.markdown` |
+| 本机文件存在但匹配不到 | `classpath:` 路径从资源根目录开始；检查文件已打入 JAR，或外部目录已正确挂载 |
+| 文件改名后导航名称没变 | 检查是否仍在使用旧制品或旧文档缓存，重新打包宿主并刷新 |
+| Markdown 的 `# 标题` 与菜单不同 | 菜单名称来自文件名，不来自正文标题或 Front Matter |
+| 排序与 YAML 中顺序不同 | 前端按名称排序，使用等宽数字前缀表达顺序 |
+| 多出重复条目 | 检查资源模式重叠，以及同组中的不同目录是否有同名文件 |
+| 图片显示失败 | 在浏览器直接打开图片 URL；不要把 Markdown 的 classpath 当作浏览器图片地址 |
+| 某些 HTML 或图表没有显示 | 检查当前渲染范围，使用标准 Markdown；清理规则不会保留任意 HTML 执行能力 |
+
+<Cards>
+  <Card title="品牌配置" href="/guide/config/brandconfiguration" description="为同一个工作台配置标题、Logo 与版权链接。" />
+  <Card title="简单认证配置" href="/guide/config/authconfiguration" description="通过文档访问认证统一控制接口说明与附加内容。" />
+</Cards>

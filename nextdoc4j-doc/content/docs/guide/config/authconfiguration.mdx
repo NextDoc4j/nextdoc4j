@@ -1,31 +1,166 @@
 ---
 title: 简单认证配置
-description: 为 API 文档增加轻量密码保护，支持动态生成凭据和自定义静态密码。
+description: 为文档设置访问密码，了解随机密码、登录会话、退出方式，以及认证响应的实际行为。
 ---
 
-简单认证配置位于 `nextdoc4j.auth`。
+简单认证适合为应用内的接口文档增加一道密码入口。它保护文档 UI、静态资源和默认 OpenAPI 地址，配置位于 `nextdoc4j.auth`，不需要额外安全插件。
 
-## 参数速查
+<Callout title="先区分两种认证" type="info">
+这里配置的是“谁可以打开文档”。工作台中填写的 Bearer Token、API Key，以及业务接口的用户登录、角色和权限，属于宿主应用的接口鉴权。文档密码不会自动成为调试请求的业务凭据。
+</Callout>
 
-| 配置项 | 类型 | 默认值 | 说明 |
+## 配置项速查
+
+| 配置项 | 类型 | 默认值 / 未配置行为 | 说明 |
 | --- | --- | --- | --- |
-| `nextdoc4j.auth.enabled` | `boolean` | `false` | 是否开启文档密码拦截。 |
-| `nextdoc4j.auth.password` | `string` | 自动生成 UUID | 自定义访问密码。 |
+| `nextdoc4j.enabled` | Boolean | `false` | 文档工作台总开关，需要设为 `true` |
+| `nextdoc4j.auth.enabled` | Boolean | `false` | 设置为 `true` 启用文档密码认证 |
+| `nextdoc4j.auth.password` | String | 未设置 | 认证启用且密码为空白时，为当前实例生成随机密码 |
+| `nextdoc4j.production` | Boolean | `false` | 设置为 `true` 时优先屏蔽文档，返回 404 |
 
-## 配置示例
+当前配置模型只提供访问密码，没有用户名、用户列表、角色和会话超时配置项。HTTP Basic 校验只比较密码部分，因此命令行示例使用空用户名。
+
+## 选择密码来源
+
+<Tabs items={['环境变量', '本地固定密码', '启动时随机生成']}>
+  <Tab value="环境变量">
+
+```yaml title="application.yml"
+nextdoc4j:
+  enabled: true
+  production: false
+  auth:
+    enabled: true
+    password: ${NEXTDOC4J_DOC_PASSWORD}
+```
+
+启动前在部署环境设置 `NEXTDOC4J_DOC_PASSWORD`。示例未提供回退值，缺少变量时应先补齐环境配置。
+
+  </Tab>
+  <Tab value="本地固定密码">
+
+```yaml title="application-local.yml"
+nextdoc4j:
+  enabled: true
+  auth:
+    enabled: true
+    password: 'local-docs-demo'
+```
+
+用于本地演示同一套登录流程；部署时替换为实际管理的密码。包含特殊符号的 YAML 字符串可以用引号明确边界。
+
+  </Tab>
+  <Tab value="启动时随机生成">
 
 ```yaml title="application.yml"
 nextdoc4j:
   enabled: true
   auth:
     enabled: true
-    password: change-me
 ```
 
-未配置 `password` 时，应用启动会在控制台输出临时密码。认证只保护文档入口和相关资源，不替代业务接口鉴权。
+不配置 `password` 时，当前实例生成去掉连字符的 UUID 字符串，并在启动日志中显示密码提示。重启后会重新生成；多实例之间也不会自动共享这份密码。
 
-## 使用建议
+  </Tab>
+</Tabs>
 
-- 生产环境使用随机密码或由部署系统注入环境变量。
-- 结合 `nextdoc4j.production=true` 控制生产环境是否暴露文档。
-- 认证失败会返回明确的 HTTP 401，前端会保留用户输入的空格和 UTF-8 字符。
+使用 Properties 时，环境变量方案写为：
+
+```properties title="application.properties"
+nextdoc4j.enabled=true
+nextdoc4j.production=false
+nextdoc4j.auth.enabled=true
+nextdoc4j.auth.password=${NEXTDOC4J_DOC_PASSWORD}
+```
+
+密码采用 UTF-8 编码处理，支持中文等字符。非空密码中的前后空格也参与精确比较；仅包含空白的配置会按未设置密码处理。
+
+## 登录与会话
+
+1. 启动宿主，访问 `/doc.html` 或配置的自定义入口。
+2. 尚未认证时，显示文档密码页；输入配置的密码。
+3. 认证成功后，服务端建立已认证会话，再打开工作台。
+4. 后续文档请求携带同一会话 Cookie，通过会话状态校验。
+
+MVC 使用 `HttpSession`，WebFlux 使用 `WebSession`。认证成功后，当前实现会更新会话 ID，并将会话最大空闲时间设置为 **30 分钟**；`nextdoc4j.auth` 下没有单独的超时参数。
+
+### 退出当前会话
+
+在浏览器中访问：
+
+```text
+http://localhost:8080/doc.html?action=logout
+```
+
+退出通过销毁当前宿主会话实现，并重定向回文档入口。若设置 `doc-path: /docs`，对应使用 `/docs?action=logout`；有应用上下文时，也要带上前缀。
+
+修改配置文件后，重新启动宿主使新配置生效。验证新密码时先退出原会话，避免已有认证状态直接放行请求。
+
+## 认证响应如何判断
+
+当前过滤器先检查已有会话，再检查 Basic 认证头。没有有效会话且没有 Basic 认证头时，会显示登录 HTML，不能只根据 HTTP 200 判断已登录。
+
+| 请求状态 | 响应行为 |
+| --- | --- |
+| 已有已认证会话 | 继续处理原请求，返回页面、资源或 OpenAPI 内容 |
+| 未登录，未提供 Basic 认证头 | HTTP `200`，内容为登录页 HTML |
+| Basic 密码正确，且请求被识别为 AJAX / JSON 请求 | HTTP `200`，返回认证成功 JSON，同时建立会话 |
+| Basic 密码正确，普通浏览器请求 | 重定向到原路径，再通过已建立的会话访问 |
+| Basic 密码错误 | HTTP `401`；AJAX / JSON 请求返回认证失败 JSON |
+| `production=true` 或 `enabled=false` | 相关文档资源返回 `404`，不会进入正常登录流程 |
+
+用于自动化访问时，可通过 `X-Requested-With: XMLHttpRequest` 明确请求认证 JSON。仅仅看到 `200`，或首个 Basic 请求返回成功消息，并不表示已经获取到原始 OpenAPI 文档。
+
+### 命令行访问示例
+
+先用文档密码认证并保存 Cookie，再请求 OpenAPI：
+
+```bash title="1. 登录并保存会话 Cookie"
+curl --cookie-jar /tmp/nextdoc4j-doc.cookies \
+  --user ":${NEXTDOC4J_DOC_PASSWORD}" \
+  --header 'X-Requested-With: XMLHttpRequest' \
+  http://localhost:8080/doc.html
+```
+
+```json title="密码正确时的认证响应"
+{
+  "success": true,
+  "message": "认证成功"
+}
+```
+
+```bash title="2. 使用同一会话读取 OpenAPI"
+curl --cookie /tmp/nextdoc4j-doc.cookies \
+  --header 'Accept: application/json' \
+  http://localhost:8080/v3/api-docs
+```
+
+将端口、文档入口和上下文路径替换为实际配置。第一步的密码应与宿主服务一致，第二步返回的内容才应包含 `openapi`、`info`、`paths` 等文档字段。
+
+## 与其他配置配合
+
+| 目标 | 使用的能力 |
+| --- | --- |
+| 关闭某环境的全部文档资源 | [基础配置](/guide/config/basicconfiguration)中的 `production` 或 `enabled` |
+| 登录页显示项目标题和 Logo | [品牌配置](/guide/config/brandconfiguration)，同时启用 `extension.enabled` |
+| 文档中显示接口 Token / API Key 方案 | [认证展示插件](/guide/plugin/authentication)与工作台的全局认证 |
+| 展示 Sa-Token 权限和角色 | [Sa-Token 插件](/guide/plugin/satoken)，业务鉴权仍由宿主处理 |
+
+保护范围沿用当前文档路径与默认 SpringDoc / Swagger 资源规则。宿主如果另有自定义文档接口、网关转发地址或外层认证系统，需要一起核对实际访问链路。
+
+## 常见问题
+
+| 现象 | 排查方向 |
+| --- | --- |
+| 开启认证后文档直接返回 404 | 检查 `enabled` 和 `production`，生产屏蔽优先于密码认证 |
+| 每次重启密码都变了 | 未配置固定密码或配置为空白；使用部署环境注入同一密码 |
+| 页面拿到 HTML，解析 JSON 失败 | 请求可能返回了登录页；检查认证会话与 `Content-Type` |
+| 命令行认证成功但没有接口数据 | 首次 Basic 请求返回的是认证结果；保存 Cookie 后再请求文档 |
+| 代理或多实例环境中反复登录 | 检查 Cookie 域名与路径、代理转发、密码配置和宿主会话共享方式 |
+| 开启文档认证后业务接口仍返回 401 | 业务 Token 与文档密码不同，在工作台全局认证中配置接口需要的凭据 |
+| 设置品牌后登录页没有 Logo | 确认 `extension.enabled=true`，品牌资源在宿主环境可读 |
+
+<Cards>
+  <Card title="品牌配置" href="/guide/config/brandconfiguration" description="配置登录页与工作台的项目标题和 Logo。" />
+  <Card title="基础配置" href="/guide/config/basicconfiguration" description="核对入口、环境开关与跨域行为。" />
+</Cards>

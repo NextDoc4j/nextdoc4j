@@ -1,35 +1,171 @@
 ---
 title: 品牌配置
-description: 自定义 NextDoc4j 文档界面的 Logo、标题和页脚信息。
+description: 定制工作台与登录页的标题、Logo 和工作台页脚，了解资源路径、显示优先级与配置生效方式。
 ---
 
-品牌配置位于 `nextdoc4j.extension.brand`。
+品牌配置将宿主项目的名称与视觉标识传给工作台。常用入口是 `nextdoc4j.extension.brand`，并且需要同时启用 **`nextdoc4j.enabled` 与 `nextdoc4j.extension.enabled`**。
 
-## 配置项
+## 配置后的展示范围
 
-| 配置项 | 类型 | 说明 |
+| 品牌元素 | 工作台 | 文档登录页 |
 | --- | --- | --- |
-| `logo` | `string` | Logo 路径，支持 classpath 资源。 |
-| `title` | `string` | 登录页和文档导航显示的主标题。 |
-| `footer-text` | `string` | 页脚文本，支持 Markdown 链接和环境变量。 |
+| `title` | 使用品牌标题显示项目标识 | 使用品牌标题作为登录标题 |
+| `logo` | 使用宿主配置的 Logo | 资源可读时显示品牌 Logo |
+| `footer-text` | 显示自定义版权文本与链接 | 当前不使用此项定制登录页页脚 |
 
-## YAML 示例
+品牌配置不需要额外插件依赖。已有的 `OpenAPI.info.title` 仍可以作为文档本身的标题信息，品牌标题用于工作台的品牌展示。
+
+## 三步完成定制
+
+### 1. 准备 Logo
+
+先把资源放入宿主工程：
+
+```text title="宿主项目资源目录"
+src/main/resources/
+└── brand/
+    └── logo.svg
+```
+
+`classpath:/brand/logo.svg` 对应的是 JAR 内的资源。无需仅为了读取品牌 Logo，再把它映射成一个公开 HTTP 接口。
+
+### 2. 启用扩展并配置品牌
+
+<Tabs items={['YAML', 'Properties']}>
+  <Tab value="YAML">
 
 ```yaml title="application.yml"
 nextdoc4j:
+  enabled: true
   extension:
+    enabled: true
     brand:
-      logo: classpath:brand/logo/logo.png
-      title: 企业级开放平台 API 文档
-      footer-text: 'Copyright © 2025 [NextDoc4j](https://nextdoc4j.top)'
+      title: 订单开放平台
+      logo: classpath:/brand/logo.svg
+      footer-text: "Copyright © 2026 订单开放平台 · [开发者中心](https://example.com)"
 ```
 
-## Properties 示例
+  </Tab>
+  <Tab value="Properties">
 
 ```properties title="application.properties"
-nextdoc4j.extension.brand.logo=classpath:brand/logo/logo.png
-nextdoc4j.extension.brand.title=企业级开放平台 API 文档
-nextdoc4j.extension.brand.footer-text=Copyright © 2025 NextDoc4j
+nextdoc4j.enabled=true
+nextdoc4j.extension.enabled=true
+nextdoc4j.extension.brand.title=\u8ba2\u5355\u5f00\u653e\u5e73\u53f0
+nextdoc4j.extension.brand.logo=classpath:/brand/logo.svg
+nextdoc4j.extension.brand.footer-text=Copyright \u00a9 2026 \u8ba2\u5355\u5f00\u653e\u5e73\u53f0 \u00b7 [\u5f00\u53d1\u8005\u4e2d\u5fc3](https://example.com)
 ```
 
-品牌资源放在宿主项目的 `src/main/resources` 下，并确保路径可被 Spring Boot classpath 访问。
+  </Tab>
+</Tabs>
+
+Properties 示例将中文和特殊字符写成 Unicode 转义，兼容配置文件的编码规则；实际显示内容与 YAML 示例相同。
+
+### 3. 启动后查看工作台
+
+打开宿主的 `/doc.html` 或[自定义入口](/guide/config/basicconfiguration#自定义文档入口)，查看导航中的品牌标题、Logo 和页面底部的版权信息。启用[文档访问认证](/guide/config/authconfiguration)后，登录页也会读取同一套标题与 Logo。
+
+## 配置项与显示优先级
+
+以下品牌字段都位于 `nextdoc4j.extension.brand` 下，默认均未设置。
+
+| 配置项 | 类型 | 未设置时的行为 | 示例 |
+| --- | --- | --- | --- |
+| `title` | String | 工作台继续使用 OpenAPI 标题或前端默认标题 | `订单开放平台` |
+| `logo` | String | 工作台使用内置 Logo；登录页不展示自定义 Logo | `classpath:/brand/logo.svg` |
+| `footer-text` | String | 不下发自定义页脚内容 | `Copyright © 2026 订单开放平台` |
+
+### 标题如何决定
+
+| 页面 | 标题优先级 |
+| --- | --- |
+| 工作台 | 品牌扩展标题 → 当前 OpenAPI 的 `info.title` → 前端默认标题 `NextDoc4j` |
+| 登录页 | 已启用扩展的品牌标题 → 宿主 OpenAPI 标题 → `NextDoc4j - API文档认证` |
+
+品牌标题填写普通文本即可。它不是一段用于执行的 HTML，也不需要在标题中嵌入标签来排版。
+
+### Logo 从哪里读取
+
+| 资源写法 | 读取位置 | 适合的用途 |
+| --- | --- | --- |
+| `classpath:/brand/logo.svg` | 宿主应用 classpath | 跟随应用制品发布，适合作为默认方案 |
+| `file:/opt/app/brand/logo.png` | 宿主进程可访问的文件系统 | 在部署时挂载不同的品牌资源 |
+| `https://assets.example.com/logo.png` | 由宿主服务端读取的远程资源 | 已具备稳定资源服务、且后端能访问该地址的场景 |
+
+当前可识别的常见格式包括 PNG、JPG/JPEG、GIF、SVG、WebP 和 ICO。建议使用体积适中的透明背景资源，并在工作台深浅两种主题下检查可读性；当前配置模型只有一个 `logo` 字段。
+
+后端读取资源后，会转成带 MIME 类型的 Base64 Data URL，通过 OpenAPI 扩展传给前端。因此这里填写的是 **Spring 资源地址**，不是浏览器中相对于 `/doc.html` 的图片路径，也不是直接粘贴一段 Base64 数据。
+
+### 页脚可以写什么
+
+```yaml title="application.yml · 页脚示例"
+nextdoc4j:
+  enabled: true
+  extension:
+    enabled: true
+    brand:
+      footer-text: "Copyright © 2026 [订单开放平台](https://example.com) · [服务状态](https://status.example.com)"
+```
+
+当前工作台页脚支持普通文本和 `[文字](https://地址)` 形式的 HTTP / HTTPS 链接，不按完整 Markdown 文档或原始 HTML 渲染。需要标题、列表、表格或代码块的说明，更适合放入[附加 Markdown 文档](/guide/config/markdownIntegrationConfiguration)。
+
+当文本中不包含 `Copyright` 时，前端会添加 `Copyright © ` 前缀。希望完整控制版权行时，可以像上面的示例一样写明 `Copyright`。
+
+## 按服务和环境复用配置
+
+可以沿用 Spring Boot 的属性占位符，将应用名或部署变量带入品牌信息：
+
+```yaml title="application.yml"
+spring:
+  application:
+    name: order-service
+
+nextdoc4j:
+  enabled: true
+  extension:
+    enabled: true
+    brand:
+      title: ${spring.application.name} API
+      logo: classpath:/brand/logo.svg
+      footer-text: "Copyright © 2026 ${spring.application.name}"
+```
+
+占位符由 Spring Boot 配置系统解析。它不会自动生成新的前端品牌配置项，也不会修改接口的认证和访问路径。
+
+网关聚合场景下，品牌来自所加载文档的扩展信息，界面还涉及网关与服务文档的切换。需要统一品牌时，先对网关和下游的品牌配置作出一致约定，再检查两个演示入口中的实际展示：[单体服务](https://single-demo.nextdoc4j.top/) · [网关聚合](https://gateway-demo.nextdoc4j.top/)。
+
+## 确认配置已生效
+
+在有权访问文档的前提下，查看宿主 `/v3/api-docs` 中的 `x-nextdoc4j.brand`。配置完成后通常可以看到类似内容：
+
+```json title="OpenAPI 扩展片段"
+{
+  "x-nextdoc4j": {
+    "brand": {
+      "title": "订单开放平台",
+      "logo": "data:image/svg+xml;base64,...",
+      "footerText": "Copyright © 2026 订单开放平台"
+    }
+  }
+}
+```
+
+上面的 Logo 仅示意数据格式。JSON 使用 `footerText`，而 YAML / Properties 的常用写法是 `footer-text`。
+
+修改 classpath 资源后，重新打包并重启宿主，再刷新文档。Logo 存在后端资源缓存，前端也会保存品牌快照；先检查最新 OpenAPI 返回的数据，再判断是资源问题还是显示缓存问题。
+
+## 常见问题
+
+| 现象 | 排查方向 |
+| --- | --- |
+| 写了品牌配置但仍显示默认内容 | 确认 `enabled=true` 和 `extension.enabled=true`，并查看当前加载的是哪个服务文档 |
+| Logo 没显示 | 确认资源已打入 JAR、路径大小写一致、宿主进程可读；远程地址要从后端所在环境检查 |
+| 本机正常，容器中失效 | `file:` 指向容器文件系统，检查挂载路径；随包资源优先使用 `classpath:` |
+| 替换同名 Logo 后仍是旧图 | 重启宿主清理资源缓存，再刷新文档并检查 `brand.logo` 是否更新 |
+| 页脚链接没有生效 | 使用带 HTTP / HTTPS 地址的简单 Markdown 链接，不使用 HTML 或相对链接 |
+| 标题改变后接口名称没变 | 品牌标题与 `@Tag`、`@Operation` 描述的接口信息是不同层级的配置 |
+
+<Cards>
+  <Card title="简单认证配置" href="/guide/config/authconfiguration" description="让品牌信息同时出现在受保护的文档登录页。" />
+  <Card title="Markdown 文档配置" href="/guide/config/markdownIntegrationConfiguration" description="把平台介绍、调用约定和变更记录加入工作台。" />
+</Cards>

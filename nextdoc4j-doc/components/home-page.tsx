@@ -338,7 +338,8 @@ const quickLinkGroups = [
     links: [
       ['GitHub 组织', 'https://github.com/NextDoc4j'],
       ['Gitee 组织', 'https://gitee.com/NextDoc4j'],
-      ['在线演示平台', 'https://demo.nextdoc4j.top/'],
+      ['单体服务演示', 'https://single-demo.nextdoc4j.top/'],
+      ['网关聚合演示', 'https://gateway-demo.nextdoc4j.top/'],
     ],
   },
 ] as const;

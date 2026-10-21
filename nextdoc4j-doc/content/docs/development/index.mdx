@@ -1,68 +1,290 @@
 ---
 title: 开发指南
-description: NextDoc4j UI 使用 React、TypeScript 和 Vite 构建，提供 API 文档浏览、在线调试和导出能力。
+description: 从配置、访问保护和 Demo 场景，到 Monorepo 开发、联调、验证与发布，了解 NextDoc4j 的实际接入和贡献流程。
 ---
 
-`nextdoc4j-ui` 是独立的 React 前端应用，官网 `nextdoc4j-doc` 使用 Fumadocs 构建，两个项目分别维护和发布。
+这页面向两类读者：已经完成[快速开始](/guide/start/started)、希望继续配置和调试项目的使用者，以及准备修改源码的贡献者。示例和默认值以仓库 **1.5.0** 的配置模型、自动配置与 Demo 为准。
 
-## 技术栈
+<Cards>
+  <Card title="使用进阶" href="#使用进阶" description="查配置、配置文档登录，选择接入场景与响应展示方式。" />
+  <Card title="参与开发" href="#参与开发" description="了解目录分工、本地联调、验证入口和发布流程。" />
+</Cards>
 
-| 技术 | 用途 |
+## 使用进阶
+
+### 通用配置与默认值
+
+以下配置都位于 `nextdoc4j` 下。表中“未配置”表示没有额外配置值；实际展示还会使用 OpenAPI 或前端默认信息。
+
+| 配置名 | 类型 | 默认值 / 未配置行为 | 说明 |
+| --- | --- | --- | --- |
+| `nextdoc4j.enabled` | Boolean | `false` | 启用文档工作台；关闭时屏蔽相关文档资源 |
+| `nextdoc4j.doc-path` | String | `/doc.html` | 自定义对外文档入口；配置后原 `/doc.html` 入口失效 |
+| `nextdoc4j.cors` | Boolean | `false` | 启用内置跨域配置；宿主已有 CORS 配置时优先统一管理 |
+| `nextdoc4j.production` | Boolean | `false` | 开启后通过过滤器屏蔽文档相关资源，返回 404 |
+| `nextdoc4j.auth.enabled` | Boolean | `false` | 开启文档密码认证 |
+| `nextdoc4j.auth.password` | String | 未配置 | 开启认证而未提供密码时，生成随机密码并输出启动提示 |
+| `nextdoc4j.extension.enabled` | Boolean | `false` | 开启品牌和 Markdown 扩展信息解析 |
+| `nextdoc4j.extension.brand.title` | String | 未配置 | 自定义品牌标题；为空时尝试读取宿主 OpenAPI 标题 |
+| `nextdoc4j.extension.brand.logo` | String | 未配置 | 品牌 Logo，支持例如 `classpath:/logo/logo.png` 的资源地址 |
+| `nextdoc4j.extension.brand.footer-text` | String | 未配置 | 页脚文本，支持 Markdown 链接 |
+| `nextdoc4j.extension.markdown` | List | `[]` | 附加 Markdown 文档配置列表 |
+| `nextdoc4j.extension.markdown[].group` | String | 未配置 | 文档分组名称 |
+| `nextdoc4j.extension.markdown[].location` | String | 未配置 | 文档资源位置，例如 `classpath:/markdown/help/**` |
+| `nextdoc4j.plugin.enum.enabled` | Boolean | 未配置时不装配 | 引入枚举插件后，显式设置 `true` 启用枚举增强 |
+| `nextdoc4j.plugin.security.enabled` | Boolean | 未配置时不装配 | 引入对应安全插件后，显式设置 `true` 启用安全方案或权限元数据处理 |
+
+安全配置模型内部的 `enabled` 初值为 `true`，但自动配置仍要求属性显式为 `true`；接入时应以**插件是否被装配**为准。插件开关也不会自动引入缺少的 Maven 依赖。
+
+```yaml title="application.yml · 开发环境配置示例"
+nextdoc4j:
+  enabled: true
+  production: false
+  auth:
+    enabled: true
+    password: ${NEXTDOC4J_DOC_PASSWORD}
+  extension:
+    enabled: true
+    brand:
+      title: 订单服务 API
+      logo: classpath:/logo/logo.png
+      footer-text: "接口文档 · [项目主页](https://example.com)"
+    markdown:
+      - group: 接入说明
+        location: classpath:/markdown/help/**
+```
+
+上面的密码由环境变量提供；请在启动环境设置 `NEXTDOC4J_DOC_PASSWORD`。Logo 放在 `src/main/resources/logo/logo.png`，附加 Markdown 放在对应资源目录。更多示例见[基础配置](/guide/config/basicconfiguration)、[品牌配置](/guide/config/brandconfiguration)和[Markdown 集成](/guide/config/markdownIntegrationConfiguration)。
+
+### 文档访问保护与业务认证
+
+**文档密码认证**用于保护文档资源。设置 `auth.enabled=true` 和 `auth.password` 后，浏览器访问文档入口会显示密码页；认证成功后保持登录会话。配置的是一个访问密码，没有单独的用户名配置项。
+
+**业务接口认证**由宿主应用负责。在文档的全局认证中填写 Bearer Token 或 API Key 后，工作台按 OpenAPI 中的安全定义将凭据加入请求。权限、角色等提示属于文档元数据，真正的业务权限仍由你的服务校验。
+
+| 需要 | 对应能力 | 接入入口 |
+| --- | --- | --- |
+| 进入文档前输入密码 | 内置文档访问认证 | [认证配置](/guide/config/authconfiguration) |
+| 展示和携带接口 Token / API Key | OpenAPI Security Schemes 与调试认证设置 | [认证插件](/guide/plugin/authentication) |
+| 展示 Sa-Token 权限、角色、忽略认证规则 | Sa-Token 插件与宿主注解 | [Sa-Token 插件](/guide/plugin/satoken) |
+
+当前 Sa-Token 插件依赖 MVC 的请求映射能力，**纯 WebFlux 应用不会激活这套注解解析**。不要把基础 UI 的 WebFlux 支持与这个插件的适用范围混为一谈。
+
+生产环境如果不需要暴露文档，可在环境配置中设置 `nextdoc4j.production=true`。需要向指定用户开放时，结合 HTTPS、文档认证和宿主的访问策略管理入口。修改文档路径用于调整入口位置，不能替代访问认证。
+
+### 选择单体或网关场景
+
+单体 Starter 的 MVC / WebFlux 自动配置根据宿主 Web 环境生效；网关 Starter 在此基础上增加文档发现与响应处理。Boot 3 / Boot 4 共用同一套 NextDoc4j 坐标，通过宿主依赖和 Jackson 适配器处理版本差异。
+
+| 场景 | NextDoc4j Starter | 宿主提供的文档依赖 |
+| --- | --- | --- |
+| 单体 MVC | `nextdoc4j-spring-boot-starter` | `springdoc-openapi-starter-webmvc-ui` |
+| 单体 WebFlux | 同上 | `springdoc-openapi-starter-webflux-ui` |
+| Gateway WebFlux | `nextdoc4j-gateway-spring-boot-starter` | Gateway Server WebFlux + SpringDoc WebFlux UI |
+| Gateway WebMVC | 同上 | Gateway Server WebMVC + SpringDoc WebMVC UI |
+
+Boot 3 Demo 对齐 Boot `3.5.16`、SpringDoc `2.9.1`、Cloud `2025.0.3`；Boot 4 Demo 对齐 Boot `4.1.1`、SpringDoc `3.1.1`、Cloud `2025.1.2`。选择版本时一起调整平台栈，NextDoc4j BOM 只管理 `top.nextdoc4j` 自身模块。
+
+网关根据路由构建服务文档列表，前端通过服务 URL 加载下游 OpenAPI。下游可以只提供 OpenAPI JSON；需要读取它的 SpringDoc 分组时，再启用 `service-swagger-config-enabled`，并保证对应接口可访问。
+
+<details>
+<summary>网关常用配置与默认值</summary>
+
+以下是 `nextdoc4j.gateway` 下最常用的发现与聚合配置。全局认证方案、匿名路径和复杂路由解析见[网关聚合插件](/guide/plugin/gateway)。
+
+| 配置名（省略 `nextdoc4j.gateway.`） | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `doc-path` | String | `/v3/api-docs` | 下游文档路径后缀，与 UI 的 `nextdoc4j.doc-path` 不同 |
+| `auto-discovery` | Boolean | `true` | 自动从网关路由发现文档 |
+| `service-swagger-config-enabled` | Boolean | `false` | 是否读取下游 Swagger Config 和分组文档 |
+| `exclude-routes` | List | `[]` | 排除路由 ID，支持通配符 |
+| `include-patterns` | List | `[]` | 包含规则；为空时不额外限制 |
+| `name-mappings` | Map | `{}` | 将路由 ID 映射为显示名称 |
+| `name-resolve-strategy` | Enum | `AUTO` | 服务显示名称解析策略 |
+| `doc-path-strategy` | Enum | `AUTO` | 文档地址解析策略；复杂场景可以手动配置 |
+| `services` | List | `[]` | 手动服务列表，补充自动发现无法覆盖的场景 |
+| `context-path.metadata-key` | String | `nextdoc4j.context-path` | 从服务注册元数据读取上下文路径时使用的键 |
+
+</details>
+
+### Demo 场景与阅读顺序
+
+仓库的 `nextdoc4j-demo-api-user`、`nextdoc4j-demo-api-system` 和 `nextdoc4j-demo-api-file` 复用业务接口；启动模块分别放在 `nextdoc4j-demo-boot3`、`nextdoc4j-demo-boot4` 下。
+
+统一联调工具支持以下八个 Profile：
+
+| Profile | 运行方式 | 默认后端端口 |
+| --- | --- | --- |
+| `sb3-single-webmvc` | Boot 3 · 单体 MVC | `8000` |
+| `sb3-single-webflux` | Boot 3 · 单体 WebFlux | `8001` |
+| `sb4-single-webmvc` | Boot 4 · 单体 MVC | `8100` |
+| `sb4-single-webflux` | Boot 4 · 单体 WebFlux | `8101` |
+| `sb3-gateway-webflux` | Boot 3 · Gateway WebFlux | `9000` |
+| `sb3-gateway-webmvc` | Boot 3 · Gateway WebMVC | `9001` |
+| `sb4-gateway-webflux` | Boot 4 · Gateway WebFlux | `9100` |
+| `sb4-gateway-webmvc` | Boot 4 · Gateway WebMVC | `9101` |
+
+建议先运行单体 MVC，再查看用户查询、文件上传和 SSE 示例，最后体验网关。网关默认启动用户、系统、文件三个服务，支持用 `--services=user,system` 选择子集。当前网关 Demo 包含 Nacos 接入，请根据 [Demo README](https://github.com/NextDoc4j/nextdoc4j/blob/master/nextdoc4j-demo/README.md) 准备注册配置环境。
+
+### 请求与响应展示范围
+
+下面描述的是当前前端的处理行为，不要求你为某种返回类型更换 Starter。响应读取以 `Content-Type`、`Content-Disposition` 和实际内容为依据。
+
+| 类型 | 工作台行为 | Demo 中的入口或说明 |
+| --- | --- | --- |
+| JSON / `application/*+json` | 结构化展示，支持格式化、字段展开与复制 | 用户管理中的查询与分页接口 |
+| XML / `application/*+xml` | 识别并按 XML 格式化；格式不合法时保留原文 | 接口需声明实际 `produces`，并由宿主配置相应消息转换器 |
+| `text/plain` | 显示文本内容 | 响应测试 → 获取系统配置 - 纯文本 |
+| `text/csv` | 无附件声明时按文本处理；`attachment` 响应触发下载 | 响应测试 → 导出系统配置 - CSV，Demo 明确设置了附件头 |
+| `text/html` | 以源码内容展示，不作为业务页面执行 | 响应测试 → 系统信息 - HTML 视图 |
+| 二进制、PDF、ZIP、图片、音视频 | 按二进制读取并下载；尽量使用响应声明的文件名 | 响应测试 → 下载系统日志文件、获取系统状态徽章 |
+| `Content-Disposition: attachment` | 即使 MIME 类型是文本，也优先按附件下载 | CSV 导出、文件下载接口 |
+| `text/event-stream` | 持续读取 SSE，展示事件类型、ID、数据与接收状态，可手动中止 | SSE测试 → 用户事件、纯文本、Token 流等接口 |
+| Base64 / Data URI | 按承载它的 JSON 或文本响应展示；文档示例中的图片识别另有展示逻辑 | Base64响应示例、系统二维码接口 |
+
+较大的非二进制响应会限制屏幕预览，避免大文本阻塞界面；当前阈值为 **1 MiB**，预览上限为 **256 KiB**。SSE 历史使用有界缓冲，长连接不等于无限保存全部事件。
+
+请求侧支持 JSON、XML、文本、URL 编码表单、multipart 表单和二进制文件。浏览器对跨域、Cookie 和受限请求头的规则依然适用，跨域调试需要服务端配合 CORS。
+
+### 注解与文档组织建议
+
+| 注解 / 配置 | 建议用途 |
 | --- | --- |
-| React | 页面与交互组件 |
-| TypeScript | 类型安全 |
-| Vite | 开发服务器和生产构建 |
-| Tailwind CSS | 样式基础 |
-| CodeMirror | JSON、XML 和脚本编辑 |
-| Vitest | 单元与组件测试 |
+| `@Tag` | 按业务领域组织侧栏标签，如“用户管理”“文件管理” |
+| `@Operation` | 给出简洁的接口名称和必要的业务说明 |
+| `@Parameter` | 解释路径、查询参数的语义与示例值 |
+| `@Schema` | 描述 DTO 字段、枚举、示例、约束与数据格式 |
+| `@ApiResponse` / `@Content` | 明确不同状态码、内容类型与响应模型，避免文档和运行时返回不一致 |
+| `@SecurityRequirement` / Security Schemes | 描述接口需要的认证方式，与宿主实际鉴权规则保持一致 |
+| `GroupedOpenApi` / `springdoc.group-configs` | 以路径或包组织大项目分组，与标签形成两个导航层级 |
 
-## 目录结构
+对象型查询参数需要展开时，按需设置 `springdoc.default-flat-param-object=true`。使用 Java 参数名时，确保编译开启 `-parameters`；枚举值和描述增强见[枚举插件](/guide/plugin/enum)。
 
-```text
-nextdoc4j-ui/
-├── src/
-│   ├── components/       # 通用交互组件
-│   ├── features/         # 首页、文档、调试、导出等功能
-│   ├── lib/              # HTTP、路由、存储和工具
-│   └── styles/           # 功能模块样式
-├── scripts/              # 后端资源同步和兼容性夹具
-└── tests/                # 单元、组件和功能测试
+## 参与开发
+
+### 仓库结构与职责
+
+这是一个统一维护的 Monorepo。官网已迁移为 **Next.js + Fumadocs**，与 React + Vite 的产品 UI 分别构建。
+
+```text title="仓库根目录"
+nextdoc4j/
+├── nextdoc4j/          # Maven 产品模块与后端 UI 资源 JAR
+│   ├── nextdoc4j-core/       # 纯 Java 模型、路径工具、JSON 抽象
+│   ├── nextdoc4j-common/     # Spring 公共资源与过滤能力
+│   ├── nextdoc4j-adapter/    # Jackson 2 / 3 适配
+│   ├── nextdoc4j-plugin/     # 枚举、认证、安全信息、网关插件
+│   ├── nextdoc4j-starter/    # 单体与网关自动配置
+│   ├── nextdoc4j-bom/        # 对外版本管理
+│   └── nextdoc4j-ui/         # 将产品 UI 静态资源打入 JAR
+├── nextdoc4j-ui/       # React + TypeScript + Vite 产品 UI 源码
+├── nextdoc4j-doc/      # Next.js + Fumadocs 官网与 MDX 文档
+├── nextdoc4j-demo/     # Boot 3 / 4、单体 / 网关集成示例
+├── nextdoc4j-tests/    # 集中 Java 单元与跨模块验证，不发布
+├── release/           # 构建、联调、预览与发布脚本
+└── static/            # README 使用的图片等仓库静态素材
 ```
 
-## 本地开发
+产品后端依赖方向从 `core` 到 `common`、插件 / 适配器，再到 Starter。Jackson 的实现差异放在适配器中；页面功能放到前端对应的 `src/features`，通用组件再放入 `src/components`。
+
+### 准备本地环境
+
+- 后端：JDK **17+**、Maven **3.9+**，以及能访问依赖仓库的 Maven 配置。
+- 产品 UI / 官网：Node.js **20.10+**、pnpm **9.12+**；仓库使用 `pnpm@10.12.4`。
+- 网关 Demo：按所选 Profile 准备 Nacos 等依赖环境。
+
+```bash title="获取代码并安装前端依赖"
+git clone https://github.com/NextDoc4j/nextdoc4j.git
+cd nextdoc4j
+pnpm --dir nextdoc4j-ui install
+pnpm --dir nextdoc4j-doc install
+```
+
+所有下面的命令都从**仓库根目录**执行。
+
+### 启动与前后端联调
+
+```bash title="最常用的联调入口"
+# 启动最新 React UI + Boot 3 单体 MVC Demo
+pnpm --dir release run test-dev-single
+
+# 启动 UI + Boot 3 WebFlux 网关及默认三个下游服务
+pnpm --dir release run test-dev-gateway
+
+# 选择任意 Profile，或者限制网关启动的服务
+pnpm --dir release run test-dev -- --profile=sb4-single-webflux
+pnpm --dir release run test-dev -- --profile=sb4-gateway-webmvc --services=user,system
+```
+
+Vite 默认端口是 `5777`。脚本优先检查所选后端端口：已有服务时复用，否则打包并启动 Demo。`--existing` 强制复用已有后端，`--jar` 强制重新打包启动；可在 `release/.env` 中指定本机工具路径、后端地址和端口，模板见 [`release/.env.example`](https://github.com/NextDoc4j/nextdoc4j/blob/master/release/.env.example)。
+
+只启动某个前端：
+
+```bash title="产品 UI 与官网分别启动"
+# 产品 UI：请求代理目标由其环境配置决定
+pnpm --dir nextdoc4j-ui dev
+
+# 官网：Next.js 开发服务，默认 http://localhost:3000
+pnpm --dir nextdoc4j-doc dev
+```
+
+### 修改与验证入口
+
+| 改动范围 | 验证入口 | 覆盖内容 |
+| --- | --- | --- |
+| 后端与 Demo | `mvn test` | 根聚合中的后端、集中测试及 Demo 测试 |
+| React UI | `pnpm --dir nextdoc4j-ui check` | TypeScript、ESLint、Vitest、Prettier |
+| 官网 | `pnpm --dir nextdoc4j-doc type-check` | Next.js 路由类型与 TypeScript |
+| 官网静态发布 | `pnpm --dir nextdoc4j-doc build` | 团队缓存更新和 Next.js 静态导出 |
+| 打包后宿主集成 | `pnpm --dir release run test-preview` | 构建资源、运行所选 Demo，检查页面、文档接口和静态资源 |
+
+Java 测试位于 `nextdoc4j-tests/src/test/java`，覆盖核心工具、JSON 适配、资源过滤、路径与网关文档改写等；产品 UI 测试位于 `nextdoc4j-ui/tests`，包括功能、组件、存储和兼容性夹具。不要在产品 Java 模块中再复制一套同功能测试。
+
+### 构建、同步与预览
+
+```bash title="构建产品 UI 并预览后端制品"
+# 构建 UI，并同步到 Java 静态资源目录
+pnpm --dir release run build-ui
+
+# 构建指定 Demo 并启动预览
+pnpm --dir release run test-preview -- --profile=sb4-single-webflux
+
+# 资源已同步时，跳过重复的 UI 构建
+pnpm --dir release run test-preview -- --profile=sb3-gateway-webflux --build-ui=false
+
+# 批量运行八种默认 Profile
+pnpm --dir release run test-matrix
+```
+
+UI 同步脚本把 `dist/index.html` 转换为后端的 `doc.html`，将 `assets`、`fonts`、`licenses` 放到 `nextdoc4j/nextdoc4j-ui/src/main/resources/nextdoc`。这些资源被 Maven 打入 JAR，随宿主应用提供给用户。
+
+`test-preview` 通过后默认保持服务运行，便于浏览器查看，按 `Ctrl+C` 停止。官网构建产物位于 `nextdoc4j-doc/out`，可用 `pnpm --dir nextdoc4j-doc preview` 预览；官网构建和产品 UI 同步是两条独立流程。
+
+### 发布流程
+
+发布维护者在完成版本调整、检查与预览后，可使用统一脚本：
+
+```bash title="Maven Central 发布入口"
+pnpm --dir release run publish
+
+# 指定 Maven settings.xml
+pnpm --dir release run publish -- --settings /path/to/settings.xml
+```
+
+脚本默认检查前端、构建 UI、运行根 Maven 测试与 Demo 预览，再部署产品 Maven 制品。只执行后端发布时：
 
 ```bash
-cd nextdoc4j-ui
-pnpm install
-pnpm dev
+mvn -f nextdoc4j/pom.xml clean deploy -Prelease -s /path/to/settings.xml
 ```
 
-常用检查命令：
+发布需要维护者的 Maven Central 凭据和签名配置；根聚合、集中测试与 Demo 不作为产品发布。Central 插件配置为 `autoPublish=false`，上传后的正式发布仍需按平台流程完成。参数与环境配置详见 [release README](https://github.com/NextDoc4j/nextdoc4j/blob/master/release/README.md)。
 
-```bash
-pnpm typecheck
-pnpm lint
-pnpm test
-pnpm format:check
-pnpm check
-```
+### 参与贡献
 
-## 构建后端资源
+- Bug：描述复现步骤、Boot / SpringDoc 版本和场景，附上必要日志；界面问题补充截图。
+- 功能建议：说明使用场景、期望行为，以及现有能力为什么无法满足需求。
+- 文档：在 `nextdoc4j-doc/content/docs` 修改对应 MDX；当前界面截图应提供深浅两套并随主题切换。
+- 代码：从 `master` 创建 `feat/*`、`fix/*`、`docs/*` 等短期分支，完成后向 `master` 提交 PR。
 
-将前端构建结果同步到后端静态资源目录：
+提交信息沿用 `fix(docs): 修复文档导航位置` 这样的类型与范围格式。PR 应说明行为变化、验证方式和结果，避免夹带无关格式化、构建缓存或个人配置。
 
-```bash
-pnpm build:backend
-```
-
-发布工具会检查 `doc.html` 和 `nextdoc/assets` 是否生成，并在 Demo 预览中验证 OpenAPI 请求和网关聚合能力。
-
-## API 文档数据
-
-前端通过宿主应用提供的接口读取：
-
-- `/v3/api-docs`
-- `/v3/api-docs/swagger-config`
-- 聚合场景下的下游服务 OpenAPI 地址
-
-调试、认证、模型展示、Markdown 文档和导出功能都围绕这些 OpenAPI 数据构建。
+完整规则见 [CONTRIBUTING.md](https://github.com/NextDoc4j/nextdoc4j/blob/master/CONTRIBUTING.md) 与[贡献指南](/more/contribute)。安全问题按 [SECURITY.md](https://github.com/NextDoc4j/nextdoc4j/blob/master/SECURITY.md) 私下报告；社区交流遵循 [CODE_OF_CONDUCT.md](https://github.com/NextDoc4j/nextdoc4j/blob/master/CODE_OF_CONDUCT.md)。

@@ -1,41 +1,136 @@
 ---
 title: 基础配置
-description: 配置 NextDoc4j 的核心开关、文档入口、跨域调试和生产环境安全模式。
+description: 配置文档开关、自定义入口、跨域和环境策略，了解各开关组合后的实际行为。
 ---
 
-所有配置均使用 `nextdoc4j` 命名空间。
+基础配置决定文档是否开放、从哪个地址访问，以及是否启用内置跨域。将配置写在**宿主服务**的 `application.yml` 或 `application.properties` 中；依赖接入方式见[快速开始](/guide/start/started)。
 
-## 参数速查
+## 最小可用配置
 
-| 配置项 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| `nextdoc4j.enabled` | `boolean` | `false` | 是否启用 NextDoc4j。 |
-| `nextdoc4j.doc-path` | `string` | `/doc.html` | 自定义文档入口，使用以 `/` 开头的单段路径。 |
-| `nextdoc4j.cors` | `boolean` | `false` | 是否允许前后端分离项目跨域联调。 |
-| `nextdoc4j.production` | `boolean` | `false` | 生产环境安全隐身模式，关闭文档和原始 SpringDoc 元数据暴露。 |
-
-## YAML 配置
+<Tabs items={['YAML', 'Properties']}>
+  <Tab value="YAML">
 
 ```yaml title="application.yml"
 nextdoc4j:
   enabled: true
-  doc-path: /doc.html
-  cors: false
-  production: false
 ```
 
-## Properties 配置
+  </Tab>
+  <Tab value="Properties">
 
 ```properties title="application.properties"
 nextdoc4j.enabled=true
-nextdoc4j.doc-path=/doc.html
-nextdoc4j.cors=false
-nextdoc4j.production=false
 ```
 
-## 多环境配置
+  </Tab>
+</Tabs>
 
-开发环境可以开启跨域和文档，生产环境建议启用安全隐身：
+启动后访问 `http://localhost:8080/doc.html`，将端口替换为宿主实际端口。接入依赖、启用功能后，文档内容由宿主的 SpringDoc OpenAPI 提供。
+
+## 配置项速查
+
+| 配置项 | 类型 | 默认值 / 未配置行为 | 配置后影响 |
+| --- | --- | --- | --- |
+| `nextdoc4j.enabled` | Boolean | `false` | 设置为 `true` 启用工作台；关闭时由过滤器屏蔽相关文档资源 |
+| `nextdoc4j.doc-path` | String | `/doc.html` | 修改文档 UI 的对外入口，要求单段路径 |
+| `nextdoc4j.cors` | Boolean | `false` | 按需注册内置 CORS 过滤器 |
+| `nextdoc4j.production` | Boolean | `false` | 设置为 `true` 时屏蔽文档相关路径，返回 404 |
+
+`doc-path` 在模型中没有显式初值，未设置或空白时按 `/doc.html` 处理。`production` 是一个显式配置开关，不会仅因为当前 Spring Profile 名为 `prod` 就自动开启。
+
+## 开关组合与访问结果
+
+| `enabled` | `production` | `auth.enabled` | 文档入口行为 |
+| --- | --- | --- | --- |
+| `false` | 任意 | 任意 | 相关文档资源被屏蔽，返回 404 |
+| `true` | `false` | `false` | 可直接访问文档 |
+| `true` | `false` | `true` | 需要先通过[文档密码认证](/guide/config/authconfiguration) |
+| `true` | `true` | 任意 | 文档资源被屏蔽，返回 404，不显示登录页 |
+
+关闭和生产过滤器覆盖当前 UI 入口、`/nextdoc/**` 静态资源、默认 `/v3/api-docs` 及其分组地址、`/v3/api-docs.yaml` 和常见 Swagger UI 资源路径。配置自定义 UI 入口后，关闭过滤器也会处理该入口。
+
+<Callout title="配置与服务边界" type="info">
+这些开关管理文档资源，业务 Controller 仍由宿主应用提供。如果宿主另外修改了 `springdoc.api-docs.path` 等路径，应同步核对自定义路径的访问策略，不能假定所有自定义地址都会被默认路径规则覆盖。
+</Callout>
+
+## 自定义文档入口
+
+```yaml title="application.yml"
+nextdoc4j:
+  enabled: true
+  doc-path: /docs
+```
+
+配置后访问 `http://localhost:8080/docs`，原来的 `/doc.html` 返回 404。它是入口替换，不是额外增加一个别名；UI 的物理资源仍随 NextDoc4j JAR 提供。
+
+### 支持的路径形式
+
+| 配置值 | 是否支持 | 说明 |
+| --- | --- | --- |
+| `/docs` | 支持 | 单段入口，不要求 `.html` 后缀 |
+| `/internal-docs.html` | 支持 | 单段文件式入口 |
+| `/api/docs` | 不支持 | 多段入口会影响 UI 相对资源路径，启动校验不通过 |
+| `/` | 不支持 | 根路径不是有效文档入口 |
+
+建议直接使用带前导 `/` 的规范写法。源码会规范化部分格式，但不要把域名、查询参数或浏览器 Hash 当成 `doc-path`。
+
+### 应用上下文路径
+
+`doc-path` 只填写应用内部的入口，不重复包含上下文前缀。例如 WebMVC 服务配置：
+
+```yaml title="application.yml · WebMVC 示例"
+server:
+  servlet:
+    context-path: /order
+
+nextdoc4j:
+  enabled: true
+  doc-path: /docs
+```
+
+对应访问地址为 `http://localhost:8080/order/docs`。WebFlux 使用宿主对应的基础路径配置时，也需要在最终访问地址中带上该前缀。
+
+`nextdoc4j.doc-path` 管理 UI 入口；`springdoc.api-docs.path` 管理 OpenAPI JSON 地址；网关的 `nextdoc4j.gateway.doc-path` 管理下游文档后缀。修改其中一个不会自动重命名另外两个。
+
+## 跨域配置
+
+工作台与 API 同源时通常可以保持默认 `cors=false`。需要其他来源的浏览器页面访问宿主接口时，可根据实际部署选择内置配置或宿主自己的 CORS 策略。
+
+```yaml title="application.yml · 启用内置跨域"
+nextdoc4j:
+  enabled: true
+  cors: true
+```
+
+当前内置配置的范围如下：
+
+| 项目 | 内置行为 |
+| --- | --- |
+| 生效路径 | 宿主的 `/**`，不只限于文档接口 |
+| 来源 | 允许任意 Origin 模式 |
+| 请求头与方法 | 允许全部请求头与 HTTP 方法 |
+| 浏览器凭据 | 允许携带 Cookie 等凭据 |
+| 预检缓存 | `1800` 秒 |
+| 已有过滤器 | 存在对应 `CorsFilter` / `CorsWebFilter` Bean 时，不再装配这套内置过滤器 |
+
+如果需要限定具体来源、方法和请求头，应在宿主中定义对应 CORS 过滤器。只开启 NextDoc4j 的跨域配置，不会自动调整其他服务、反向代理或宿主认证框架的策略。
+
+## 按环境选择配置
+
+<Tabs items={['本地开发', '生产环境关闭', '受控开放文档']}>
+  <Tab value="本地开发">
+
+```yaml title="application-dev.yml"
+nextdoc4j:
+  enabled: true
+  production: false
+  cors: false
+```
+
+同源开发保持 `cors=false`；需要跨域访问时再开启或配置宿主 CORS。
+
+  </Tab>
+  <Tab value="生产环境关闭">
 
 ```yaml title="application-prod.yml"
 nextdoc4j:
@@ -43,10 +138,39 @@ nextdoc4j:
   production: true
 ```
 
-`production=true` 会同时隐藏 NextDoc4j 文档入口和 SpringDoc 原始接口描述，适合由独立网关或发布流程控制文档暴露。
+用于保留依赖、在该环境屏蔽文档资源的场景。它不会把业务服务切换成“生产模式”，也不会修改业务接口的权限。
 
-## 配置注意事项
+  </Tab>
+  <Tab value="受控开放文档">
 
-- `doc-path` 必须是单段路径，例如 `/docs`；非法格式会在启动时快速失败。
-- 修改文档入口后，网关路由、反向代理和部署说明需要同步更新。
-- 关闭 `enabled` 后不会注册相关路由和自动配置 Bean。
+```yaml title="application-docs.yml"
+nextdoc4j:
+  enabled: true
+  production: false
+  auth:
+    enabled: true
+    password: ${NEXTDOC4J_DOC_PASSWORD}
+```
+
+启动前设置环境变量 `NEXTDOC4J_DOC_PASSWORD`。需要登录后开放文档时，`production` 应为 `false`，具体会话行为见[简单认证配置](/guide/config/authconfiguration)。
+
+  </Tab>
+</Tabs>
+
+## 常见问题
+
+| 现象 | 排查方向 |
+| --- | --- |
+| 引入依赖后仍是 404 | 确认 `enabled=true`，并检查实际生效的 Profile 与 `production` 值 |
+| 修改入口后旧地址失效 | 这是预期行为；使用新的 `doc-path`，同步更新代理与访问链接 |
+| 启动报 `Invalid nextdoc4j.doc-path` | 改成 `/docs` 这样的单段路径，不包含应用上下文 |
+| 能看到页面，但接口文档加载失败 | 检查 SpringDoc、宿主安全过滤器、OpenAPI 实际 URL 和认证状态 |
+| 跨域仍失败 | 确认请求实际发往哪个服务，并检查该服务、预检请求和宿主安全配置 |
+| 关闭功能后仍有配置 Bean | 配置绑定与关闭过滤器会继续装配，用于识别并屏蔽相关路径；关闭不等于移除全部 Bean |
+
+<Cards>
+  <Card title="品牌配置" href="/guide/config/brandconfiguration" description="定制工作台标题、Logo 和页脚。" />
+  <Card title="简单认证配置" href="/guide/config/authconfiguration" description="管理文档访问密码、登录会话和退出。" />
+  <Card title="Markdown 文档配置" href="/guide/config/markdownIntegrationConfiguration" description="把接入说明和变更记录加入工作台。" />
+  <Card title="网关聚合" href="/guide/plugin/gateway" description="了解 UI 入口以外的服务发现与文档路径。" />
+</Cards>
