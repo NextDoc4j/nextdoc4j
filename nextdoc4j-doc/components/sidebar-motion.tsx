@@ -1,5 +1,6 @@
 'use client';
 
+import { preserveSidebarScroll } from '@/lib/sidebar-scroll';
 import { useLayoutEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 
@@ -79,11 +80,13 @@ export function SidebarMotion() {
       const nextRoot = document.getElementById('nd-sidebar');
       if (!nextRoot) return;
 
-      const content = nextRoot.querySelector<HTMLElement>('[role="presentation"] [data-id] > div');
-      if (!content) return;
+      const viewport = nextRoot.querySelector<HTMLElement>(':scope > [role="presentation"] > [data-id]');
+      const content = viewport?.firstElementChild;
+      if (!viewport || !(content instanceof HTMLElement)) return;
       root = nextRoot;
       surface = content;
       rootObserver.disconnect();
+      const cleanupScroll = preserveSidebarScroll(viewport);
       surface.classList.add('nd-sidebar-motion');
       setPortalTarget(surface);
       resize = typeof ResizeObserver === 'undefined' ? undefined : new ResizeObserver(schedule);
@@ -136,6 +139,7 @@ export function SidebarMotion() {
       measure();
 
       cleanup = () => {
+        cleanupScroll();
         root?.removeEventListener('pointerover', onPointerOver);
         root?.removeEventListener('pointerleave', onPointerLeave);
         root?.removeEventListener('focusin', onFocusIn);

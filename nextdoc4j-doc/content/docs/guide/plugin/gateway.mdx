@@ -1,452 +1,435 @@
 ---
 title: 网关聚合插件
-description: 网关聚合插件用于在 Spring Cloud Gateway WebFlux / WebMvc 场景下，自动聚合多个微服务的 OpenAPI 文档，并在 NextDoc4j UI 中按服务维度统一浏览与调试。
+description: 接入 Gateway WebFlux / WebMVC，配置路由发现、文档路径与全局安全方案，并通过中立 SPI 自定义聚合策略。
 ---
-网关聚合插件用于在 **Spring Cloud Gateway WebFlux / WebMvc** 场景下，自动聚合多个微服务的 OpenAPI 文档，并在 NextDoc4j UI 中按服务维度统一浏览与调试。
 
-## UI 适配效果
+网关聚合把多个微服务的 OpenAPI 地址组织到同一个工作台，并在文档响应经过网关时处理服务前缀、安全方案和分组地址。后端接入推荐使用 `nextdoc4j-gateway-spring-boot-starter`，它包含插件与运行时适配。
 
-配置完成后，UI 会自动进入聚合模式，展示服务选择器与按服务隔离的菜单：
+[在线网关演示](https://gateway-demo.nextdoc4j.top/)提供实际效果，界面操作见[网关与多服务](/guide/ui/gateway-ui)。本页重点介绍网关和下游如何配置，以及如何扩展聚合规则。
 
-## 快速开始
+## 网关与下游各负责什么
 
-引入统一网关 Starter，并按网关运行时选择对应的 Spring Cloud Gateway 和 SpringDoc UI：
+| 位置 | 需要提供的内容 |
+| --- | --- |
+| 网关 | NextDoc4j Gateway Starter、对应 Gateway 运行时、SpringDoc UI、真实转发路由 |
+| 下游服务 | 可访问的 OpenAPI 文档及业务接口；可使用 SpringDoc API-only 依赖 |
+| 枚举与权限增强 | 在生成相关文档的下游安装插件并输出扩展 |
+| 浏览器工作台 | 读取服务列表、选择服务、访问文档并发起调试请求 |
 
-```xml title="Gateway WebFlux"
+声明文档 URL 不会自动创建转发路由。下游无需为了被聚合而安装网关 Starter；如果希望下游也有独立工作台，再按单体接入方式配置。
+
+## 最小接入
+
+以下省略 Gateway 和 SpringDoc 的版本，需由宿主匹配的 Spring Boot、Spring Cloud 与 SpringDoc BOM 管理。Boot 3 使用 SpringDoc 2.x，Boot 4 使用 SpringDoc 3.x，具体接入见[快速开始](/guide/start/started)。
+
+<Tabs items={['Gateway WebFlux', 'Gateway WebMVC']}>
+  <Tab value="Gateway WebFlux">
+
+```xml title="pom.xml"
 <dependency>
-  <groupId>top.nextdoc4j</groupId>
-  <artifactId>nextdoc4j-gateway-spring-boot-starter</artifactId>
-  <version>1.5.0</version>
+    <groupId>top.nextdoc4j</groupId>
+    <artifactId>nextdoc4j-gateway-spring-boot-starter</artifactId>
+    <version>1.5.0</version>
 </dependency>
 <dependency>
-  <groupId>org.springframework.cloud</groupId>
-  <artifactId>spring-cloud-starter-gateway-server-webflux</artifactId>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-gateway-server-webflux</artifactId>
 </dependency>
 <dependency>
-  <groupId>org.springdoc</groupId>
-  <artifactId>springdoc-openapi-starter-webflux-ui</artifactId>
-  <version>2.8.17</version>
-</dependency>
-```
-
-```xml title="Gateway WebMvc"
-<dependency>
-  <groupId>top.nextdoc4j</groupId>
-  <artifactId>nextdoc4j-gateway-spring-boot-starter</artifactId>
-  <version>1.5.0</version>
-</dependency>
-<dependency>
-  <groupId>org.springframework.cloud</groupId>
-  <artifactId>spring-cloud-starter-gateway-server-webmvc</artifactId>
-</dependency>
-<dependency>
-  <groupId>org.springdoc</groupId>
-  <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-  <version>2.8.17</version>
+    <groupId>org.springdoc</groupId>
+    <artifactId>springdoc-openapi-starter-webflux-ui</artifactId>
 </dependency>
 ```
 
-### 1. 引入依赖与配置网关
+  </Tab>
+  <Tab value="Gateway WebMVC">
 
-> **从 1.3.x 升级**
->
-> 旧坐标 `nextdoc4j-springboot3/4-gateway-webflux-starter` / `...-webmvc-starter` 已合并为 `nextdoc4j-gateway-spring-boot-starter`，并需**自行补上** Gateway 运行时与 springdoc UI。
+```xml title="pom.xml"
+<dependency>
+    <groupId>top.nextdoc4j</groupId>
+    <artifactId>nextdoc4j-gateway-spring-boot-starter</artifactId>
+    <version>1.5.0</version>
+</dependency>
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-gateway-server-webmvc</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.springdoc</groupId>
+    <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+</dependency>
+```
 
-### 2. 统一配置（基础能力 + `gateway` 聚合）
+  </Tab>
+</Tabs>
 
-> 配置前缀仍为 `nextdoc4j`。
+选择与宿主一致的 Web 栈。Gateway 运行时与 SpringDoc UI 都是宿主显式依赖；仅添加底层 `nextdoc4j-plugin-gateway` 不会完成 Starter 的自动装配。使用 NextDoc4j BOM 时可省略 NextDoc4j 版本。
 
-> 只有一个总开关：`nextdoc4j.enabled`，`nextdoc4j.gateway` 下没有第二个 `enabled`。
+### 1. 启用工作台
 
-> **1.4.0**：路由上的 `StripPrefix` 等 filter 会参与外部文档路径推导；子服务 `swagger-config` 中带网关前缀的分组 URL 会自动改写为服务相对地址。
+```yaml title="application.yml"
+server:
+  port: 9000
+
+nextdoc4j:
+  enabled: true
+  gateway:
+    auto-discovery: true
+```
+
+总开关是 `nextdoc4j.enabled`，不存在 `nextdoc4j.gateway.enabled`。`production`、文档访问密码和品牌配置沿用[基础配置](/guide/config/basicconfiguration)与相应配置页。
+
+### 2. 添加真实网关路由
+
+以下例子假设下游在 `http://localhost:8081` 提供 `/v3/api-docs`，应用没有额外上下文路径。把对应片段合并到同一份配置：
+
+<Tabs items={['WebFlux 路由', 'WebMVC 路由']}>
+  <Tab value="WebFlux 路由">
+
+```yaml
+spring:
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: user-service
+              uri: http://localhost:8081
+              predicates:
+                - Path=/user/**
+              filters:
+                - StripPrefix=1
+              metadata:
+                nextdoc4j:
+                  name: 用户服务
+```
+
+  </Tab>
+  <Tab value="WebMVC 路由">
+
+```yaml
+spring:
+  cloud:
+    gateway:
+      server:
+        webmvc:
+          routes:
+            - id: user-service
+              uri: http://localhost:8081
+              predicates:
+                - Path=/user/**
+              filters:
+                - StripPrefix=1
+              metadata:
+                nextdoc4j:
+                  name: 用户服务
+```
+
+  </Tab>
+</Tabs>
+
+对应链路为：
+
+| 访问入口 | 路由后的目标 |
+| --- | --- |
+| `http://localhost:9000/user/v3/api-docs` | `http://localhost:8081/v3/api-docs` |
+| `http://localhost:9000/user/api/users` | `http://localhost:8081/api/users`，前提是下游存在该业务接口 |
+| `http://localhost:9000/doc.html` | 网关工作台 |
+
+使用注册中心时可把 URI 改为 `lb://user-service`，并由宿主添加相应发现与负载均衡依赖。
+
+### 3. 按顺序验证
+
+1. 先直连下游 `/v3/api-docs`，确认返回 OpenAPI JSON。
+2. 再访问网关 `/user/v3/api-docs`，确认真实路由可以转发。
+3. 查看网关 `/v3/api-docs/swagger-config`，确认 `urls` 中包含用户服务。
+4. 打开 `/doc.html`，切换服务并检查实际调试 URL。
+
+<ThemedScreenshot light="/images/screenshots/plugins/gateway-light.webp" dark="/images/screenshots/plugins/gateway-dark.webp" alt="网关聚合后的服务选择器与微服务文档节点" />
+
+## 基础配置速查
+
+以下字段均以 `nextdoc4j.gateway` 为前缀：
+
+| 字段 | 默认值 | 作用 |
+| --- | --- | --- |
+| `auto-discovery` | `true` | 从适配的 Gateway 路由中发现文档 |
+| `doc-path` | `/v3/api-docs` | 下游文档后缀，也参与文档响应识别与重写 |
+| `service-swagger-config-enabled` | `false` | 向前端声明是否读取下游 swagger-config |
+| `exclude-routes` | `[]` | 按 routeId 排除，支持通配符 |
+| `include-patterns` | `[]` | 按 routeId 包含，空表示不额外限制 |
+| `name-mappings` | `{}` | AUTO 名称策略下的 routeId → 显示名映射 |
+| `name-resolve-strategy` | `AUTO` | 服务显示名解析策略 |
+| `doc-path-strategy` | `AUTO` | 文档 URL 解析策略 |
+| `services` | `[]` | 手动添加文档条目 |
+| `security.global-schemes` | `{}` | 网关默认安全方案 |
+| `security.anonymous` | `[]` | 按 serviceId 与 Path 匹配的匿名规则 |
+| `context-path.metadata-key` | `nextdoc4j.context-path` | 读取服务上下文路径的自定义 metadata key |
+
+`nextdoc4j.doc-path` 改的是工作台入口，例如 `/docs`；`nextdoc4j.gateway.doc-path` 改的是下游文档后缀，两个配置不能混用。
+
+## 基础功能：发现、过滤与手动补充
+
+### 默认过滤规则
+
+自动发现会排除配置命中的路由和以 `CompositeDiscoveryClient_` / `ReactiveCompositeDiscoveryClient_` 开头的自动路由，并要求存在 Path 谓词，然后才检查 include-patterns。
 
 ```yaml
 nextdoc4j:
-  # 总开关（唯一）
   enabled: true
-  # 可选：自定义文档入口（默认 /doc.html）
-  # doc-path: /docs
-
-  # 生产环境配置
-  production: false
-
-  # 认证配置
-  auth:
-    enabled: false
-    password: nextdoc4j2025
-  # 扩展配置
-  extension:
-    # 扩展开关（不是总开关）
-    enabled: true
-    # 品牌信息
-    brand:
-      logo: classpath:/static/favicon.ico
-      footer-text: "Copyright © 2025 - [NextDoc4j](https://nextdoc4j.top) All Rights Reserved."
-
-    # markdown 配置 - 用于展示更新日志等文档
-    markdown:
-      - group: 更新日志
-        location: classpath:/markdown/changelog/**
-      - group: 项目简介
-        location: classpath:/markdown/otherdoc/**
-
-  # 网关聚合配置（前缀：nextdoc4j.gateway）
   gateway:
-    # 自动从网关路由发现服务
-    auto-discovery: true
-
-    # 文档后缀，默认 /v3/api-docs
-    doc-path: /v3/api-docs
-
-    # 服务名解析策略：ROUTE_ID / METADATA / URI / AUTO
-    name-resolve-strategy: AUTO
-
-    # 文档路径解析策略：AUTO / METADATA / ROUTE_PREDICATE / MANUAL_ONLY
-    doc-path-strategy: AUTO
-
-    # 是否访问 微服务 /v3/api-docs/swagger-config 默认为 false
-    service-swagger-config-enabled: true
-
-    # 过滤规则（匹配 routeId）
-    exclude-routes:
-      - "*-gray"
     include-patterns:
-      - "*-service"
-
-    # routeId 到显示名映射
+      - '*-service'
+    exclude-routes:
+      - '*-gray'
     name-mappings:
       user-service: 用户中心
+```
 
-    # 手动补充服务（自动发现之外）
+匹配的是 routeId，不是显示名、URI 或业务接口 Path。没有 Path 谓词的路由不会因为配置了 metadata 就绕过默认过滤。
+
+### 手动与混合模式
+
+```yaml
+nextdoc4j:
+  enabled: true
+  gateway:
+    auto-discovery: false
     services:
-      - name: 第三方文档
+      - name: 用户服务
+        url: /user/v3/api-docs
+        service-id: user-service
+      - name: 外部文档
         url: https://api.example.com/v3/api-docs
-
-    # 网关全局认证配置
-    security:
-      global-schemes:
-        Authorization:
-          type: HTTP
-          in: HEADER
-          name: Authorization
-          scheme: Bearer
-          description: "请输入 Bearer Token，格式：Bearer {token}"
-
-      # 免鉴权规则：按 service-id + ant 路径匹配
-      anonymous:
-        - service-id: user-service
-          paths:
-            - /api/user/public/**
-
-    # context-path metadata key（默认 nextdoc4j.context-path）
-    context-path:
-      metadata-key: nextdoc4j.context-path
 ```
 
-> 说明：`auth.enabled`、`extension.enabled` 属于子功能开关，不是 NextDoc4j 总开关。
+| 手动字段 | 说明 |
+| --- | --- |
+| `name` | 必填，用于显示 |
+| `url` | 必填，必须能从浏览器访问；同源路径需要已有网关路由 |
+| `service-id` | 可选，供匿名规则等需要识别服务的逻辑使用 |
 
-### 3. （可选）自定义基础信息（`project` + OpenAPI）
+开启 `auto-discovery=true` 时，自动发现与手动条目合并；当前按“名称 + URL”去重，自动条目先加入。手动配置不是覆盖同名自动条目的通用机制，命中同一身份的不同 serviceId 也不会自动合并。
 
-> 该部分是可选增强。如果不配置，会使用 SpringDoc 默认的 OpenAPI 基础信息。
+外部绝对 URL 由浏览器访问，需要目标服务的跨域与认证配合；没有经过网关的响应不会自动获得网关文档重写。手动条目不经过自动发现的路由过滤器。
 
-#### 3.1 自定义网关 OpenAPI 基础信息
+## 自定义功能：名称与文档路径
 
-```java
-@Component
-@RequiredArgsConstructor
-@EnableConfigurationProperties({ProjectProperties.class})
-public class SpringDocAutoConfiguration implements WebFluxConfigurer {
+| 名称策略 | 解析方式 |
+| --- | --- |
+| `AUTO` | name-mappings → metadata 的 nextdoc4j.name → metadata.name → URI 推导 → 格式化 routeId |
+| `METADATA` | 读取 metadata 名称，缺失时回退格式化 routeId |
+| `URI` | 从 URI 的服务名 / host 推导并格式化 |
+| `ROUTE_ID` | 格式化 routeId，移除常见后缀并整理分隔符 |
 
-    @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/static/favicon.ico")
-                .addResourceLocations("classpath:/");
-    }
+| 文档路径策略 | 解析方式 |
+| --- | --- |
+| `AUTO` | nextdoc4j.doc-path → springdoc.path → Path 谓词 → URI / routeId 推导，并结合上下文路径 |
+| `METADATA` | 只使用 metadata 中的文档路径；没有有效结果就无法形成该文档条目 |
+| `ROUTE_PREDICATE` | 使用 Path 谓词和配置的文档后缀，结合 StripPrefix 与上下文路径推导 |
+| `MANUAL_ONLY` | 不自动发现，只使用 services |
 
-    @Bean
-    @ConditionalOnMissingBean
-    public OpenAPI openApi(ProjectProperties projectProperties) {
-        Info info = new Info()
-                .title("%s %s".formatted(projectProperties.getName(), "API 文档"))
-                .version(projectProperties.getVersion())
-                .description(projectProperties.getDescription());
+### 路由 metadata
 
-        ProjectProperties.Contact contact = projectProperties.getContact();
-        if (null != contact) {
-            info.contact(new Contact()
-                    .name(contact.getName())
-                    .email(contact.getEmail())
-                    .url(contact.getUrl()));
-        }
+支持以下两种写法；这里的 `doc-path` 是要通过网关访问的文档 URL：
 
-        ProjectProperties.License license = projectProperties.getLicense();
-        if (null != license) {
-            info.license(new License()
-                    .name(license.getName())
-                    .url(license.getUrl()));
-        }
-
-        return new OpenAPI().info(info);
-    }
-}
-```
-
-#### 3.2 `ProjectProperties` 配置类
-
-```java
-@Data
-@ConfigurationProperties("project")
-public class ProjectProperties {
-
-    /**
-     * 名称
-     */
-    private String name;
-
-    /**
-     * 版本
-     */
-    private String version;
-
-    /**
-     * 描述
-     */
-    private String description;
-
-    /**
-     * 联系人
-     */
-    private Contact contact;
-
-    /**
-     * 许可协议
-     */
-    private License license;
-
-    /**
-     * 联系人配置属性
-     */
-    @Data
-    public static class Contact {
-        /**
-         * 名称
-         */
-        private String name;
-
-        /**
-         * 邮箱
-         */
-        private String email;
-
-        /**
-         * URL
-         */
-        private String url;
-    }
-
-    /**
-     * 许可协议配置属性
-     */
-    @Data
-    public static class License {
-        /**
-         * 名称
-         */
-        private String name;
-
-        /**
-         * URL
-         */
-        private String url;
-    }
-}
-```
-
-#### 3.3 `application.yml` 中的 `project` 示例
-
-```yaml
-project:
-  name: NextDoc4j-网关聚合服务
-  version: 1.5.0
-  description: 专为 SpringDoc 和 OpenAPI 3 设计的现代化文档界面，替代 Swagger UI，提供更美观、更强大的开发体验。让 API 文档焕然一新。这个演示项目展示了完整的 CRUD 操作、文件上传、SSE 推送、批量操作等各种场景。
-
-  contact:
-    name: echo
-    email: nextdoc4j@163.com
-    url: https://nextdoc4j.top/
-
-  license:
-    name: Apache License 2.0
-    url: https://www.apache.org/licenses/LICENSE-2.0.html
-```
-
-### 4. 访问网关文档入口
-
-```text
-http://localhost:9000/doc.html
-```
-
-## 核心配置项
-
-统一前缀：`nextdoc4j.gateway`
-
-| 配置项（后缀） | 类型 | 默认值 | 说明 |
-| :--- | :--- | :--- | :--- |
-| `auto-discovery` | boolean | `true` | 是否自动从网关路由发现服务 |
-| `doc-path` | string | `/v3/api-docs` | 微服务文档路径后缀 |
-| `service-swagger-config-enabled` | boolean | `false` | 是否启用微服务 `swagger-config` 访问标记（聚合扩展字段） |
-| `exclude-routes` | list | `[]` | 排除的路由 ID 列表（支持 `*`） |
-| `include-patterns` | list | `[]` | 包含的路由模式（Ant 风格，匹配 routeId） |
-| `name-mappings` | map | `{}` | 路由 ID 到显示名称的映射 |
-| `name-resolve-strategy` | enum | `AUTO` | 服务显示名解析策略 |
-| `doc-path-strategy` | enum | `AUTO` | 文档地址解析策略 |
-| `services` | list | `[]` | 手动补充服务列表 |
-| `security.global-schemes` | map | `{}` | 网关全局 `SecurityScheme` 配置 |
-| `security.anonymous` | list | `[]` | 网关接口免鉴权规则（`service-id + paths`） |
-| `context-path.metadata-key` | string | `nextdoc4j.context-path` | 从 metadata 读取服务 `context-path` 的 key |
-
-## 解析策略说明
-
-### `name-resolve-strategy`
-
-| 值 | 说明 |
-| :--- | :--- |
-| `AUTO` | 优先级：`nameMappings` > `metadata.nextdoc4j.name` > `metadata.name` > URI 服务名 > routeId |
-| `METADATA` | 只从 metadata 解析（失败回退格式化 routeId） |
-| `URI` | 从 `lb://service-id` 提取服务名 |
-| `ROUTE_ID` | 直接使用 routeId（做格式化） |
-
-### `doc-path-strategy`
-
-| 值 | 说明 |
-| :--- | :--- |
-| `AUTO` | 优先级：`metadata.nextdoc4j.doc-path` > `metadata.springdoc.path` > Path 谓词 > URI/routeId 推断 |
-| `METADATA` | 仅使用 metadata 中文档路径 |
-| `ROUTE_PREDICATE` | 从路由 Path 谓词提取前缀，再拼接 `doc-path` |
-| `MANUAL_ONLY` | 仅使用 `services` 手动配置，不做路由自动发现 |
-
-## 微服务聚合导出中心
-
-## 路由 metadata 配置（推荐）
-
-插件同时支持 metadata 的扁平与嵌套写法：
-
-```yaml
-metadata:
-  nextdoc4j.name: 文件服务
-  nextdoc4j.doc-path: /file/v3/api-docs
-```
+<Tabs items={['嵌套写法', '扁平写法']}>
+  <Tab value="嵌套写法">
 
 ```yaml
 metadata:
   nextdoc4j:
-    name: 文件服务
-    doc-path: /file/v3/api-docs
+    name: 用户服务
+    doc-path: /user/v3/api-docs
 ```
 
-也兼容：
+  </Tab>
+  <Tab value="扁平写法">
 
 ```yaml
 metadata:
-  springdoc.path: /file/v3/api-docs
+  nextdoc4j.name: 用户服务
+  nextdoc4j.doc-path: /user/v3/api-docs
 ```
 
-## 网关全局鉴权与免鉴权
+  </Tab>
+</Tabs>
 
-插件会在 OpenAPI 响应改写阶段执行以下逻辑：
+也兼容 `metadata.springdoc.path`。选择多个 Path 谓词或复杂改写路由时，显式 metadata 往往比仅依赖第一个路径的推导更易维护；但它不会自动改变真实路由规则。
 
-1. 将 `security.global-schemes` 合并到 `components.securitySchemes`
-2. 对缺失 `security` 的接口补默认安全要求
-3. 对命中 `security.anonymous` 的接口移除 `security`
-4. 根据当前请求路径修正 `servers.url`
+## 上下文路径与前缀改写
 
-示例：
+例如下游设置 `server.servlet.context-path=/order`，网关通过 `/orders/**` 转发并 `StripPrefix=1`：
+
+```yaml title="网关路由片段"
+- id: order-service
+  uri: http://localhost:8082
+  predicates:
+    - Path=/orders/**
+  filters:
+    - StripPrefix=1
+  metadata:
+    nextdoc4j:
+      name: 订单服务
+      context-path: /order
+```
+
+文档的外部地址应为 `/orders/order/v3/api-docs`，转发后是下游 `/order/v3/api-docs`。解析器结合 StripPrefix、服务上下文与文档后缀生成该地址，并避免已包含的上下文重复拼接。
+
+### context-path 从哪里获取
+
+HTTP 路由使用路由 metadata；`lb://` 服务还可以从注册中心实例 metadata 获取。有有效缓存时先复用缓存；未命中时尝试发现，发现失败再使用路由 metadata 或已有回退值。
+
+| 项目 | 当前规则 |
+| --- | --- |
+| 常见 key | nextdoc4j.context-path、server.servlet.context-path、server.servlet.contextPath、context-path / contextPath / context_path |
+| 自定义 key | 使用 `context-path.metadata-key` |
+| 成功缓存 | 约 30 秒 |
+| 未发现结果缓存 | 约 5 秒，仍可结合路由 metadata 回退 |
+
+这些时长属于当前实现常量，没有对应的公开调节配置项。实例 metadata 变化后，不能假定浏览器立即看到新路径。
+
+### 文档响应重写
+
+| 数据 | 处理 |
+| --- | --- |
+| 下游 OpenAPI `servers` | 按文档请求路径提取外部服务前缀，写入相应相对 server URL |
+| 下游 swagger-config 的分组 URL | 对已经包含服务前缀的同类文档路径移除重复前缀，再由前端结合服务定位 |
+| 标准安全方案与接口要求 | 按下节规则合并和补充 |
+
+主要按 `gateway.doc-path` 识别相应文档响应。自定义文档后缀、任意 RewritePath / SetPath、反向代理前缀等情况都应核对实际返回的 `urls`、`servers` 与调试 URL，不能把 StripPrefix 的适配推导泛化到所有任意路由改写。
+
+## 多分组与 API-only 下游
+
+`service-swagger-config-enabled=false` 适合只有 API 文档地址、不提供 Swagger UI 配置接口的下游。需要读取下游 SpringDoc 分组时，启用：
 
 ```yaml
 nextdoc4j:
+  enabled: true
+  gateway:
+    service-swagger-config-enabled: true
+```
+
+此时相应服务的 `/v3/api-docs/swagger-config` 及其声明的分组文档也必须能通过网关访问。这个开关只是声明读取能力，不会替下游生成缺失的 swagger-config 接口。
+
+## 自定义功能：网关默认认证与匿名规则
+
+```yaml
+nextdoc4j:
+  enabled: true
   gateway:
     security:
       global-schemes:
-        Authorization:
+        BearerAuth:
           type: HTTP
-          in: HEADER
-          name: Authorization
-          scheme: Bearer
+          scheme: bearer
+          bearer-format: JWT
       anonymous:
         - service-id: user-service
           paths:
-            - /api/user/public/**
+            - /api/auth/login
+            - /api/public/**
 ```
 
-## `context-path` 自动发现
+`service-id` 对应 `lb://` 的服务 ID，不是 routeId 或中文显示名；HTTP 路由自动条目通常没有这个 ID，需要像前面的手动配置那样明确提供。规则按服务 ID 忽略大小写匹配，路径匹配的是下游规范的 `paths` 键。
 
-当微服务存在 `context-path` 时，网关聚合会自动尝试解析并拼接文档地址。解析顺序：
+### 重写的优先关系
 
-1. 注册中心实例 metadata
-2. 路由 metadata
-3. 本地缓存
+1. 合法的网关方案先加入字典，下游文档自己的同名方案后覆盖。
+2. 有合法网关默认方案时，用这些方案构造默认要求；否则可沿用下游根级 security。
+3. 普通接口在 security 缺失、类型不符或为空数组时，填入默认要求。
+4. 命中 anonymous 时移除该操作的 security；使用默认要求的场景会把根级要求转到操作级后移除根级字段。
 
-默认识别的 key 包括：
+因此，下游只输出 `security: []` 不足以在该重写流程中始终保持匿名，应使用网关 anonymous 规则表达免追加需求。此规则仍只修改文档，不修改网关或下游的真实鉴权过滤器。
 
-- `nextdoc4j.context-path`
-- `server.servlet.context-path`
-- `server.servlet.contextPath`
-- `context-path` / `contextPath` / `context_path`
+### 网关方案类型与校验
 
-## 自动发现 + 手动补充（混合模式）
+网关使用自己的中立配置模型，其类型名与单体插件直接绑定 Swagger 类型的写法有所不同：
 
-适用于部分服务无法被网关路由发现、或需要接入外部文档地址的场景：
+| 网关 `type` | 必需信息 |
+| --- | --- |
+| `HTTP` | scheme，例如 bearer / basic |
+| `API_KEY` | name 与 in（HEADER / QUERY / COOKIE） |
+| `OAUTH2` | 至少一套有效 flows，包含相应授权 / Token URL |
+| `OPEN_ID_CONNECT` | open-id-connect-url |
+| `MUTUAL_TLS` | 声明双向 TLS 方案；握手由浏览器和服务部署处理 |
 
-```yaml
-nextdoc4j:
-  gateway:
-    auto-discovery: true
-    services:
-      - name: 外部支付服务
-        url: /pay/v3/api-docs
-      - name: 第三方文档
-        url: https://api.example.com/v3/api-docs
-```
+无效配置会被跳过并记录诊断，不会凭空成为可用方案。`extensions` 仅保留以 `x-` 开头的键。OAuth、OpenID Connect 或 TLS 的规范声明也不等于工作台实现完整授权或证书管理流程。
 
-## 扩展点
+## 自定义功能：Spring Bean 扩展
 
-### 1. 自定义路由过滤逻辑
+Starter 对以下组件采用缺失 Bean 时才装配默认实现的方式。自定义时替换对应接口，并保留需要的默认规则。
 
-实现 `NextDoc4jGatewayRouteFilter`，按业务规则决定哪些路由进入聚合列表：
+### 追加业务路由过滤
 
-```java
-@Bean
-public NextDoc4jGatewayRouteFilter customGatewayRouteFilter() {
-    return (route, props) -> {
-        String routeId = route.getId();
-        return routeId != null && routeId.startsWith("biz-");
-    };
+```java title="GatewayPluginConfiguration.java"
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import top.nextdoc4j.plugin.gateway.filter.NextDoc4jDefaultGatewayRouteFilter;
+import top.nextdoc4j.plugin.gateway.filter.NextDoc4jGatewayRouteFilter;
+
+@Configuration
+public class GatewayPluginConfiguration {
+    @Bean
+    public NextDoc4jGatewayRouteFilter gatewayRouteFilter() {
+        NextDoc4jDefaultGatewayRouteFilter defaults =
+            new NextDoc4jDefaultGatewayRouteFilter();
+        return (route, properties) -> defaults.test(route, properties)
+            && route.getId() != null && route.getId().startsWith("biz-");
+    }
 }
 ```
 
-### 2. 自定义 metadata 解析逻辑
+该例在默认规则上增加 `biz-` 限制。直接返回自己的判断就会替换默认过滤，include / exclude 与 Path 条件不会自动额外执行。
 
-实现 `NextDoc4jGatewayRouteMetadataResolver`，可自定义服务名与文档地址提取策略：
+### 定制名称，保留默认路径推导
 
-```java
-@Bean
-public NextDoc4jGatewayRouteMetadataResolver customMetadataResolver(
-        GatewayDocProperties properties,
-        NextDoc4jGatewayServiceContextPathResolver contextPathResolver) {
-    return new NextDoc4jDefaultGatewayRouteMetadataResolver(properties, contextPathResolver) {
-        @Override
-        public String resolveDisplayName(RouteDefinition route) {
-            return "业务-" + super.resolveDisplayName(route);
-        }
-    };
+```java title="GatewayMetadataConfiguration.java"
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import top.nextdoc4j.plugin.gateway.configuration.GatewayDocProperties;
+import top.nextdoc4j.plugin.gateway.model.GatewayRouteDefinition;
+import top.nextdoc4j.plugin.gateway.resolver.NextDoc4jDefaultGatewayRouteMetadataResolver;
+import top.nextdoc4j.plugin.gateway.resolver.NextDoc4jGatewayRouteMetadataResolver;
+import top.nextdoc4j.plugin.gateway.resolver.NextDoc4jGatewayServiceContextPathResolver;
+
+@Configuration
+public class GatewayMetadataConfiguration {
+    @Bean
+    public NextDoc4jGatewayRouteMetadataResolver routeMetadataResolver(
+            GatewayDocProperties properties,
+            NextDoc4jGatewayServiceContextPathResolver contextPathResolver) {
+        return new NextDoc4jDefaultGatewayRouteMetadataResolver(
+                properties, contextPathResolver) {
+            @Override
+            public String resolveDisplayName(GatewayRouteDefinition route) {
+                String name = super.resolveDisplayName(route);
+                return name == null || name.isBlank() ? name : "业务 / " + name;
+            }
+        };
+    }
 }
 ```
 
-## OpenAPI 扩展字段示例
+这里使用的是 `top.nextdoc4j.plugin.gateway.model.GatewayRouteDefinition`，不是某一种 Gateway 运行时专有的 RouteDefinition，便于 MVC / WebFlux 共用。
 
-插件会在网关 `/v3/api-docs` 注入聚合标记：
+### 路由来源不同怎么办
 
-```json
+| 扩展点 | 适用情况 |
+| --- | --- |
+| `NextDoc4jGatewayRouteFilter` | 对自动发现路由增加过滤条件 |
+| `NextDoc4jGatewayRouteMetadataResolver` | 自定义显示名、文档 URL 或 URI 名称解析 |
+| `NextDoc4jGatewayRouteDefinitionLocator` | 提供自定义中立路由列表，方法为 `List<GatewayRouteDefinition> getRouteDefinitions()` |
+
+WebMVC 默认从 GatewayMvcProperties 中的路由配置读取；纯 Java RouterFunction 或项目自建路由来源不能假定都会被同样扫描。可以为定位器提供真实路由的文档视图，但这仍不替代业务路由本身的注册。
+
+## 服务列表刷新与数据检查
+
+服务文档列表在初始化、注册中心心跳和受支持的路由刷新事件后后台更新，连续刷新请求会在约 500ms 窗口内合并。已有列表可继续用于请求，发现服务后还需要浏览器重新取得相应配置。
+
+检查两个不同的输出位置：
+
+```json title="网关 /v3/api-docs 的聚合标记"
 {
   "x-nextdoc4j-aggregation": {
     "aggregation": true,
@@ -456,4 +439,31 @@ public NextDoc4jGatewayRouteMetadataResolver customMetadataResolver(
 }
 ```
 
-前端据此自动进入聚合模式并渲染服务选择器。
+```json title="网关 /v3/api-docs/swagger-config 的服务列表片段"
+{
+  "urls": [
+    { "name": "用户服务", "url": "/user/v3/api-docs" }
+  ]
+}
+```
+
+只有聚合标记不代表下游可达，只有 urls 也不代表业务路由成功。再打开选中服务文档检查 servers、security 和插件扩展，最后通过调试区的实际请求验证完整链路。
+
+## 排查速查
+
+| 现象 | 优先检查 |
+| --- | --- |
+| 没有进入聚合模式 | 总开关、Web 栈、Gateway / SpringDoc UI 依赖与聚合标记 |
+| 服务不在列表 | 默认过滤、routeId 模式、是否存在 Path、metadata 是否返回有效名和 URL |
+| 文档地址 404 | 先直连下游，再检查 StripPrefix、上下文路径与真正转发地址 |
+| 多了重复服务 | 自动与手动的名称 / URL 是否完全相同，是否误以为同名就会覆盖 |
+| 分组文档重复前缀 | 下游 swagger-config URL、服务前缀与网关重写结果 |
+| 文档能读但调试路径错误 | servers、实际请求 URL 和业务路由，与文档路由分别核对 |
+| 匿名规则没有命中 | 有无有效 serviceId、是否误用了 routeId / 显示名，以及 paths 键是否匹配 |
+| 新 metadata 暂未生效 | 上下文缓存、后台列表刷新与浏览器文档缓存 |
+| 外部绝对地址无法读取 | 浏览器可达性、跨域和目标服务认证，不是仅修改 services 就能转发 |
+
+<Cards>
+  <Card title="网关与多服务界面" href="/guide/ui/gateway-ui" description="了解服务切换、状态、跨服务搜索和导出。" />
+  <Card title="认证展示插件" href="/guide/plugin/authentication" description="比较下游安全声明、默认要求和路径排除。" />
+</Cards>

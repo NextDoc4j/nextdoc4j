@@ -1,4 +1,15 @@
 {
   "title": "界面功能",
-  "pages": ["overview", "browse-debug", "security-permissions", "gateway-ui", "search-export"]
+  "pages": [
+    "overview",
+    "documentation-models",
+    "parameters-enums",
+    "browse-debug",
+    "response-preview",
+    "request-workflows",
+    "security-permissions",
+    "gateway-ui",
+    "search-export",
+    "preferences"
+  ]
 }

@@ -1,0 +1,578 @@
+{
+  "capturedAt": "2026-10-21",
+  "format": "lossless WebP",
+  "screenshots": [
+    {
+      "name": "workspace",
+      "theme": "light",
+      "url": "https://single-demo.nextdoc4j.top/#/home",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "clip": null,
+      "file": "workspace-light.webp",
+      "deviceScaleFactor": 2
+    },
+    {
+      "name": "api-detail",
+      "theme": "light",
+      "url": "https://single-demo.nextdoc4j.top/#/docs/operations/createUser",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "clip": null,
+      "file": "api-detail-light.webp",
+      "deviceScaleFactor": 2
+    },
+    {
+      "name": "model",
+      "theme": "light",
+      "url": "https://single-demo.nextdoc4j.top/#/docs/schemas/UserResp",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "clip": {
+        "x": 310,
+        "y": 62,
+        "width": 1120,
+        "height": 830
+      },
+      "file": "model-light.webp",
+      "deviceScaleFactor": 2
+    },
+    {
+      "name": "json-enum",
+      "theme": "light",
+      "url": "https://single-demo.nextdoc4j.top/#/docs/operations/updateUser/debug",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "clip": {
+        "x": 330,
+        "y": 179,
+        "width": 692,
+        "height": 480
+      },
+      "file": "json-enum-light.webp",
+      "deviceScaleFactor": 2
+    },
+    {
+      "name": "query-enum",
+      "theme": "light",
+      "url": "https://single-demo.nextdoc4j.top/#/docs/operations/getUserByStatusQuery/debug",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "clip": {
+        "x": 330,
+        "y": 179,
+        "width": 692,
+        "height": 380
+      },
+      "file": "query-enum-light.webp",
+      "deviceScaleFactor": 2
+    },
+    {
+      "name": "form-enum",
+      "theme": "light",
+      "url": "https://single-demo.nextdoc4j.top/#/docs/operations/updateUser/debug",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "clip": {
+        "x": 330,
+        "y": 179,
+        "width": 692,
+        "height": 570
+      },
+      "file": "form-enum-light.webp",
+      "deviceScaleFactor": 2
+    },
+    {
+      "name": "debug-request",
+      "theme": "light",
+      "url": "https://single-demo.nextdoc4j.top/#/docs/operations/getUserById/debug",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "clip": null,
+      "file": "debug-request-light.webp",
+      "deviceScaleFactor": 2
+    },
+    {
+      "name": "response-json",
+      "theme": "light",
+      "url": "https://single-demo.nextdoc4j.top/#/docs/operations/getUserById/debug",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "clip": {
+        "x": 858,
+        "y": 171,
+        "width": 560,
+        "height": 650
+      },
+      "file": "response-json-light.webp",
+      "deviceScaleFactor": 2
+    },
+    {
+      "name": "response-image",
+      "theme": "light",
+      "url": "https://single-demo.nextdoc4j.top/#/docs/operations/getAvatar/debug",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "clip": {
+        "x": 390,
+        "y": 244,
+        "width": 660,
+        "height": 472
+      },
+      "file": "response-image-light.webp",
+      "deviceScaleFactor": 2
+    },
+    {
+      "name": "response-sse",
+      "theme": "light",
+      "url": "https://single-demo.nextdoc4j.top/#/docs/operations/streamTokens/debug",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "clip": {
+        "x": 858,
+        "y": 171,
+        "width": 560,
+        "height": 690
+      },
+      "file": "response-sse-light.webp",
+      "deviceScaleFactor": 2
+    },
+    {
+      "name": "workflow",
+      "theme": "light",
+      "url": "https://single-demo.nextdoc4j.top/#/docs/operations/getUserById/debug",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "clip": {
+        "x": 330,
+        "y": 179,
+        "width": 692,
+        "height": 490
+      },
+      "file": "workflow-light.webp",
+      "deviceScaleFactor": 2
+    },
+    {
+      "name": "authentication",
+      "theme": "light",
+      "url": "https://single-demo.nextdoc4j.top/#/settings/auth",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "clip": {
+        "x": 320,
+        "y": 70,
+        "width": 1100,
+        "height": 450
+      },
+      "file": "authentication-light.webp",
+      "deviceScaleFactor": 2
+    },
+    {
+      "name": "global-parameters",
+      "theme": "light",
+      "url": "https://single-demo.nextdoc4j.top/#/settings/config",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "clip": {
+        "x": 320,
+        "y": 70,
+        "width": 1100,
+        "height": 310
+      },
+      "file": "global-parameters-light.webp",
+      "deviceScaleFactor": 2
+    },
+    {
+      "name": "gateway",
+      "theme": "light",
+      "url": "https://gateway-demo.nextdoc4j.top/#/services/%E7%B3%BB%E7%BB%9F%E7%AE%A1%E7%90%86/home",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "clip": null,
+      "file": "gateway-light.webp",
+      "deviceScaleFactor": 2
+    },
+    {
+      "name": "search",
+      "theme": "light",
+      "url": "https://single-demo.nextdoc4j.top/#/home",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "clip": {
+        "x": 380,
+        "y": 150,
+        "width": 680,
+        "height": 660
+      },
+      "file": "search-light.webp",
+      "deviceScaleFactor": 2
+    },
+    {
+      "name": "export",
+      "theme": "light",
+      "url": "https://single-demo.nextdoc4j.top/#/settings/export",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "clip": {
+        "x": 390,
+        "y": 300,
+        "width": 660,
+        "height": 359
+      },
+      "file": "export-light.webp",
+      "deviceScaleFactor": 2
+    },
+    {
+      "name": "preferences",
+      "theme": "light",
+      "url": "https://single-demo.nextdoc4j.top/#/home",
+      "viewport": {
+        "width": 1440,
+        "height": 820
+      },
+      "clip": {
+        "x": 1000,
+        "y": 0,
+        "width": 440,
+        "height": 820
+      },
+      "file": "preferences-light.webp",
+      "deviceScaleFactor": 2
+    },
+    {
+      "name": "cache-settings",
+      "theme": "light",
+      "url": "https://gateway-demo.nextdoc4j.top/#/services/%E7%B3%BB%E7%BB%9F%E7%AE%A1%E7%90%86/home",
+      "viewport": {
+        "width": 1440,
+        "height": 820
+      },
+      "clip": {
+        "x": 1000,
+        "y": 0,
+        "width": 440,
+        "height": 820
+      },
+      "file": "cache-settings-light.webp",
+      "deviceScaleFactor": 2
+    },
+    {
+      "name": "workspace",
+      "theme": "dark",
+      "url": "https://single-demo.nextdoc4j.top/#/home",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "clip": null,
+      "file": "workspace-dark.webp",
+      "deviceScaleFactor": 2
+    },
+    {
+      "name": "api-detail",
+      "theme": "dark",
+      "url": "https://single-demo.nextdoc4j.top/#/docs/operations/createUser",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "clip": null,
+      "file": "api-detail-dark.webp",
+      "deviceScaleFactor": 2
+    },
+    {
+      "name": "model",
+      "theme": "dark",
+      "url": "https://single-demo.nextdoc4j.top/#/docs/schemas/UserResp",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "clip": {
+        "x": 310,
+        "y": 62,
+        "width": 1120,
+        "height": 830
+      },
+      "file": "model-dark.webp",
+      "deviceScaleFactor": 2
+    },
+    {
+      "name": "json-enum",
+      "theme": "dark",
+      "url": "https://single-demo.nextdoc4j.top/#/docs/operations/updateUser/debug",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "clip": {
+        "x": 330,
+        "y": 179,
+        "width": 692,
+        "height": 480
+      },
+      "file": "json-enum-dark.webp",
+      "deviceScaleFactor": 2
+    },
+    {
+      "name": "query-enum",
+      "theme": "dark",
+      "url": "https://single-demo.nextdoc4j.top/#/docs/operations/getUserByStatusQuery/debug",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "clip": {
+        "x": 330,
+        "y": 179,
+        "width": 692,
+        "height": 380
+      },
+      "file": "query-enum-dark.webp",
+      "deviceScaleFactor": 2
+    },
+    {
+      "name": "form-enum",
+      "theme": "dark",
+      "url": "https://single-demo.nextdoc4j.top/#/docs/operations/updateUser/debug",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "clip": {
+        "x": 330,
+        "y": 179,
+        "width": 692,
+        "height": 570
+      },
+      "file": "form-enum-dark.webp",
+      "deviceScaleFactor": 2
+    },
+    {
+      "name": "debug-request",
+      "theme": "dark",
+      "url": "https://single-demo.nextdoc4j.top/#/docs/operations/getUserById/debug",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "clip": null,
+      "file": "debug-request-dark.webp",
+      "deviceScaleFactor": 2
+    },
+    {
+      "name": "response-json",
+      "theme": "dark",
+      "url": "https://single-demo.nextdoc4j.top/#/docs/operations/getUserById/debug",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "clip": {
+        "x": 858,
+        "y": 171,
+        "width": 560,
+        "height": 650
+      },
+      "file": "response-json-dark.webp",
+      "deviceScaleFactor": 2
+    },
+    {
+      "name": "response-image",
+      "theme": "dark",
+      "url": "https://single-demo.nextdoc4j.top/#/docs/operations/getAvatar/debug",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "clip": {
+        "x": 390,
+        "y": 244,
+        "width": 660,
+        "height": 472
+      },
+      "file": "response-image-dark.webp",
+      "deviceScaleFactor": 2
+    },
+    {
+      "name": "response-sse",
+      "theme": "dark",
+      "url": "https://single-demo.nextdoc4j.top/#/docs/operations/streamTokens/debug",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "clip": {
+        "x": 858,
+        "y": 171,
+        "width": 560,
+        "height": 690
+      },
+      "file": "response-sse-dark.webp",
+      "deviceScaleFactor": 2
+    },
+    {
+      "name": "workflow",
+      "theme": "dark",
+      "url": "https://single-demo.nextdoc4j.top/#/docs/operations/getUserById/debug",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "clip": {
+        "x": 330,
+        "y": 179,
+        "width": 692,
+        "height": 490
+      },
+      "file": "workflow-dark.webp",
+      "deviceScaleFactor": 2
+    },
+    {
+      "name": "authentication",
+      "theme": "dark",
+      "url": "https://single-demo.nextdoc4j.top/#/settings/auth",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "clip": {
+        "x": 320,
+        "y": 70,
+        "width": 1100,
+        "height": 450
+      },
+      "file": "authentication-dark.webp",
+      "deviceScaleFactor": 2
+    },
+    {
+      "name": "global-parameters",
+      "theme": "dark",
+      "url": "https://single-demo.nextdoc4j.top/#/settings/config",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "clip": {
+        "x": 320,
+        "y": 70,
+        "width": 1100,
+        "height": 310
+      },
+      "file": "global-parameters-dark.webp",
+      "deviceScaleFactor": 2
+    },
+    {
+      "name": "gateway",
+      "theme": "dark",
+      "url": "https://gateway-demo.nextdoc4j.top/#/services/%E7%B3%BB%E7%BB%9F%E7%AE%A1%E7%90%86/home",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "clip": null,
+      "file": "gateway-dark.webp",
+      "deviceScaleFactor": 2
+    },
+    {
+      "name": "search",
+      "theme": "dark",
+      "url": "https://single-demo.nextdoc4j.top/#/home",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "clip": {
+        "x": 380,
+        "y": 150,
+        "width": 680,
+        "height": 660
+      },
+      "file": "search-dark.webp",
+      "deviceScaleFactor": 2
+    },
+    {
+      "name": "export",
+      "theme": "dark",
+      "url": "https://single-demo.nextdoc4j.top/#/settings/export",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "clip": {
+        "x": 390,
+        "y": 300,
+        "width": 660,
+        "height": 359
+      },
+      "file": "export-dark.webp",
+      "deviceScaleFactor": 2
+    },
+    {
+      "name": "preferences",
+      "theme": "dark",
+      "url": "https://single-demo.nextdoc4j.top/#/home",
+      "viewport": {
+        "width": 1440,
+        "height": 820
+      },
+      "clip": {
+        "x": 1000,
+        "y": 0,
+        "width": 440,
+        "height": 820
+      },
+      "file": "preferences-dark.webp",
+      "deviceScaleFactor": 2
+    },
+    {
+      "name": "cache-settings",
+      "theme": "dark",
+      "url": "https://gateway-demo.nextdoc4j.top/#/services/%E7%B3%BB%E7%BB%9F%E7%AE%A1%E7%90%86/home",
+      "viewport": {
+        "width": 1440,
+        "height": 820
+      },
+      "clip": {
+        "x": 1000,
+        "y": 0,
+        "width": 440,
+        "height": 820
+      },
+      "file": "cache-settings-dark.webp",
+      "deviceScaleFactor": 2
+    }
+  ]
+}

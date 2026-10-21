@@ -1,0 +1,108 @@
+---
+title: 参数填写与枚举
+description: 详细了解 JSON Body 枚举下拉、Query 和 Form 选择器、字段说明、嵌套参数与真实发送值。
+---
+
+枚举不仅在文档中展示，还会参与调试填写。同一组候选项在三个地方有不同用途：**文档中解释含义、JSON 编辑器中替换值、参数表格中选择值**。
+
+## 三种入口，一份字段定义
+
+| 所在位置 | 交互 | 会修改请求吗 |
+| --- | --- | --- |
+| 接口参数 / JSON 结构示例 | 查看枚举值、含义与当前示例值 | 不会；这是阅读文档 |
+| 调试 Body → JSON | 点击值旁的下拉按钮，选择候选值 | 会替换当前 JSON 字段的值 |
+| 调试 Params / 表单 Body | 在参数值单元格中下拉选择 | 会更新该行的待发送值；还需确认该行启用 |
+
+候选值来自 OpenAPI Schema 的 `enum`，`x-nextdoc4j-enum` 可以补充每个值的业务含义。仅在描述里写“1 表示启用”，而没有结构化枚举定义，不会自动生成选择器。后端接入方法见[枚举展示插件](/guide/plugin/enum)。
+
+## JSON Body 中直接选择枚举
+
+以[单体 Demo 的更新用户](https://single-demo.nextdoc4j.top/#/docs/operations/updateUser/debug)为例，`status` 是字符串枚举：
+
+| 实际值 | 展示含义 |
+| --- | --- |
+| `ACTIVE` | 启用 |
+| `INACTIVE` | 停用 |
+| `PENDING` | 待处理 |
+
+1. 进入“在线调试”，打开 **Body → JSON**。
+2. 在 `status` 值旁点击下拉按钮，查看值、说明与类型提示。
+3. 选择候选项，编辑器只替换该字段值，保留其余 JSON。
+4. 发送前确认 Path 中的 `id`、接口所需认证和最终请求体。
+
+<ThemedScreenshot light="/images/screenshots/features/json-enum-light.webp" dark="/images/screenshots/features/json-enum-dark.webp" alt="JSON Body 中 status 字段展开枚举候选值，包含类型和中文含义" width={692} height={480} />
+
+### 值类型不会被说明文字替代
+
+选择 `INACTIVE - 停用` 后，JSON 中写入的是 `"INACTIVE"`，而不是整段标签。数字候选值会以数字字面量写入，不会因为界面有中文说明就被转换成字符串。
+
+```json title="选择状态之后的请求体片段"
+{
+  "status": "INACTIVE"
+}
+```
+
+JSON 编辑器仍支持手动输入，枚举建议不会把整个编辑器变成只读表单。更改枚举范围、填写未声明值或破坏 JSON 格式时，应以最终正文和服务端验证结果为准。
+
+### 嵌套对象与数组
+
+编辑器根据当前 JSON 字段路径寻找 Schema，嵌套对象、数组元素中的字段也可获得对应枚举建议。字段需要能映射到当前模型；切换组合模型分支后，要再次确认候选值属于正在使用的结构。
+
+字段说明、可选值列表与补全菜单是不同交互：阅读模式的“查看可选值”用于解释，调试模式的“选择枚举值”用于编辑，不能把查看定义当成已经填写参数。
+
+## Query 与 Path 的表格下拉
+
+在[按状态查询用户](https://single-demo.nextdoc4j.top/#/docs/operations/getUserByStatusQuery/debug)中，`status` 位于 Query，不在请求体中。打开 Params，点击“参数值”列即可选择枚举。
+
+<ThemedScreenshot light="/images/screenshots/features/query-enum-light.webp" dark="/images/screenshots/features/query-enum-dark.webp" alt="Query 参数表格中 status 枚举下拉展开，显示启用、停用和待处理" width={692} height={380} />
+
+- 选择后的真实 URL 类似 `/api/user/status?status=ACTIVE`。
+- 同类控件也用于具备枚举元数据的 Path、Header、Cookie 参数行。
+- 描述区域会补充候选含义；文字被截断时可悬浮查看完整说明。
+- 下拉选择与“是否发送”分开：可选参数取消勾选后，不会因为单元格还有值就继续发送。
+- 声明为必填的接口参数有相应标记；不要把示例占位提示当成已经输入的真实值。
+
+Query、Header 和表单最终以各自协议的文本形式传递，JSON Body 则保留 JSON 字面量类型。例如数字枚举在 URL 中显示为 `status=1`，不代表 JSON 中也应写成 `"1"`。
+
+## Form 表单中的枚举
+
+Body 的 **form-data** 与 **x-www** 编辑模式同样根据字段 Schema 生成枚举下拉，操作方式与 Query 参数表一致。普通字段是文本输入，枚举字段是选择器，文件字段是文件选择。
+
+<ThemedScreenshot light="/images/screenshots/features/form-enum-light.webp" dark="/images/screenshots/features/form-enum-dark.webp" alt="form-data 编辑模式下 status 字段使用相同的枚举下拉选择器" width={692} height={570} />
+
+上图使用更新用户的 Schema 切换到 form-data 编辑模式，展示同一字段的表单交互。该 Demo 接口原本声明接收 JSON；真正发送时应使用后端支持的媒体类型。**切换编辑模式不会修改后端接口契约。**
+
+| 编辑模式 | 传输方式 | 枚举字段的发送内容 |
+| --- | --- | --- |
+| JSON | JSON 请求体 | 例如 `"status": "ACTIVE"` |
+| x-www | `application/x-www-form-urlencoded` | 例如 `status=ACTIVE` |
+| form-data | `multipart/form-data` | `status` 字段的文本值 `ACTIVE` |
+
+form-data 的 boundary 由浏览器生成，不要手动固定。混合上传时，还可以为相应字段指定 MIME 类型，详见[在线请求调试](/guide/ui/browse-debug)。
+
+## 文档里的枚举如何阅读
+
+在参数定义和结构示例中，可以查看候选值与扩展含义。只读 JSON 说明中的可选值弹层会标出当前值，并支持复制，适合先确认业务语义再填写。
+
+- **值**：真正传给后端的内容，例如 `ACTIVE`、`1`。
+- **说明**：帮助理解的文字，例如“启用”。
+- **当前值**：当前示例或编辑内容匹配到的候选项，不等于服务器上的最新状态。
+
+响应中的枚举注释同样用于理解返回值，不能在响应只读区域修改后端数据。
+
+## 其他容易遗漏的参数细节
+
+| 场景 | 建议 |
+| --- | --- |
+| 同名 Header 来自全局与接口 | 查看来源标签、当前覆盖值及最终“实际请求” |
+| 同一个 Query 要传多次 | 按接口约定保留多行同名参数，例如 `id=1&id=2` |
+| 参数值很长 | 使用放大编辑入口，避免在窄单元格里盲改 |
+| 参数暂时不用 | 对可选行取消勾选，区分禁用、空字符串和删除 |
+| 切换 JSON、表单等 Body 模式 | 检查每种模式中的草稿与 Content-Type，不能假定所有格式都被后端接受 |
+| 没有下拉 | 检查当前服务 / 分组、Schema 是否含枚举，以及扩展是否正确下发 |
+| 有值但没有中文含义 | 标准 `enum` 能提供候选值；业务含义需要对应扩展元数据 |
+
+<Cards>
+  <Card title="在线请求调试" href="/guide/ui/browse-debug" description="了解参数来源、Body 格式、上传与实际发送内容。" />
+  <Card title="枚举展示插件" href="/guide/plugin/enum" description="配置后端枚举值与业务含义的关联。" />
+</Cards>

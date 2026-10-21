@@ -1,22 +1,112 @@
 ---
-title: 文档浏览与在线调试
-description: 聚焦 NextDoc4j 日常研发最高频的两大核心功能：沉浸式接口结构树浏览 与 强交互在线请求调试面板。
+title: 在线请求调试
+description: 从一次真实 GET 请求开始，配置参数、Body、文件、认证和浏览器凭据，检查 cURL 与实际请求。
 ---
-聚焦 NextDoc4j 日常研发最高频的两大核心功能：**沉浸式接口结构树浏览** 与 **强交互在线请求调试面板**。
 
-## 1. 多维接口文档浏览体系
+接口详情右上角的“在线调试”会打开当前接口的请求工作区。左侧准备请求，右侧查看结果；中间分隔条可以拖动，也可以聚焦后用方向键调整区域大小。
 
-- **分组与标签多维聚合**：左侧导航树支持快速切换 OpenAPI Group 与 Controller Tag，**1.4.0** 全新推出**分组概览工作台**。
-- **模型与示例联动**：请求 Body / 返回 Response 支持参数视图、模式 Schema 视图与多状态码示例实时切换。
-- **多态模型分段选择**：原生支持 OpenAPI 3 的 `oneOf` / `anyOf` 互斥模型选择器。
-- **TypeScript 代码生成**：一键生成全强类型的 TS 请求/响应 Interface 定义，大幅提升前端对接效率。
+<ThemedScreenshot light="/images/screenshots/features/debug-request-light.webp" dark="/images/screenshots/features/debug-request-dark.webp" alt="根据 ID 查询用户的在线调试，左侧填写参数，右侧显示实际返回的 JSON" />
 
-## 2. 沉浸式在线调试与 SSE 事件流
+## 先完成一次查询
 
-![在线调试面板](/images/screenshots/guide/debug-panel-placeholder.png)
+打开[单体 Demo 的用户查询](https://single-demo.nextdoc4j.top/#/docs/operations/getUserById/debug)：
 
-- **五维参数联动编辑**：原生支持 Path 路径变量、Query 查询参数、Header 自定义请求头、Cookie 与 Body 请求体。
-- **Content-Type 智能感知**：支持 `application/json`、`multipart/form-data`、`x-www-form-urlencoded`、`raw` 等自动补全。
-- **文件与混合表单上传**：轻松调试多附件与复杂 Form 表单组合入参。
-- **SSE 流式事件调试（1.4.0+）**：原生接收大模型输出与持续数据流，支持虚拟滚动与手动中断。
-- **请求缓存机制**：自动记忆历史填写的测试参数，无需重复输入。
+1. 在 Params 中找到 Path 参数 `id`，填写 `1`。
+2. 如果部署环境要求业务凭据，在“全局认证”中填写该接口使用的方案。
+3. 确认地址、请求方法和启用的参数，点击“发送”。
+4. 在右侧“实时响应”中检查 HTTP 状态和正文，在“实际请求”中核对最终 URL。
+5. 使用左上角返回按钮回到文档详情，继续对照接口声明。
+
+这里的请求由浏览器直接发往当前选定的接口服务，不会由官网代为转发。接口是否成功取决于服务状态、业务认证、网络和跨域配置。
+
+## 请求区六个页签
+
+| 页签 | 主要内容 | 需要留意 |
+| --- | --- | --- |
+| Params | Path 路径变量与 Query 查询参数 | Path 占位符需要真实值；Query 可出现同名多值 |
+| Body | JSON、XML、表单、raw、binary 等请求体 | 编辑格式应与后端支持的 Content-Type 一致 |
+| Headers | 接口请求头、公共请求头与认证值 | 来源和单次覆盖会影响最终值 |
+| Cookies | 接口使用的 Cookie 参数 | 受浏览器域名、凭据和 HttpOnly 限制 |
+| 前置操作 | 发请求前的准备步骤 | 可取变量、计算值、补齐参数和执行辅助请求 |
+| 后置操作 | 收到响应后的处理步骤 | 可提取、校验并保存联调需要的数据 |
+
+枚举字段的下拉、参数启用和长值编辑见[参数填写与枚举](/guide/ui/parameters-enums)，流程步骤见[前后置操作与变量](/guide/ui/request-workflows)。
+
+## Body 模式选择
+
+| 模式 | 常见 Content-Type | 适合场景 |
+| --- | --- | --- |
+| none | 不自动生成请求体 | 接口没有 Body |
+| JSON | `application/json` 或接口声明的 JSON 媒体类型 | 对象、数组与结构化参数 |
+| form-data | `multipart/form-data` | 文件上传、普通字段与文件混合提交 |
+| x-www | `application/x-www-form-urlencoded` | 普通键值表单 |
+| raw | 通常为 `text/plain` | 自定义文本正文 |
+| binary | 文件 MIME 或 `application/octet-stream` | 整个文件作为请求正文 |
+| XML | `application/xml` | 接收 XML 的业务接口 |
+
+模式切换时，工作台会结合接口 Schema 准备相应编辑内容。未声明的格式也可能可编辑，因此不能仅凭模式按钮判断服务端一定支持该格式。GET / HEAD 的实际请求不会附加 Body。
+
+### JSON 与 XML 编辑
+
+JSON 支持字段折叠、枚举值选择、复制和放大编辑。XML 模式可以结合当前结构准备内容，再按后端真实 XML 根元素、命名和字段要求调整。
+
+发送前应检查 JSON / XML 是否符合接口契约。Schema 示例是起点，日期、必填字段、业务唯一键和模型分支仍需要按真实场景填写。
+
+### 文件与混合上传
+
+单体 Demo 的文件管理分组包含单文件、多文件和文件加参数等例子。请按接口文档确认文件位于 Body，普通参数位于 Query 还是表单字段，不能只凭接口名称判断。
+
+- 单文件字段选择一个文件，多文件字段可选择多个文件。
+- 普通表单字段与文件可以一起提交，相关字段支持 MIME 设置。
+- form-data 的 `Content-Type` boundary 由浏览器生成，工作台会让浏览器处理该头。
+- binary 模式把所选文件作为整个正文，不会额外生成一个命名的 multipart 字段。
+- 文件选择保留在当前页面的内存中；刷新后要重新选择，调试草稿不会把文件本体保存到磁盘缓存。
+
+<Callout title="上传前确认参数位置" type="info">
+例如“文件 + 参数混合上传”可能把 `category` 声明在 Query，把 `file` 声明在 multipart Body。应分别在 Params 与 Body 填写，不要把所有值都放进表单。
+</Callout>
+
+## 认证值、公共参数与本次覆盖
+
+调试表格会汇总接口声明、全局配置与认证产生的参数，并显示来源。可以针对本次调试调整继承项的值或启用状态；这不等于修改全局保存的配置。
+
+| 操作 | 结果 |
+| --- | --- |
+| 修改接口参数 | 影响该接口当前调试内容 |
+| 修改全局 Header / Query | 影响使用这份配置的后续请求 |
+| 保存认证凭据 | 为对应认证方案提供可注入的值 |
+| 单次禁用继承项 | 本次请求排除该参数，避免默认值再次补回 |
+
+有同名项时，以“实际请求”核对最终结果。Header 名称不区分大小写；Query 名称按原名匹配。具体来源与网关继承方式见[认证、权限与公共参数](/guide/ui/security-permissions)。
+
+## 请求设置
+
+地址栏旁的设置入口提供认证、公共 Query、公共 Headers 和请求设置等快捷面板。可调整请求超时，以及是否随请求携带浏览器凭据。
+
+- **超时**：用于结束等待过久的请求；SSE 建立响应后的持续接收行为见[响应预览与 SSE](/guide/ui/response-preview)。
+- **携带凭据**：控制 Fetch 是否携带浏览器可用的 Cookie 等凭据。
+- **Cookie 编辑**：仅能在浏览器允许的同源范围写入；跨域 Cookie 需要在目标域完成登录并满足服务端策略。
+
+HttpOnly Cookie 不能被页面 JavaScript 任意读取或写入，浏览器管理的 Header 也不保证能手动设置。需要检查完整网络行为时，使用浏览器 Network 面板。
+
+## 发送之后看三个层面
+
+| 结果区域 | 回答的问题 |
+| --- | --- |
+| 实时响应 | 返回了什么内容、HTTP 状态是什么 |
+| 头信息 | 应用交给 Fetch 的请求头、浏览器能读取的响应头分别是什么 |
+| 实际请求 | 本次真实使用的 URL、参数、正文和请求快照是什么 |
+| 控制台 | 前置、网络与后置阶段做了什么，哪一步失败 |
+
+发送过程中可以取消等待；取消浏览器请求不等于服务器端业务已经回滚。不要通过反复点击有副作用的接口来判断网络是否恢复。
+
+## cURL、草稿与恢复示例
+
+“复制 cURL”把当前请求组织成命令行示例，适合带到终端排查浏览器外的行为。文件路径、Cookie、环境变量和网关地址应在目标环境重新核对。
+
+启用调试草稿缓存后，工作台会保存参数、Body 和流程配置等可序列化内容，方便下次继续。恢复接口示例用于回到文档推导的初始填写内容；缓存范围和清理方式见[偏好与本地数据](/guide/ui/preferences)。
+
+<Cards>
+  <Card title="响应预览与 SSE" href="/guide/ui/response-preview" description="进一步查看返回类型、图片、流式事件与大响应处理。" />
+  <Card title="前后置操作与变量" href="/guide/ui/request-workflows" description="让重复准备、取值和校验步骤随请求执行。" />
+</Cards>

@@ -1,26 +1,170 @@
 ---
 title: 枚举展示插件
-description: 解析枚举值与说明，并在接口详情和在线调试中增强枚举展示。
+description: 为枚举生成类型、候选值与业务含义，区分文档增强和运行时转换，并适配团队已有枚举接口。
 ---
 
-枚举展示插件会把枚举的值和说明写入 `x-nextdoc4j-enum` OpenAPI 扩展。
+枚举插件在 SpringDoc 生成文档时补充 `type`、`format`、`enum` 和 `x-nextdoc4j-enum`。工作台据此展示枚举含义，并为 JSON Body、Query 和表单等调试输入提供候选项。
 
-## 引入依赖
+它负责文档元数据；JSON 序列化、请求参数转换和业务校验仍由宿主工程配置。
 
-```xml
+## 最小接入
+
+宿主需要先完成 [NextDoc4j 与 SpringDoc 接入](/guide/start/started)，再添加插件：
+
+```xml title="pom.xml"
 <dependency>
-  <groupId>top.nextdoc4j</groupId>
-  <artifactId>nextdoc4j-plugin-enum</artifactId>
-  <version>1.5.0</version>
+    <groupId>top.nextdoc4j</groupId>
+    <artifactId>nextdoc4j-plugin-enum</artifactId>
+    <version>1.5.0</version>
 </dependency>
 ```
 
-## 自定义解析器
+已导入 `nextdoc4j-bom` 时可省略版本。Boot 3 使用 SpringDoc 2.x，Boot 4 使用 SpringDoc 3.x；插件坐标相同。
 
-实现 `EnumMetadataResolver` 可以适配团队已有的枚举基类：
+<Tabs items={['YAML', 'Properties']}>
+  <Tab value="YAML">
 
-```java
+```yaml title="application.yml"
+nextdoc4j:
+  enabled: true
+  plugin:
+    enum:
+      enabled: true
+```
+
+  </Tab>
+  <Tab value="Properties">
+
+```properties title="application.properties"
+nextdoc4j.enabled=true
+nextdoc4j.plugin.enum.enabled=true
+```
+
+  </Tab>
+</Tabs>
+
+| 配置 | 未配置时 | 作用 |
+| --- | --- | --- |
+| `nextdoc4j.enabled` | 工作台不开放 | 控制文档访问入口 |
+| `nextdoc4j.plugin.enum.enabled` | 不装配枚举插件 | 注册枚举参数处理器与模型转换器 |
+
+枚举插件不依赖 `nextdoc4j.extension.enabled`。普通 Java enum 可以继续由 SpringDoc 描述；内置增强解析器默认识别实现 `EnumValue` 的枚举。
+
+## 基础用法：值与含义一起定义
+
+下面以数字状态为例，不依赖 Lombok：
+
+```java title="RoleStatus.java"
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+import top.nextdoc4j.enums.core.EnumValue;
+
+public enum RoleStatus implements EnumValue<Integer> {
+    ACTIVE(1, "启用"),
+    DISABLED(2, "停用");
+
+    private final Integer value;
+    private final String description;
+
+    RoleStatus(Integer value, String description) {
+        this.value = value;
+        this.description = description;
+    }
+
+    @Override
+    @JsonValue
+    public Integer getValue() {
+        return value;
+    }
+
+    @Override
+    public String getDescription() {
+        return description;
+    }
+
+    @JsonCreator
+    public static RoleStatus fromValue(Integer value) {
+        RoleStatus result = EnumValue.getByValue(value, RoleStatus.class);
+        if (result == null) {
+            throw new IllegalArgumentException("未知角色状态: " + value);
+        }
+        return result;
+    }
+}
+```
+
+`EnumValue<T>` 的泛型用于推导文档类型，`getValue()` 提供真实候选值，`getDescription()` 提供说明。不重写描述方法时，默认使用枚举常量名；所有说明都等于常量名时，内置解析器不额外写入含义扩展，但仍可生成标准枚举值。
+
+### 在接口中使用
+
+```java title="EnumDemoController.java"
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Schema;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/enum-demo")
+public class EnumDemoController {
+    public record ChangeStatus(@Schema(description = "角色状态") RoleStatus status) {}
+
+    @Operation(summary = "提交角色状态")
+    @PostMapping
+    public ChangeStatus submit(@RequestBody ChangeStatus request) {
+        return request;
+    }
+
+    @Operation(summary = "按状态查询")
+    @GetMapping
+    public String query(@RequestParam RoleStatus status) {
+        return status.getDescription();
+    }
+}
+```
+
+JSON 请求正文可以是 `{"status": 1}`，响应中的状态也序列化为数字。这里的 JSON 行为由 `@JsonCreator` / `@JsonValue` 决定，安装文档插件本身不会替你注册业务枚举的序列化器。
+
+### Query、Path 和表单的数字转换
+
+Spring 的 Query / Path / 表单绑定与 Jackson 处理 JSON 是两条链路。上面的数字状态若要接收 `?status=1`，需要注册转换器：
+
+```java title="RoleStatusConverter.java"
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.stereotype.Component;
+
 @Component
+public class RoleStatusConverter implements Converter<String, RoleStatus> {
+    @Override
+    public RoleStatus convert(String source) {
+        return RoleStatus.fromValue(Integer.valueOf(source));
+    }
+}
+```
+
+默认按枚举常量名称绑定时，通常需要传 `ACTIVE` 等常量名。请让文档候选值、JSON 映射和 Spring 参数绑定约定保持一致；自定义 MVC / WebFlux 转换体系时，也要确认转换器进入了实际使用的 ConversionService。
+
+## 自定义功能：适配已有枚举接口
+
+团队已有 `getCode()` / `getLabel()` 约定时，可以保留现有枚举类型，通过 `EnumMetadataResolver` 适配：
+
+```java title="BusinessEnum.java"
+public interface BusinessEnum<T> {
+    T getCode();
+    String getLabel();
+}
+```
+
+```java title="BusinessEnumResolver.java"
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
+import top.nextdoc4j.enums.resolver.EnumMetadataResolver;
+
+@Component
+@Order(50)
 public class BusinessEnumResolver implements EnumMetadataResolver {
     @Override
     public boolean supports(Class<?> enumClass) {
@@ -45,4 +189,92 @@ public class BusinessEnumResolver implements EnumMetadataResolver {
 }
 ```
 
-解析结果会以枚举下拉选项和说明形式出现在 NextDoc4j UI 中。
+例如枚举直接实现 `BusinessEnum<String>` 时，默认逻辑会提取该接口泛型，再调用公开的 `getCode()`、`getLabel()`。该适配同样只作用于文档，保留宿主原有的 JSON 和参数转换配置。
+
+### 哪些方法可以重写
+
+| 方法 | 用途 | 返回默认值时 |
+| --- | --- | --- |
+| `supports` | 限定支持的枚举类型 | 必须实现 |
+| `getEnumInterfaceType` | 指定用于提取泛型的接口 | `null` 使用 `EnumValue` |
+| `getValueMethodName` | 指定值方法 | 默认 `getValue` |
+| `getDescriptionMethodName` | 指定说明方法 | 默认 `getDescription` |
+| `resolveValueType` | 直接决定 Schema 类型 | `null` 按接口泛型推导 |
+| `resolveFormat` | 直接决定 Schema 格式 | `null` 走默认推导 |
+| `resolveEnumValues` | 自定义标准候选值列表 | `null` 反射读取各常量的值 |
+| `resolveMetadata` | 自定义值与说明映射 | `null` 使用默认元数据构造 |
+
+复杂继承、泛型无法直接提取或特殊值类型，建议显式重写类型、格式与值解析。例如长整数规范应使用 `type=integer`、`format=int64`；不要仅根据 Java 类型名拼出 Schema 类型。
+
+元数据可以用 `new NextDoc4jEnumMetadata(List.of(new NextDoc4jEnumMetadata.EnumItem(value, description)))` 构造，相关类型位于 `top.nextdoc4j.enums.model`。需要主动不输出说明扩展时，可以返回 items 为空的元数据对象；返回 `null` 的含义是回退默认解析。
+
+### 多个解析器如何选择
+
+Spring 收集解析器 Bean，插件按注入顺序查找，**第一个 `supports=true` 的解析器生效**，并在该解析器内部对未重写的方法执行回退。可用 `@Order` 控制自定义 Bean 顺序。
+
+没有自定义解析器支持时，才尝试内置 `EnumValue` 解析器。避免写一个支持所有 enum 的解析器，却没有实现这些类型实际使用的方法。
+
+## 验证生成的数据
+
+在当前服务 `/v3/api-docs` 的对应参数或模型 Schema 中检查：
+
+```json title="RoleStatus 的 Schema 片段"
+{
+  "type": "integer",
+  "format": "int32",
+  "enum": [1, 2],
+  "x-nextdoc4j-enum": {
+    "items": [
+      { "value": 1, "description": "启用" },
+      { "value": 2, "description": "停用" }
+    ]
+  }
+}
+```
+
+先确认标准 `enum` 的值和类型，再检查说明扩展。只有修改了一段文字描述，没有结构化枚举信息时，前端不会据此推断完整选择器。
+
+## 对应的前端效果
+
+单体 Demo 的 `StatusType` 使用字符串值 `ACTIVE`、`INACTIVE`、`PENDING`，分别对应“启用”“停用”“待处理”。同一份枚举元数据既用于文档说明，也用于调试填写。
+
+### 文档详情：参数定义
+
+打开[根据用户状态查询用户信息](https://single-demo.nextdoc4j.top/#/docs/operations/getUserByStatusQuery)，在“请求参数”中可以直接看到 `status` 的类型、必填标记，以及每个候选值和业务含义，无需进入在线调试。
+
+<ThemedScreenshot light="/images/screenshots/plugins/enum-document-parameters-light.webp" dark="/images/screenshots/plugins/enum-document-parameters-dark.webp" alt="接口文档的参数定义中，status 字段直接展示枚举值与启用、停用、待处理的含义" width={636} height={168} />
+
+Body 字段和响应字段也会按各自 Schema 展示枚举。实际传输值与说明一起呈现，便于区分 `ACTIVE` 这样的接口值与“启用”这样的解释文字。
+
+### 文档详情：JSON 结构示例
+
+在[更新用户](https://single-demo.nextdoc4j.top/#/docs/operations/updateUser)的请求 JSON 结构示例中，点击 `status` 字段说明旁的“查看可选值”，可以展开枚举定义，查看字段路径、候选值、业务含义及当前示例值，也可以复制枚举值。
+
+<ThemedScreenshot light="/images/screenshots/plugins/enum-document-example-light.webp" dark="/images/screenshots/plugins/enum-document-example-dark.webp" alt="文档详情中的只读 JSON 结构示例展开 status 枚举定义，标记当前值并展示候选含义" width={440} height={386} />
+
+这里的“当前值”指结构示例中的值，不是一次真实接口调用返回的状态。该区域用于阅读和复制，不会替换调试请求里的参数。
+
+### 在线调试：选择并写入请求
+
+进入在线调试的 Body → JSON 后，点击枚举值旁的下拉按钮，选择候选项会替换当前请求 JSON 的字段值；Query 与 Form 则使用参数表格中的下拉选择器。
+
+<ThemedScreenshot light="/images/screenshots/plugins/enum-light.webp" dark="/images/screenshots/plugins/enum-dark.webp" alt="枚举插件的值与说明在 JSON Body 中形成可选择的候选项" width={692} height={480} />
+
+完整的填写交互见[参数填写与枚举](/guide/ui/parameters-enums)。表单中的下拉出现，只说明 Schema 提供了候选项；后端是否接收这种 Body 格式仍由接口声明决定。
+
+## 排查速查
+
+| 现象 | 优先检查 |
+| --- | --- |
+| 引入后没有增强 | 插件开关、当前 OpenAPI 分组、枚举字段是否进入模型 |
+| 有候选值但没有业务说明 | 是否实现 / 适配枚举接口，说明是否全部等于常量名 |
+| 数字枚举显示成字符串 | 接口泛型能否直接提取，或显式重写类型与格式 |
+| Query 下拉选数字后返回 400 | Spring 参数转换器，而不只是 Jackson 注解 |
+| JSON 候选值与真实返回不同 | 宿主序列化器、`@JsonValue` 和解析器返回值是否一致 |
+| 自定义解析器没有执行 | Bean 扫描范围、`supports` 条件与 `@Order` |
+| 获取值或说明失败 | 方法必须可被反射调用，且说明返回 String |
+
+<Cards>
+  <Card title="认证展示插件" href="/guide/plugin/authentication" description="为接口补齐可调试的标准安全方案。" />
+  <Card title="开发指南" href="/development" description="查看插件模块与宿主 Demo 的工程组织。" />
+</Cards>

@@ -1,28 +1,252 @@
 ---
 title: Sa-Token 权限码插件
-description: 解析 Sa-Token 权限和角色注解，在接口调试时展示权限元数据。
+description: 解析 Sa-Token 权限与角色注解，了解匿名排除、MVC 装配条件，并通过统一 SPI 展示自定义权限注解。
 ---
 
-Sa-Token 插件支持 `@SaCheckPermission`、`@SaCheckRole` 和 `@SaIgnore`。
+Sa-Token 插件读取 Controller 上的权限、角色与忽略鉴权注解，将信息加入操作级 `x-nextdoc4j-security`。工作台在接口详情中展示权限组合，便于联调时对照后端声明。
 
-## 引入依赖
+它不安装业务鉴权拦截器，也不替你完成登录、分配角色或验证权限。
 
-```xml
+## 接入前先选能力
+
+| 需求 | 所需组件 |
+| --- | --- |
+| 展示 Sa-Token 权限与角色 | Sa-Token 运行时 + 本页的 Sa-Token 插件 |
+| 通过 YAML 自动追加认证方案 | 再引入[认证展示插件](/guide/plugin/authentication) |
+| 根据 `@SaIgnore` 跳过默认认证追加 | Sa-Token 提供路径排除器，认证展示插件消费它 |
+| 展示其他框架的权限注解 | 认证展示插件作为解析桥接 + 自定义 `NextDoc4jSecurityMetadataResolver` |
+
+### 当前运行条件
+
+- 宿主已完成 [NextDoc4j 与 SpringDoc 接入](/guide/start/started)。
+- 当前 Sa-Token 自动配置依赖 `SaCheckPermission`、`SaCheckRole`、`SaIgnore` 注解类和 MVC 的 `RequestMappingHandlerMapping`。
+- 纯 WebFlux 应用不装配这套 Sa-Token 适配，不要为了显示权限信息给 WebFlux 工程额外引入 MVC。
+- 网关可以展示下游已经生成的权限扩展；网关聚合本身不会远程扫描下游 Controller 注解。
+
+## 最小接入
+
+在已使用合适 Sa-Token 运行时的 MVC 宿主中添加：
+
+```xml title="pom.xml"
 <dependency>
-  <groupId>top.nextdoc4j</groupId>
-  <artifactId>nextdoc4j-plugin-security-satoken</artifactId>
-  <version>1.5.0</version>
+    <groupId>top.nextdoc4j</groupId>
+    <artifactId>nextdoc4j-plugin-security-satoken</artifactId>
+    <version>1.5.0</version>
 </dependency>
 ```
 
-## 支持的注解
+插件里的 Sa-Token 核心依赖是可选依赖，业务宿主仍需选择适配自身 Boot 版本的 Sa-Token 运行时。已使用 `nextdoc4j-bom` 时可省略插件版本。
 
-| 注解 | 作用 |
+```yaml title="application.yml"
+nextdoc4j:
+  enabled: true
+  plugin:
+    security:
+      enabled: true
+```
+
+认证展示和 Sa-Token 适配共用 `nextdoc4j.plugin.security.enabled`，必须显式启用。仅有权限展示需求时，不要求额外配置 `springdoc.components.security-schemes`。
+
+## 基础用法：在接口声明权限
+
+```java title="PermissionDemoController.java"
+import cn.dev33.satoken.annotation.SaCheckPermission;
+import cn.dev33.satoken.annotation.SaCheckRole;
+import cn.dev33.satoken.annotation.SaIgnore;
+import cn.dev33.satoken.annotation.SaMode;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/permission-demo")
+public class PermissionDemoController {
+    @GetMapping("/orders")
+    @SaCheckPermission(value = {"order:view", "order:admin"},
+        mode = SaMode.OR, orRole = "admin")
+    public String orders() {
+        return "ok";
+    }
+
+    @GetMapping("/management")
+    @SaCheckRole(value = {"admin", "auditor"}, mode = SaMode.AND)
+    public String management() {
+        return "ok";
+    }
+
+    @GetMapping("/public")
+    @SaIgnore
+    public String publicInfo() {
+        return "public";
+    }
+}
+```
+
+| 声明 | 输出含义 |
 | --- | --- |
-| `@SaCheckPermission` | 展示权限码和匹配模式。 |
-| `@SaCheckRole` | 展示角色要求。 |
-| `@SaIgnore` | 标记免鉴权接口。 |
+| `@SaCheckPermission` | 权限值、AND / OR 模式、登录类型及额外角色条件 |
+| `@SaCheckRole` | 角色值、AND / OR 模式与登录类型 |
+| `@SaIgnore` | 忽略该接口的权限扩展，并为默认认证追加提供路径排除信息 |
 
-## 自定义权限解析器
+上面的方法返回值只用于说明注解位置。业务接口实际是否执行鉴权，仍取决于宿主的 Sa-Token 拦截器或切面配置。
 
-非 Sa-Token 鉴权框架可以实现 `NextDoc4jSecurityMetadataResolver`，将权限信息写入统一元数据模型。
+## 类与方法如何组合
+
+| 情况 | 当前解析规则 |
+| --- | --- |
+| 方法和类都有权限注解 | 两处都会收集，先方法、再类，不简单覆盖 |
+| 方法和类都有角色注解 | 两处都会收集，保留各自模式与登录类型 |
+| 方法或类存在 `@SaIgnore` | 优先设置忽略状态，停止该解析器的权限和角色提取 |
+| 自定义组合注解 | 内置解析器通过反射读取指定注解，不承诺解析任意组合注解 |
+
+`mode=AND` 与 `mode=OR` 只描述该条权限 / 角色项内部的关系；`orRole` 会作为权限项的额外角色分支保留。不要把多条元数据平铺成一个没有组别的字符串列表。
+
+## 生成的权限元数据
+
+正常受保护接口的操作节点包含类似扩展：
+
+```json title="权限扩展片段"
+{
+  "x-nextdoc4j-security": {
+    "permissions": [
+      {
+        "values": ["order:view", "order:admin"],
+        "mode": "OR",
+        "type": "",
+        "orValues": ["admin"],
+        "orType": "role"
+      }
+    ],
+    "roles": [],
+    "ignore": false
+  }
+}
+```
+
+`type` 表示登录类型等框架上下文，不是 OpenAPI SecurityScheme 名。它不能代替 `Authorization` 之类的标准方案引用。
+
+当前定制器在 `ignore=true` 时不写入这份扩展，而不是固定输出一个 `ignore: true` 对象。排查匿名接口时，要同时查看标准 `security` 和路径排除结果，不能只寻找这个标志。
+
+<ThemedScreenshot light="/images/screenshots/plugins/permissions-light.webp" dark="/images/screenshots/plugins/permissions-dark.webp" alt="单体 Demo 新增用户接口展示 OR 权限条件及 admin 角色分支" width={636} height={478} />
+
+## `@SaIgnore` 与标准认证要求
+
+Sa-Token 适配会通过 MVC HandlerMapping 收集带 `@SaIgnore` 的映射路径，提供给 `NextDoc4jPathExcluder`。认证展示插件据此跳过自动追加默认认证。
+
+- 只安装 Sa-Token 插件时，权限元数据可以独立生成；不会因此自动出现一套 Bearer SecurityScheme。
+- 排除按路径集合处理，同一 Path 下不同 HTTP 方法不在该排除器中细分。
+- 已由其他注解或定制器添加的 `security` 不会被路径排除器主动清除。
+- 业务鉴权和文档描述都应按实际需求配置，不能用文档排除代替服务端的匿名访问规则。
+
+需要 Bearer 等输入入口时，按[认证展示插件](/guide/plugin/authentication)同时配置标准方案。
+
+## 自定义功能：接入其他权限注解
+
+统一 SPI 位于 `nextdoc4j-plugin-security-core`。该模块提供接口与模型；**只依赖 core 不会自动执行解析器**。非 Sa-Token 工程可以使用 `nextdoc4j-plugin-security-schemes` 提供的操作定制器作为桥接，并启用相同安全插件开关，无需为了自定义权限引入 Sa-Token。
+
+### 1. 定义项目注解
+
+```java title="ApiPermission.java"
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.TYPE, ElementType.METHOD})
+public @interface ApiPermission {
+    String[] value();
+    String mode() default "AND";
+}
+```
+
+这只是示例的文档读取约定。若项目已有权限注解，直接读取已有类型；业务校验由自己的权限框架处理。
+
+### 2. 注册解析器 Bean
+
+示例类与注解放在同一包，或按项目包名添加相应 import：
+
+```java title="ProjectPermissionResolver.java"
+import java.lang.reflect.Method;
+import org.springframework.stereotype.Component;
+import top.nextdoc4j.security.core.enhancer.NextDoc4jSecurityMetadataResolver;
+import top.nextdoc4j.security.core.model.NextDoc4jSecurityMetadata;
+
+@Component
+public class ProjectPermissionResolver implements NextDoc4jSecurityMetadataResolver {
+    @Override
+    public boolean supports(Class<?> beanType, Method method) {
+        return method.isAnnotationPresent(ApiPermission.class)
+            || beanType.isAnnotationPresent(ApiPermission.class);
+    }
+
+    @Override
+    public void resolve(Class<?> beanType, Method method,
+                        NextDoc4jSecurityMetadata metadata) {
+        add(method.getAnnotation(ApiPermission.class), metadata);
+        add(beanType.getAnnotation(ApiPermission.class), metadata);
+    }
+
+    private void add(ApiPermission annotation, NextDoc4jSecurityMetadata metadata) {
+        if (annotation != null) {
+            metadata.addPermission(annotation.value(), annotation.mode(),
+                "", new String[0]);
+        }
+    }
+
+    @Override
+    public int getOrder() {
+        return 50;
+    }
+}
+```
+
+### 3. 在接口使用
+
+```java
+@ApiPermission(value = {"order:view", "order:admin"}, mode = "OR")
+@GetMapping("/api/orders")
+public String orders() {
+    return "ok";
+}
+```
+
+确保解析器处于 Spring 扫描范围，并由认证展示插件或 Sa-Token 插件中的操作定制器调用。
+
+### 解析器契约
+
+| API | 用途 |
+| --- | --- |
+| `supports(beanType, method)` | 限定要处理的方法，默认支持所有方法 |
+| `resolve(beanType, method, metadata)` | 向同一个元数据对象添加权限与角色 |
+| `getOrder()` | 数字越小越先执行，默认 0；内置 Sa-Token 为 100 |
+| `getName()` | 解析器名称，默认使用类名 |
+| `metadata.addPermission(...)` | 添加权限组，支持额外角色分支 |
+| `metadata.addRole(...)` | 添加角色组 |
+| `metadata.setIgnore(true)` | 使本次最终权限扩展不输出，不会自动注册匿名路径 |
+
+与枚举插件的“第一个匹配解析器生效”不同，权限定制器会调用所有支持的解析器，按 `getOrder()` 依次修改同一个对象。需要覆盖、累加或忽略时，应在自己的解析器中明确规则。
+
+解析异常当前会被定制器忽略，避免影响文档生成。自定义实现有复杂逻辑时，可在自身记录必要的诊断信息；若扩展缺失，先确认 `supports` 和取值逻辑确实执行成功。
+
+## 验证与排查
+
+1. 确认运行时包含注解类与 MVC 条件，安全插件开关已启用。
+2. 在当前分组 `/v3/api-docs` 中找到目标路径与方法，查看 `x-nextdoc4j-security`。
+3. 分别核对 permissions、roles、mode、type 和 orValues。
+4. 若预期匿名，检查 `@SaIgnore`、标准 security 与排除器的职责。
+5. 最后打开工作台查看展示；网关场景先验证下游直连文档，再验证网关返回的数据。
+
+| 现象 | 排查方向 |
+| --- | --- |
+| 纯 WebFlux 中插件没有生效 | 当前 Sa-Token 适配需要 MVC；自定义权限可通过中立 SPI 与认证展示模块接入 |
+| 只有权限徽章，没有认证输入 | 还没有标准 SecurityScheme 与接口 security 声明 |
+| 类注解被认为“覆盖”了方法 | 当前会分别收集两处，检查各组模式 |
+| `@SaIgnore` 接口仍有安全要求 | 排除不删除其他来源已经写入的 security |
+| 自定义 Bean 存在却没有扩展 | 缺少操作定制器桥接、supports 不匹配或解析异常 |
+| 网关里看不到下游权限 | 下游未输出扩展、文档分组不一致或当前服务文档未刷新 |
+
+<Cards>
+  <Card title="认证展示插件" href="/guide/plugin/authentication" description="补齐标准认证方案，控制默认认证追加与路径排除。" />
+  <Card title="认证、权限与公共参数界面" href="/guide/ui/security-permissions" description="对照前端展示，理解权限要求与真实凭据的关系。" />
+</Cards>

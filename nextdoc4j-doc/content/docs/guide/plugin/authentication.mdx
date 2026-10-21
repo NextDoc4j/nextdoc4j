@@ -1,39 +1,271 @@
 ---
 title: 认证展示插件
-description: 读取 SpringDoc security schemes，生成全局认证配置页并在在线调试时自动注入认证信息。
+description: 配置标准 SecurityScheme、自动补充接口认证要求，使用路径排除与按接口声明适配不同的认证规则。
 ---
 
-认证展示插件读取 `springdoc.components.security-schemes`，在 NextDoc4j 中生成独立的全局认证配置页。
+认证展示插件把后端的安全方案声明组织成 OpenAPI 数据，供工作台列出认证方案并在调试时注入凭据。最常见的接入方式是 YAML 配置默认方案，再排除不需要自动追加的路径。
 
-## 引入依赖
+| 能力 | 由谁负责 |
+| --- | --- |
+| 定义 Bearer、Basic、API Key 等方案 | OpenAPI 的 `components.securitySchemes` |
+| 声明某个接口需要哪些方案 | 接口的 `security` |
+| 保存和发送调试 Token / Key | 工作台的全局认证与调试区 |
+| 登录、签发 Token 和校验权限 | 宿主的业务认证框架 |
+| 保护文档入口 | [简单认证配置](/guide/config/authconfiguration) |
 
-1.4.0 起使用统一坐标：
+## 最小接入
 
-```xml
+宿主先完成 [NextDoc4j / SpringDoc 接入](/guide/start/started)。插件适用于 MVC 与 WebFlux 的 SpringDoc 文档生成链路：
+
+```xml title="pom.xml"
 <dependency>
-  <groupId>top.nextdoc4j</groupId>
-  <artifactId>nextdoc4j-plugin-security-schemes</artifactId>
-  <version>1.5.0</version>
+    <groupId>top.nextdoc4j</groupId>
+    <artifactId>nextdoc4j-plugin-security-schemes</artifactId>
+    <version>1.5.0</version>
 </dependency>
 ```
 
-建议通过 `nextdoc4j-bom` 管理版本。
+已使用 `nextdoc4j-bom` 时省略版本。配置一套默认 Bearer 方案：
 
-## 路径排除
+```yaml title="application.yml"
+nextdoc4j:
+  enabled: true
+  plugin:
+    security:
+      enabled: true
 
-公开接口可以实现 `NextDoc4jPathExcluder`，避免在线调试自动挂载认证：
+springdoc:
+  components:
+    security-schemes:
+      BearerAuth:
+        type: HTTP
+        scheme: bearer
+        bearer-format: JWT
+        description: 输入业务访问 Token
+```
 
-```java
+`nextdoc4j.plugin.security.enabled` 必须显式为 `true`，未配置时不装配本插件；它也用于 Sa-Token 文档适配，与 `nextdoc4j.auth.enabled` 的文档密码开关不同。
+
+`BearerAuth` 是方案标识，接口 `security` 引用这个名称；真正注入的 Header 是 `Authorization`，并不由这个标识的名字决定。
+
+## 基础功能：默认方案如何进入接口
+
+插件读取 `springdoc.components` 后会：
+
+1. 将配置的方案写入 `components.securitySchemes`，保留 Components 中其他类别的数据。
+2. 在文档根级追加一组默认认证要求。
+3. 遍历未排除的接口，为其追加包含这些方案名的操作级认证要求。
+4. 同一接口已有完全相同的方案名集合时，不再重复追加那一组。
+
+<Callout title="方案列表与默认要求" type="info">
+该配置会设置文档的 SecuritySchemes 字典，而不是自动合并每个来源的同名方案。已有 Java OpenAPI Bean 或其他定制器时，应统一方案定义来源，并检查最终 JSON。
+</Callout>
+
+### 多个方案的 AND / OR 关系
+
+在 YAML 中定义多个方案时，插件把它们放进**同一个 SecurityRequirement 对象**，含义是 AND：
+
+```json title="同一组内同时要求两种凭据"
+{
+  "security": [
+    { "BearerAuth": [], "TenantKey": [] }
+  ]
+}
+```
+
+两者任选其一则应是两个独立对象：
+
+```json title="两组之间为替代关系"
+{
+  "security": [
+    { "BearerAuth": [] },
+    { "TenantKey": [] }
+  ]
+}
+```
+
+不同接口采用不同方案、需要 OR 关系或更复杂策略时，使用下文的[按接口声明](#自定义功能按接口声明方案)，不要把默认方案配置当成自动选择任意一种凭据的开关。
+
+## 常用方案配置
+
+以下内容是 `springdoc.components.security-schemes` 下的方案定义，按需要选择：
+
+<Tabs items={['API Key', 'Basic', 'OAuth2']}>
+  <Tab value="API Key">
+
+```yaml
+springdoc:
+  components:
+    security-schemes:
+      TenantKey:
+        type: APIKEY
+        in: HEADER
+        name: X-API-Key
+        description: 接口访问密钥
+```
+
+`in` 可以是 `HEADER`、`QUERY` 或 `COOKIE`，`name` 是真正发送的字段名。Cookie 的可发送范围还受浏览器和宿主凭据策略约束。
+
+  </Tab>
+  <Tab value="Basic">
+
+```yaml
+springdoc:
+  components:
+    security-schemes:
+      BasicAuth:
+        type: HTTP
+        scheme: basic
+        description: 输入用户名与密码
+```
+
+工作台可把 `用户名:密码` 编码为 Basic 凭据，或使用已有的 `Basic ` 认证值。这里是业务接口的 Basic，与文档入口的密码校验分别配置。
+
+  </Tab>
+  <Tab value="OAuth2">
+
+```yaml
+springdoc:
+  components:
+    security-schemes:
+      OAuthLogin:
+        type: OAUTH2
+        flows:
+          authorization-code:
+            authorization-url: https://auth.example.com/authorize
+            token-url: https://auth.example.com/token
+            scopes:
+              read: 读取接口
+```
+
+该声明描述 OAuth2 规范。当前工作台支持填写已有访问 Token 并按 Bearer 构造凭据，不提供完整 OAuth 授权跳转、回调和 Token 刷新客户端流程。
+
+  </Tab>
+</Tabs>
+
+## 自定义功能：排除公开路径
+
+实现 `NextDoc4jPathExcluder` 并注册为 Bean：
+
+```java title="PublicApiPathExcluder.java"
+import java.util.Set;
+import org.springframework.stereotype.Component;
+import top.nextdoc4j.security.core.enhancer.NextDoc4jPathExcluder;
+
 @Component
-public class CustomPathExcluder implements NextDoc4jPathExcluder {
+public class PublicApiPathExcluder implements NextDoc4jPathExcluder {
     @Override
     public Set<String> getExcludedPaths() {
-        return Set.of("/actuator/**", "/public/**", "/api/auth/login");
+        return Set.of("/api/auth/login", "/api/public/**");
     }
 
     @Override
     public int getOrder() {
-        return 200;
+        return 50;
     }
 }
 ```
+
+路径与 **OpenAPI `paths` 中的键**匹配，支持 Ant 风格模式；通常不包含域名、文档 `/doc.html` 地址或额外的反向代理前缀。多个排除器按 `getOrder()` 排序后，路径集合会合并，不是只使用第一个。
+
+### 排除具体改变了什么
+
+| 情况 | 当前插件行为 |
+| --- | --- |
+| 路径命中排除器 | 跳过该路径下操作的自动追加 |
+| 接口已经手写了 `security` | 排除器不会主动删除它 |
+| 文档根级已有默认 `security` | 排除器不会清除根级要求 |
+| 同一路径包含多个 HTTP 方法 | 路径排除会作用于整条 Path 下的操作 |
+
+因此它适合控制“哪些接口不追加这套默认认证”。需要向其他 OpenAPI 工具明确表达匿名时，还要检查最终操作是否输出 `security: []`，并避免之后的自动追加逻辑再次填入要求。
+
+仅在接口声明一个空 `security`，但没有排除该路径，也不能阻止此插件继续追加默认方案。工作台当前调试读取操作级要求，标准 OpenAPI 的根级继承语义也应在交付规范时一并核对。
+
+## 自定义功能：按接口声明方案
+
+需要不同接口使用不同凭据时，可用标准 OpenAPI Bean 定义方案，再在接口上声明。**这一模式不要同时配置上文那份 YAML 默认方案列表**，以免再被插件统一追加。
+
+```java title="ApiSecurityConfiguration.java"
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class ApiSecurityConfiguration {
+    @Bean
+    public OpenAPI applicationOpenApi() {
+        Components components = new Components()
+            .addSecuritySchemes("BearerAuth", new SecurityScheme()
+                .type(SecurityScheme.Type.HTTP).scheme("bearer"))
+            .addSecuritySchemes("TenantKey", new SecurityScheme()
+                .type(SecurityScheme.Type.APIKEY)
+                .in(SecurityScheme.In.HEADER).name("X-API-Key"));
+        return new OpenAPI().components(components);
+    }
+}
+```
+
+已有 OpenAPI Bean 时，把方案合入现有 Bean，不需要另建相互竞争的配置。接口按标准注解引用：
+
+```java title="ProtectedApiController.java"
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class ProtectedApiController {
+    @GetMapping("/api/orders")
+    @Operation(summary = "查询订单", security = {
+        @SecurityRequirement(name = "BearerAuth"),
+        @SecurityRequirement(name = "TenantKey")
+    })
+    public String orders() {
+        return "ok";
+    }
+}
+```
+
+上述两个声明形成替代关系。Java 方案和注解本身属于 SpringDoc / OpenAPI 能力；当 YAML `springdoc.components` 没有提供默认方案时，此插件不会替你再补一套默认安全要求。
+
+如果同时需要自定义权限元数据，可以保留 `plugin.security.enabled=true` 和本插件的解析器桥接能力，详见 [Sa-Token 与自定义权限解析](/guide/plugin/satoken#自定义功能接入其他权限注解)。
+
+## 工作台如何使用这些数据
+
+“文档管理 → 全局认证”列出方案及其原始声明。保存凭据后，在线调试会结合当前接口操作级要求、已有参数和单次覆盖，构造实际请求。
+
+<ThemedScreenshot light="/images/screenshots/plugins/authentication-light.webp" dark="/images/screenshots/plugins/authentication-dark.webp" alt="后端 SecuritySchemes 在工作台中生成认证方案与凭据配置界面" width={1100} height={450} />
+
+| 后端声明 | 前端行为 |
+| --- | --- |
+| HTTP Bearer / OAuth2 / OpenID Connect | 可用 Token 按 Bearer 写入 Authorization |
+| HTTP Basic | 准备 Basic Authorization |
+| API Key | 按声明的位置与字段名注入 |
+| 多组 security | 优先寻找凭据完整的替代组，按选中要求构造认证参数 |
+| 已存在同名参数或本次禁用 | 结合调试参数覆盖规则决定最终值 |
+
+配置方案并不替服务端验证凭据；实际发送结果见调试区“实际请求”。完整交互见[认证、权限与公共参数](/guide/ui/security-permissions)。
+
+## 按数据链路排查
+
+1. 检查当前 `/v3/api-docs` 的 `components.securitySchemes`，确认方案名、类型、位置和实际字段名。
+2. 检查目标 `paths` 下对应方法的 `security`，确认它引用了正确方案。
+3. 若使用排除器，按规范中的 Path 核对匹配结果和已有声明。
+4. 在工作台保存当前服务的凭据，查看参数来源和实际请求。
+5. 最后根据后端的 401 / 403 响应检查真实身份与权限。
+
+| 现象 | 可能原因 |
+| --- | --- |
+| 插件依赖存在但 YAML 未生效 | 缺少显式开关，或配置没有绑定到 `springdoc.components` |
+| 方案列表有内容但某接口没带认证 | 操作级未引用、已排除、被声明匿名或被本次禁用 |
+| 多配置一个方案后变成同时需要两个 | 默认配置生成的是同一组内的 AND |
+| 自定义方案被另一份配置覆盖 | 多个方案定义来源或后续定制器修改了字典 |
+| 排除路径后仍看到认证信息 | 已有操作声明和根级要求没有被排除器删除 |
+| 网关下游仍需单独填写 | 网关方案定义、服务方案和当前浏览器凭据属于不同层次 |
+
+<Cards>
+  <Card title="Sa-Token 权限码插件" href="/guide/plugin/satoken" description="展示权限和角色组合，并接入自定义元数据解析器。" />
+  <Card title="网关聚合插件" href="/guide/plugin/gateway" description="在网关侧合并默认安全方案，按服务配置匿名路径。" />
+</Cards>

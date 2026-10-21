@@ -1,55 +1,79 @@
 ---
-title: 界面功能总览
-description: NextDoc4j 提供高度现代化、开箱即用的前端交互工作台。本篇系统介绍接口多维浏览、在线交互调试、权限可视化与全量导出能力。
+title: 工作台与导航
+description: 从项目概览认识工作台，了解接口分组、多标签页、常用入口与单体和网关模式。
 ---
-NextDoc4j 提供高度现代化、开箱即用的前端交互工作台。本篇系统介绍接口多维浏览、在线交互调试、权限可视化与全量导出能力。
 
-## 前端能力地图
+工作台把接口说明、请求调试、数据模型和文档管理放在同一个入口。可以先在[单体演示](https://single-demo.nextdoc4j.top/)熟悉操作，再到[网关演示](https://gateway-demo.nextdoc4j.top/)体验多服务切换。
 
-| 功能域 | 主要能力 | 入口/位置 |
-| :--- | :--- | :--- |
-| **文档浏览** | 分组导航、**分组概览（1.4.0）**、接口详情工作台、实体模型浏览、TypeScript 实体代码生成 | 首页、分组概览与文档详情页 |
-| **在线调试** | Path / Query / Header / Cookie / Body 五维联动、`Content-Type` 自动补全、文件上传、**SSE 流式事件**、请求缓存 | 接口详情页调试工作台 |
-| **认证与权限** | 全局认证配置中心、接口权限元数据可视化（含 Sa-Token 深度集成） | 全局认证页与文档详情页 |
-| **文档扩展** | 离线 Markdown 文档导航与渲染、架构说明与部署规范挂载 | 左侧菜单 |
-| **网关聚合** | 服务选择器、按微服务维度隔离菜单与接口路由、聚合模式动态路由修正 | 网关模式下首页与文档页 |
-| **全局效率工具** | 全局搜索、公共请求参数管理、专业文档导出（含 `docx` / PDF） | 顶部工具栏与独立导出中心 |
-| **视觉与体验** | 明暗主题沉浸切换、系统主题自动跟随、流式响应式布局 | 全站 |
+<ThemedScreenshot light="/images/screenshots/features/workspace-light.webp" dark="/images/screenshots/features/workspace-dark.webp" alt="单体工作台的项目概览、指标统计与常用入口" />
 
-## 1. 现代化文档浏览
+## 先认识四个区域
 
-![文档首页](/images/screenshots/guide/overview.png)
+| 区域 | 可以做什么 | 使用提示 |
+| --- | --- | --- |
+| 左侧导航 | 在主页、文档管理、接口文档、实体模型和其他文档之间切换 | 点击箭头展开目录，点击条目打开页面；窄屏下通过侧栏开关访问 |
+| 顶部标签栏 | 同时保留多个接口、模型或管理页面 | 标签显示接口方法与名称，方便在相关页面间来回查看 |
+| 右上角工具 | 全局搜索、主题切换、偏好设置 | 搜索适合跨分组定位；偏好设置控制当前浏览器的界面习惯 |
+| 中间工作区 | 项目概览、接口详情或调试面板 | 页面会随当前文档、分组和网关服务变化 |
 
-- 支持按分组、标签和路径多维浏览接口；**1.4.0** 全新推出**接口分组概览**页。
-- 接口详情工作台支持请求参数、响应结构、多状态码示例联动查看。
-- 支持参数视图、模式视图、状态码切换，以及 `oneOf` / `anyOf` 分段选择与请求/响应 TypeScript 实体代码一键生成。
-- 实体模型区域支持结构化浏览与 JSON / XML 示例视图。
+## 项目概览能告诉你什么
 
-## 2. 沉浸式在线调试与 SSE 事件流
+主页读取当前 OpenAPI 的标题、版本、描述、服务地址、联系人与协议。API 服务基址支持点击复制，联系人和项目主页按文档声明展示。
 
-![接口详情工作台](/images/screenshots/guide/detail-workbench.png)
+| 指标 | 含义 |
+| --- | --- |
+| API 端点 | 当前文档中的接口操作数量；同一路径的 GET 与 POST 是不同操作 |
+| 实体数据模型 | 当前文档声明的数据结构与枚举引用 |
+| 分类标签分组 | 接口在文档中的业务分组 |
+| 请求方法分布 | GET、POST、PUT、PATCH、DELETE 等方法的数量和比例 |
+| 安全认证策略 / 微服务集群 | 单体侧重认证声明；聚合场景展示服务数量与可用状态 |
 
-- 支持 Path / Query / Header / Cookie / Body 五类参数联动编辑与校验。
-- 支持请求体 `Content-Type` 切换与**智能自动补全**，轻松适配 `form-data` / `x-www-form-urlencoded` / `json` / `raw` / `binary` 调试场景。
-- 支持文件上传与表单混合参数调试。
-- 支持实时响应、响应头、原请求三类结果页签，以及多内容类型高亮（含 XML 高亮）与 JSON 结构树。
-- **1.4.0** 引入 **SSE 流式事件**实时展示、打字机渲染、耗时监控与手动终止。
-- 支持请求参数持久化缓存，减少重复输入。
+指标会随 Demo 与服务版本变化。它们描述文档结构，不能代替接口运行成功率或服务性能监控。
 
-## 3. 认证授权与网关微服务聚合
+## 按任务找到入口
 
-- **全局认证中心**：自动读取 `securitySchemes` 生成独立配置页，在线调试自动携带认证 Token。
-- **权限元数据可视化**：支持 Sa-Token 注解（`@SaCheckPermission`、`@SaCheckRole`、`@SaIgnore`）解析与徽章展示。
-- **网关微服务聚合**：自动识别微服务网关模式，提供顶部服务选择器，按服务隔离菜单与接口路由。
+<Cards>
+  <Card title="阅读接口与模型" href="/guide/ui/documentation-models" description="查看字段约束、多响应示例、TypeScript 和附加 Markdown。" />
+  <Card title="填写参数与选择枚举" href="/guide/ui/parameters-enums" description="区分文档枚举说明、JSON 值选择和 Query / Form 下拉。" />
+  <Card title="发起在线请求" href="/guide/ui/browse-debug" description="准备 Path、Body、文件和请求头，检查实际发送内容。" />
+  <Card title="分析响应" href="/guide/ui/response-preview" description="阅读 JSON、XML、图片、二进制与 SSE 事件。" />
+  <Card title="配置前后置操作" href="/guide/ui/request-workflows" description="通过辅助请求、变量、转换和校验串联联调步骤。" />
+  <Card title="认证与公共参数" href="/guide/ui/security-permissions" description="保存接口凭据、公共 Header / Query，并查看权限要求。" />
+  <Card title="切换网关服务" href="/guide/ui/gateway-ui" description="查看服务状态、配置作用域以及跨服务搜索和导出。" />
+  <Card title="搜索与导出" href="/guide/ui/search-export" description="定位接口、模型和说明文档，选择范围输出离线资料。" />
+  <Card title="偏好与本地数据" href="/guide/ui/preferences" description="设置内容宽度、菜单展开、标签恢复与调试草稿。" />
+</Cards>
 
-## 相关文档
+## 分组、标签与接口导航
 
-- [快速开始](/guide/start/started)
-- [文档浏览与在线调试](/guide/ui/browse-debug)
-- [认证与权限界面](/guide/ui/security-permissions)
-- [网关聚合界面](/guide/ui/gateway-ui)
-- [全局搜索与导出](/guide/ui/search-export)
-- [网关聚合插件](/guide/plugin/gateway)
-- [认证展示插件](/guide/plugin/authentication)
-- [Sa-Token 权限码插件](/guide/plugin/satoken)
-- [枚举展示插件](/guide/plugin/enum)
+左侧“接口文档”既可以展示全部接口，也可以按 SpringDoc 分组浏览。分组内部再按 Tag 组织接口，HTTP 方法徽标用于区分同名接口。
+
+- **SpringDoc 分组**：决定加载和浏览哪一份接口文档。
+- **Tag 分类**：帮助你在文档内按业务域寻找接口。
+- **分组概览**：启用后，点击分类可先查看该分类下的接口集合，再进入详情。
+- **实体模型**：从数据结构出发查看字段，不需要先找到引用它的某个接口。
+
+菜单展开方式可在偏好设置中选择“自由展开”或“单分组”；分组概览开关位于偏好设置的 Nextdoc4j 页签。
+
+## 用标签页保留工作上下文
+
+打开接口、切换调试、查看模型时，顶部标签栏保留相应页面。支持拖动调整标签顺序，也可以通过标签菜单执行关闭、批量关闭、新窗口打开等操作。
+
+| 操作 | 作用 |
+| --- | --- |
+| 点击标签 | 回到已打开的页面 |
+| 拖动标签 | 将常用接口按工作顺序排列 |
+| 点击关闭 / 鼠标中键 | 关闭标签；中键行为可以在偏好设置中关闭 |
+| 标签上下文菜单 | 管理当前与其他标签，或在新窗口中打开 |
+| 恢复上次标签页 | 刷新后恢复工作区；由偏好设置控制 |
+
+接口详情和在线调试都有可分享的 Hash 地址。网关地址还包含服务标识，分享时复制完整浏览器 URL，接收者仍需具有相应文档和接口访问权限。
+
+## 推荐的第一次体验
+
+1. 从主页进入“接口文档”，打开用户管理中的“根据 ID 查询用户”。
+2. 阅读参数与响应结构，再点击“在线调试”，填写 `id=1` 发起查询。
+3. 查看“实时响应”“头信息”“实际请求”，对照接口说明理解真实请求。
+4. 打开“更新用户”体验 JSON 枚举选择，最后到“文档下载”选择导出范围。
+
+需要先接入自己的服务，见[快速开始](/guide/start/started)；需要改变后端行为，见[配置说明](/guide/config/basicconfiguration)。

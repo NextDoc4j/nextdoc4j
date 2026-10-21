@@ -15,18 +15,23 @@ export function DocumentationImage({ src, ...props }: DocumentationImageProps) {
 }
 
 /** Uses the site's selected theme, including a manual override of the system theme. */
-export function ThemedScreenshot({ light, dark, alt }: {
+export function ThemedScreenshot({ light, dark, alt, width = 1440, height = 960 }: {
   light: string;
   dark: string;
   alt: string;
+  width?: number;
+  height?: number;
 }) {
   return (
-    <figure className="nd-doc-image nd-doc-image--wide not-prose">
+    <figure
+      className="nd-doc-image nd-doc-image--wide not-prose"
+      style={{ maxWidth: width, marginInline: 'auto' }}
+    >
       <div className="dark:hidden">
-        <ImageZoom src={light} alt={alt} width={1440} height={960} loading="lazy" />
+        <ImageZoom src={light} alt={alt} width={width} height={height} loading="lazy" />
       </div>
       <div className="hidden dark:block">
-        <ImageZoom src={dark} alt={alt} width={1440} height={960} loading="lazy" />
+        <ImageZoom src={dark} alt={alt} width={width} height={height} loading="lazy" />
       </div>
     </figure>
   );
