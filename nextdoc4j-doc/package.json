@@ -8,6 +8,7 @@
     "start": "serve out",
     "preview": "serve out",
     "type-check": "next typegen && tsc --noEmit",
+    "changelog:sync": "node scripts/changelog/sync-changelog.mjs",
     "team:update": "tsx scripts/team/build-team-cache.ts",
     "team:force-update": "tsx scripts/team/build-team-cache.ts --force",
     "team:status": "tsx scripts/team/build-team-cache.ts --status"

@@ -32,6 +32,11 @@ interface PaymentMethods {
     wechat?: string
 }
 
+interface CommunityConfig {
+    wechatQr: string
+    remark: string
+}
+
 interface SponsorConfig {
     enabled: boolean
     payments?: PaymentMethods
@@ -48,6 +53,7 @@ interface SponsorConfig {
 interface TeamConfiguration {
     teams: Team[]
     project: ProjectConfig
+    community: CommunityConfig
     sponsor: SponsorConfig
 }
 
@@ -89,12 +95,18 @@ const teamConfig: TeamConfiguration = {
         gitcodeOrgHome: 'https://gitcode.com/NextDoc4j'
     },
 
+    // 添加维护者后邀请入群，不使用有时效的群二维码。
+    community: {
+        wechatQr: '/images/community/maintainer-wechat.png',
+        remark: 'nextdoc4j'
+    },
+
     // 赞助配置
     sponsor: {
         enabled: true,
         payments: {
-            alipay: '/images/paymentcode/alipay-qr.jpg',
-            wechat: '/images/paymentcode/wechat-qr.jpg'
+            alipay: '/images/community/sponsor-alipay.png',
+            wechat: '/images/community/sponsor-wechat.png'
         }
     }
 }
@@ -108,6 +120,7 @@ export type {
     Team,
     ProjectConfig,
     PaymentMethods,
+    CommunityConfig,
     SponsorConfig,
     TeamConfiguration
 }

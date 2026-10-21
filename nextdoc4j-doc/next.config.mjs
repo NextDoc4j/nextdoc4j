@@ -1,6 +1,6 @@
 import { createMDX } from 'fumadocs-mdx/next';
-
-const withMDX = createMDX();
+import { PHASE_DEVELOPMENT_SERVER } from 'next/constants.js';
+import { syncChangelog, watchChangelog } from './scripts/changelog/sync-changelog.mjs';
 
 /** @type {import('next').NextConfig} */
 const config = {
@@ -12,4 +12,9 @@ const config = {
   },
 };
 
-export default withMDX(config);
+export default function nextConfig(phase) {
+  // Generate the page before Fumadocs discovers and compiles the MDX collection.
+  syncChangelog();
+  if (phase === PHASE_DEVELOPMENT_SERVER) watchChangelog();
+  return createMDX()(config);
+}

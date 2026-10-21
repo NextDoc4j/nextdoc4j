@@ -1,33 +1,237 @@
 ---
 title: 贡献指南
-description: 参与 NextDoc4j 的 Issue 排查、新特性开发、文档编写和测试验证。
+description: 从反馈问题、改进文档到提交代码，了解 NextDoc4j 的模块分工、分支约定、验证要求与 PR 流程。
 ---
 
-欢迎通过代码、文档、测试和问题反馈参与 NextDoc4j。
+import { BookOpenText, Bug, GitPullRequest, Lightbulb } from 'lucide-react';
+
+补充复现步骤、修正文档、完善 Demo 和测试，以及改进代码，都是参与 NextDoc4j 的方式。本页根据仓库的 [CONTRIBUTING.md](https://github.com/NextDoc4j/nextdoc4j/blob/master/CONTRIBUTING.md)、Issue / PR 模板和各模块 README 整理。
+
+<Cards>
+  <Card icon={<Bug />} title="反馈问题" href="https://github.com/NextDoc4j/nextdoc4j/issues/new?template=bug-report.yml" description="提交版本、复现步骤、实际结果和定位材料。" />
+  <Card icon={<Lightbulb />} title="提出建议" href="https://github.com/NextDoc4j/nextdoc4j/issues/new?template=feature-request.yml" description="说明使用场景、当前障碍与希望得到的行为。" />
+  <Card icon={<BookOpenText />} title="完善文档与示例" href="#文档与资源同步" description="修正说明、补齐示例，帮助其他人完成接入。" />
+  <Card icon={<GitPullRequest />} title="提交代码" href="#代码修改流程" description="找到模块，从短期分支开始完成一次 PR。" />
+</Cards>
+
+## 反馈问题与建议
+
+提交前先搜索已有 Issue；接入与使用问题也可以先查看[常见问题](/more/faq)。新的反馈使用对应模板，便于区分缺陷和功能需求。
+
+| 类型 | 建议提供的信息 |
+| --- | --- |
+| Bug | 受影响模块、NextDoc4j 版本、运行环境、最小复现步骤、预期与实际行为 |
+| 文档 / 展示异常 | 脱敏后的 OpenAPI 片段、相关 Controller / DTO、浏览器与后端错误信息 |
+| 网关问题 | MVC / WebFlux、服务与分组、路由规则、文档 URL 和最终调试 URL |
+| 功能建议 | 真实使用场景、当前限制、期望行为、尝试过的替代方案，以及兼容性和配置影响 |
+
+能提供最小复现项目时，附上仓库、分支或代码片段。不要把密码、Token、Cookie 和业务敏感数据放进公开材料；安全漏洞按[私下报告流程](#安全与社区规范)处理。
 
 ## 代码托管平台
 
-- [Gitee 主仓库](https://gitee.com/nextdoc4j/nextdoc4j)
-- [GitHub 同步仓库](https://github.com/NextDoc4j/nextdoc4j)
-- [GitCode 同步入口](https://gitcode.com/NextDoc4j)
+| 平台 | 仓库入口 |
+| --- | --- |
+| Gitee 主仓库 | [nextdoc4j/nextdoc4j](https://gitee.com/nextdoc4j/nextdoc4j) |
+| GitHub 同步仓库 | [NextDoc4j/nextdoc4j](https://github.com/NextDoc4j/nextdoc4j) |
+| GitCode 同步仓库 | [NextDoc4j/nextdoc4j](https://gitcode.com/NextDoc4j/nextdoc4j) |
+
+本页的 Issue 模板、PR 模板和源码链接使用 GitHub 地址。使用其他平台协作时，同样遵循仓库的贡献约定。
+
+## 找到要修改的模块
+
+仓库采用 Monorepo，产品 UI 与官网分别开发、构建。
+
+| 目录 | 适合放入的改动 | 阅读入口 |
+| --- | --- | --- |
+| `nextdoc4j/` | 核心模型、过滤器、Starter、插件、Jackson 适配与 BOM | [后端 README](https://github.com/NextDoc4j/nextdoc4j/blob/master/nextdoc4j/README.md) |
+| `nextdoc4j-ui/` | React + Vite 产品工作台、文档阅读、调试与导出 | [前端 README](https://github.com/NextDoc4j/nextdoc4j/blob/master/nextdoc4j-ui/README.md) |
+| `nextdoc4j-doc/` | Next.js + Fumadocs 官网、MDX 页面与文档截图 | [官网 README](https://github.com/NextDoc4j/nextdoc4j/blob/master/nextdoc4j-doc/README.md) |
+| `nextdoc4j-demo/` | Boot 3 / 4、MVC / WebFlux、单体与网关示例 | [Demo README](https://github.com/NextDoc4j/nextdoc4j/blob/master/nextdoc4j-demo/README.md) |
+| `nextdoc4j-tests/` | Java 产品模块的单元测试与跨模块验证 | [集中测试 README](https://github.com/NextDoc4j/nextdoc4j/blob/master/nextdoc4j-tests/README.md) |
+| `release/` | UI 构建同步、开发联调、打包预览与发布工具 | [脚本 README](https://github.com/NextDoc4j/nextdoc4j/blob/master/release/README.md) |
+
+后端保持 `core`、`common`、插件 / 适配器到 Starter 的职责划分，避免把 Spring Boot 或第三方实现依赖带入 `core`。前端页面功能优先放入对应的 `src/features`，通用组件放入 `src/components`。
+
+Java 测试统一放在 `nextdoc4j-tests/src/test/java`，包名与被测功能对应；产品 UI 测试放在 `nextdoc4j-ui/tests`。新增测试优先覆盖边界、兼容性分支和异常路径，使用确定性的输入，避免依赖个人机器文件或运行中的服务。
+
+## 代码修改流程
+
+1. **确定目标**：搜索已有讨论，说明要修复的场景；涉及较大功能或兼容性变化时，建议先提交 Issue 讨论范围。
+2. **获取代码**：没有仓库写入权限时，可以先 Fork，再从最新 `master` 创建短期分支。
+3. **完成修改**：一个 PR 保持一个清晰目标，同时更新相关示例、测试或文档。
+4. **验证并提交**：按改动范围执行检查，阅读差异后推送到自己的贡献分支。
+5. **发起 PR**：目标选择 `master`，按模板填写说明，并根据评审反馈补充修改；合并后删除短期分支。
+
+下面以 GitHub Fork 为例，先把 `YOUR_NAME` 替换为你的账号：
+
+```bash title="首次获取代码并创建文档分支"
+git clone https://github.com/YOUR_NAME/nextdoc4j.git
+cd nextdoc4j
+git remote add upstream https://github.com/NextDoc4j/nextdoc4j.git
+git fetch upstream
+git switch -c docs/improve-contributing upstream/master
+```
+
+已有本地仓库时，复用现有 remote 配置，不需要重复添加 `upstream`。
 
 ## 分支模型
 
-长期主线为 `master`，短期分支完成验证后提交 PR：
+`master` 是唯一长期维护分支，应保持可构建、可测试。日常修改使用短期分支，完成后向 `master` 提交 PR，不直接向主线推送，也不需要长期 `dev` 分支。
 
 | 分支 | 用途 |
 | --- | --- |
 | `feat/<name>` | 新功能 |
 | `fix/<name>` | 缺陷修复 |
-| `docs/<name>` | 文档和官网 |
+| `docs/<name>` | 文档修改 |
 | `demo/<name>` | 集成示例 |
+| `chore/<name>` | 工程维护 |
+
+## 本地环境与启动
+
+| 工具 | 环境要求 |
+| --- | --- |
+| Java | JDK 17+ |
+| Maven | 3.9+，可访问项目依赖仓库 |
+| Node.js | 20.10+ |
+| pnpm | 9.12+；产品 UI 与 release 工具声明使用 `pnpm@10.12.4` |
+
+**以下命令均从仓库根目录执行。** 首次修改产品 UI 或官网时，在对应目录安装依赖；两者不共享一个安装入口。
+
+<Tabs items={['官网文档', '产品 UI', '后端与 Demo']}>
+  <Tab value="官网文档">
+
+```bash title="安装依赖并启动官网"
+pnpm --dir nextdoc4j-doc install
+pnpm --dir nextdoc4j-doc dev
+```
+
+默认地址为 `http://localhost:3000`。MDX 正文位于 `content/docs`，菜单顺序由各目录 `meta.json` 配置。
+
+  </Tab>
+  <Tab value="产品 UI">
+
+```bash title="安装依赖并启动单体联调"
+pnpm --dir nextdoc4j-ui install
+pnpm --dir release run test-dev-single
+```
+
+联调脚本启动 Vite，默认端口 `5777`，并复用已有后端或构建、启动所选 Demo。只运行 `pnpm --dir nextdoc4j-ui dev` 时，请核对开发环境的后端代理配置。
+
+  </Tab>
+  <Tab value="后端与 Demo">
+
+```bash title="验证聚合工程"
+mvn test
+```
+
+后端产品位于 `nextdoc4j/`，Demo 启动模块位于 `nextdoc4j-demo/`。在 IDE 中选择对应 Boot 版本和 Web 栈运行；网关 Demo 还需要按场景准备 Nacos 等依赖。
+
+  </Tab>
+</Tabs>
+
+需要网关联调或切换 Profile 时：
+
+```bash title="按场景选择联调入口"
+pnpm --dir release run test-dev-gateway
+pnpm --dir release run test-dev -- --profile=sb4-single-webflux
+pnpm --dir release run test-dev -- --profile=sb4-gateway-webmvc --services=user,system
+```
+
+完整场景、端口与本机配置见[开发指南](/development#启动与前后端联调)和 [release README](https://github.com/NextDoc4j/nextdoc4j/blob/master/release/README.md)。
 
 ## 提交前检查
 
+按涉及的模块完成对应检查；跨模块改动需要覆盖相关范围。PR 中填写**实际执行的命令和结果**，未执行的验证说明原因，不勾选没有运行过的项目。
+
+| 改动范围 | 验证入口 | 关注内容 |
+| --- | --- | --- |
+| 后端、集中测试、Demo | `mvn test` | 根目录聚合验证 |
+| 产品 UI | `pnpm --dir nextdoc4j-ui check` | TypeScript、ESLint、Vitest、Prettier |
+| 官网 | `pnpm --dir nextdoc4j-doc type-check` 与 `pnpm --dir nextdoc4j-doc build` | 类型、MDX 编译与静态导出 |
+| UI 资源随后端打包 | `pnpm --dir release run build-ui` 与 `pnpm --dir release run test-preview` | 资源同步、页面、OpenAPI 和静态资源访问 |
+
+格式遵循仓库的 [`.editorconfig`](https://github.com/NextDoc4j/nextdoc4j/blob/master/.editorconfig)：UTF-8、LF、文件末尾保留换行；Java / XML / Properties / YAML 使用 4 空格，JS / TS / CSS / JSON 等使用 2 空格。产品 UI 继续使用现有 ESLint 与 Prettier 配置，保留已有许可证头，避免夹带无关文件的格式化。
+
+提交前可以先查看差异：
+
 ```bash
-mvn test
-(cd nextdoc4j-ui && pnpm check)
-(cd nextdoc4j-doc && pnpm type-check && pnpm build)
+git status --short
+git diff --check
+git diff
 ```
 
-提交内容请遵循 Angular Commit 规范，并同步更新相关文档和变更日志。
+## 文档与资源同步
+
+### 官网文档与截图
+
+页面放在 `nextdoc4j-doc/content/docs`，图片放在 `public/images`，正文使用 `/images/...` 地址。更改页面路径或菜单后，同步检查站内链接与导航。
+
+功能截图应反映当前界面；涉及深浅模式时，准备两套图片，并使用现有 `ThemedScreenshot` 组件切换。局部截图可以设置实际宽高，避免不合比例地拉伸。
+
+更新日志统一维护根目录 **`CHANGELOG.md`**。官网在开发和构建时自动同步到 `content/docs/more/changelog.mdx`，请修改源日志；需要手动同步时执行 `pnpm --dir nextdoc4j-doc changelog:sync`。
+
+### 产品 UI 构建资源
+
+当 PR 包含需要随后端发布的 UI 资源时，使用标准构建同步入口：
+
+```bash
+pnpm --dir release run build-ui
+```
+
+产物同步到 **`nextdoc4j/nextdoc4j-ui/src/main/resources`**，需要提交的资源变更应随源码一起进入 PR。这里是后端制品的发布输入；React 源码仍在根目录的 `nextdoc4j-ui/`，不在资源目录中开发。
+
+涉及 API、配置或 Maven 坐标变化时，同步对应模块 README 或官网文档，并说明兼容性与迁移方式。不要提交 `node_modules`、`dist`、`target`、日志、个人 `.env` 或 IDE 配置。
+
+## 提交信息
+
+沿用当前仓库的 `type(scope): 简短说明` 风格。类型描述改动目的，scope 标明模块或功能，例如 `docs`、`ui`、`gateway`。
+
+| 类型 | 适用改动 |
+| --- | --- |
+| `feat` | 新功能 |
+| `fix` | 缺陷修复 |
+| `docs` | 文档、README 或说明示例 |
+| `refactor` | 保持对外行为的内部重构 |
+| `test` | 测试与覆盖补充 |
+| `build` | 构建、依赖或打包流程 |
+| `chore` | 工程维护 |
+
+```text title="提交信息示例"
+docs(contribute): 完善贡献流程与提交约定
+
+- 补充模块职责和本地开发入口
+- 明确验证、资源同步与 PR 说明要求
+```
+
+标题说明最终变化；较复杂的提交可以在空行后补充原因和要点。一个提交保持清晰目的，避免把无关修改合在一起。
+
+## 提交 Pull Request
+
+使用仓库的 [PR 模板](https://github.com/NextDoc4j/nextdoc4j/blob/master/.github/pull_request_template.md)，目标分支选择 `master`。
+
+| 项目 | 需要说明的内容 |
+| --- | --- |
+| 变更说明 | 具体问题、触发场景，以及合并后的最终行为 |
+| 类型与模块 | 标明功能 / 修复 / 文档等类型和涉及目录 |
+| 关联 Issue | 使用 `Closes #123`、`Fixes #123` 或 `Related to #123`；没有则填写“无” |
+| 验证情况 | 执行的命令、结果及未执行项的原因 |
+| 文档与兼容性 | README / 官网更新、资源同步，以及 API、配置、Maven 坐标或运行时影响 |
+| UI 变化 | 附截图或录屏；涉及主题时建议同时展示深浅模式 |
+| 破坏性变更 | 说明影响与迁移方式；没有则填写“无” |
+
+提交前确认 PR 只有一个清晰目标，差异中没有无关生成文件、个人配置或敏感信息。需要随制品发布的 UI 资源，按前面的同步规则处理。
+
+## 安全与社区规范
+
+<Callout title="安全漏洞请私下报告" type="warn">
+按 [SECURITY.md](https://github.com/NextDoc4j/nextdoc4j/blob/master/SECURITY.md) 发送邮件至 [nextdoc4j@163.com](mailto:nextdoc4j@163.com)，不要在公开 Issue、PR 或讨论区披露未修复漏洞的利用样例、凭据或完整攻击步骤。
+</Callout>
+
+安全邮件标题使用 `[Security] NextDoc4j 安全问题：简短描述`，尽量提供受影响版本、模块、影响与复现条件、最小复现，以及可行的修复建议。维护者确认后会协商修复、验证和披露时间。
+
+社区讨论遵循 [CODE_OF_CONDUCT.md](https://github.com/NextDoc4j/nextdoc4j/blob/master/CODE_OF_CONDUCT.md)：尊重不同经验和观点，讨论问题与代码，基于事实提供反馈，不公开他人隐私或凭据。违反社区规范的情况，也可通过上述邮箱提供链接、时间和上下文。
+
+<Cards>
+  <Card title="完整贡献规范" href="https://github.com/NextDoc4j/nextdoc4j/blob/master/CONTRIBUTING.md" description="查看与仓库共同维护的协作约定。" />
+  <Card title="开发指南" href="/development#参与开发" description="进一步了解架构、Demo 场景、联调与构建。" />
+</Cards>

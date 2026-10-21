@@ -1,52 +1,358 @@
 ---
-title: 常见问题 FAQ
-description: NextDoc4j 接入、兼容性和参数展示问题的排查指南。
+title: 常见问题
+description: 从启动异常、参数展示到登录调试与网关聚合，按现象找到原因、排查步骤和修复方法。
 ---
 
-先确认宿主项目满足 JDK 17、Spring Boot 3.4.0+ 或 4.x，以及匹配的 SpringDoc 版本。
+import { Accordion } from 'fumadocs-ui/components/accordion';
+import { FaqAccordions as Accordions } from '@/components/faq-accordions';
+import { BookOpenText, KeyRound, Network, PackageCheck } from 'lucide-react';
 
-## Spring Boot 版本兼容
+这里整理开发和接入过程中遇到的问题。先找到与你相同的现象，展开查看处理方法；配置细节和完整示例可从每项末尾继续阅读。
 
-如果启动时报 `LiteWebJarsResourceResolver` 找不到：
+<Cards>
+  <Card icon={<PackageCheck />} title="接入与启动" href="#接入与启动" description="版本不兼容、入口 404、多个 HandlerMapping。" />
+  <Card icon={<BookOpenText />} title="文档与参数" href="#文档与参数" description="对象未展开、arg0、枚举候选值与类型转换。" />
+  <Card icon={<KeyRound />} title="登录与在线调试" href="#登录与在线调试" description="登录页、401 / 403、跨域与请求格式。" />
+  <Card icon={<Network />} title="网关与文档更新" href="#网关与文档更新" description="服务缺失、前缀错误、多分组与旧数据。" />
+</Cards>
 
-- Spring Boot 低于 3.4.0，缺少该资源解析器。
-- Boot 3 建议使用 3.5.x，Boot 4 使用对应的 4.x 版本。
-- SpringDoc 2.8.x 适配 Boot 3，SpringDoc 3.x 适配 Boot 4。
+<Callout title="先确认问题发生在哪一层" type="info">
+启动失败先看后端异常；页面打不开先看文档入口；页面已打开但没有接口，检查 OpenAPI 请求；只有在线调试失败，再检查业务请求。浏览器 Network 中的**实际 URL、状态码、Content-Type 和响应正文**通常能帮助缩小范围。
+</Callout>
 
-## 实体参数没有展开
+## 接入与启动
 
-SpringDoc 默认可能只显示 DTO 类型名称。可以开启对象参数平铺：
+<Accordions defaultValue={['entry-not-found']}>
+  <Accordion id="spring-boot-版本兼容" value="version-compatibility" title="启动报 LiteWebJarsResourceResolver 找不到，或出现 NoSuchMethodError？">
+
+**先检查 Spring Boot、Spring Framework 与 SpringDoc 的版本组合。** `LiteWebJarsResourceResolver` 属于 Spring Framework 6.2；使用较新 SpringDoc、但宿主仍加载旧版 Spring Web 时，可能出现该类缺失。Boot 低于 3.4 的项目尤其需要检查。
+
+当前仓库 Demo 使用以下组合，便于对照；这不是全部兼容版本的清单：
+
+| 宿主 | Demo 的 Spring Boot | Demo 的 SpringDoc |
+| --- | --- | --- |
+| Spring Boot 3 | `3.5.16` | `2.9.1`（2.x） |
+| Spring Boot 4 | `4.1.1` | `3.1.1`（3.x） |
+
+1. 确认实际运行的 JDK 为 17+，并查看宿主生效的 Boot 版本。
+2. Boot 3 使用兼容的 SpringDoc 2.x，Boot 4 使用 SpringDoc 3.x；同一工程内不要混用两个主版本。
+3. 检查传递依赖，排除旧 SpringDoc、旧 Swagger Starter 或手动锁定的 Spring Framework 版本。
+
+```bash title="查看实际解析的依赖版本"
+mvn dependency:tree '-Dincludes=org.springframework.boot:*,org.springframework:*,org.springdoc:*,top.nextdoc4j:*'
+```
+
+`NoSuchMethodError` 也常见于依赖冲突，应以异常中的类和方法归属定位，不要只补一个缺失的 JAR。NextDoc4j BOM 只对齐自身模块，Boot / SpringDoc 仍由宿主管理。
+
+继续阅读：[快速开始与 BOM 示例](/guide/start/started)。
+
+  </Accordion>
+  <Accordion id="文档页面无法访问" value="entry-not-found" title="引入依赖后，访问 /doc.html 仍然返回 404？">
+
+**依次检查功能开关、实际入口和 SpringDoc UI 依赖。** NextDoc4j 默认不开放文档。
+
+```yaml title="application.yml · 本地接入"
+nextdoc4j:
+  enabled: true
+  production: false
+```
+
+1. 检查当前生效的 Profile、环境变量和配置中心，确认最终值为 `enabled=true`、`production=false`。`production=true` 会主动返回 404，开启密码认证也不会改变这一点。
+2. 默认入口是 `/doc.html`。配置 `doc-path: /docs` 后改用 `/docs`，旧 `/doc.html` 会失效；`doc-path` 使用单段路径。
+3. 有应用上下文时带上前缀。例如 `context-path=/order`、`doc-path=/docs` 对应 `/order/docs`。
+4. 宿主需要自行引入对应 Web 栈的 SpringDoc UI Starter。NextDoc4j Starter 中该依赖是 optional，不会自动传递给你的项目。
+
+| Web 栈 | 需要的 SpringDoc 依赖 |
+| --- | --- |
+| WebMVC | `springdoc-openapi-starter-webmvc-ui` |
+| WebFlux | `springdoc-openapi-starter-webflux-ui` |
+
+如果直连宿主可以打开、经过代理却是 404，再检查反向代理是否转发了入口和 `/nextdoc/**` 资源，而不只是业务接口。
+
+继续阅读：[基础配置](/guide/config/basicconfiguration) · [接入依赖](/guide/start/started)。
+
+  </Accordion>
+  <Accordion id="多个-handlermapping" value="multiple-handler-mappings" title="接入 Actuator 后报 NoUniqueBeanDefinitionException？">
+
+出现 `NoUniqueBeanDefinitionException` 时，先看异常是否指向多个 `RequestMappingHandlerMapping`。业务映射、Actuator 或自定义映射可以同时存在，旧版本在只按类型获取单个 Bean 时可能发生冲突。
+
+该问题已在 **v1.4.1** 修复，当前 Sa-Token 路径排除实现会遍历提供器中的多个映射器。
+
+1. 使用包含修复的版本，并通过 `nextdoc4j-bom` 对齐 Starter 与插件，避免只升级了部分模块。
+2. 如果仍然报错，根据异常堆栈确认是否来自其他依赖或项目自己的单 Bean 注入。
+3. 使用依赖树确认运行时没有旧版 NextDoc4j 模块残留。
+
+继续阅读：[更新日志](/more/changelog) · [Sa-Token 插件](/guide/plugin/satoken)。
+
+  </Accordion>
+</Accordions>
+
+## 文档与参数
+
+<Accordions defaultValue={['flat-parameter-object']}>
+  <Accordion id="实体参数没有展开" value="flat-parameter-object" title="GET / Query 的实体参数只显示类型名，没有展开字段？">
+
+**先区分查询参数对象和 JSON 请求体。** 查询 DTO 需要由 SpringDoc 展开成独立参数；这和展开 `@RequestBody` 的 JSON 结构是两种处理。
+
+可以启用全局参数对象平铺：
+
+<Tabs items={['YAML', 'Properties']}>
+  <Tab value="YAML">
 
 ```yaml title="application.yml"
 springdoc:
   default-flat-param-object: true
 ```
 
+  </Tab>
+  <Tab value="Properties">
+
 ```properties title="application.properties"
 springdoc.default-flat-param-object=true
 ```
 
-## 参数名称显示为 arg0
+  </Tab>
+</Tabs>
 
-Java 编译器默认不保留方法形参名，请在 Maven 编译插件中启用 `-parameters`：
+也可以只对目标参数添加 `org.springdoc.core.annotations.ParameterObject` 注解，避免改变其他接口的文档行为：
 
-```xml title="pom.xml"
+```java title="Controller 方法片段"
+@GetMapping("/users")
+public List<UserView> list(@ParameterObject UserQuery query) {
+    return userService.list(query);
+}
+```
+
+调整后检查对应 `/v3/api-docs` 的 `parameters` 是否已生成字段。如果 JSON 请求体缺少字段，则检查 `requestBody`、模型 Schema、可见性与隐藏注解，参数平铺开关不负责修复请求体。
+
+继续阅读：[接口文档与数据模型](/guide/ui/documentation-models)。
+
+  </Accordion>
+  <Accordion id="参数名称显示为-arg0" value="parameter-names" title="参数名称显示为 arg0 / arg1，或提示找不到参数名？">
+
+参数显示为 `arg0` / `arg1` 时，**编译产物可能没有保留方法形参名。** 在 Maven 编译插件中启用 `-parameters`：
+
+```xml title="pom.xml · build/plugins"
 <plugin>
-  <groupId>org.apache.maven.plugins</groupId>
-  <artifactId>maven-compiler-plugin</artifactId>
-  <configuration>
-    <compilerArgument>-parameters</compilerArgument>
-  </configuration>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-compiler-plugin</artifactId>
+    <configuration>
+        <parameters>true</parameters>
+    </configuration>
 </plugin>
 ```
 
-## 文档页面无法访问
+重新编译并启动应用；仅刷新页面不会改变已生成的 class 文件。IDEA 运行时也要确认采用了相同的编译配置。参数声明位于公共模块时，该模块同样需要保留形参名。
 
-- 检查 `nextdoc4j.enabled` 是否为 `true`。
-- 检查访问路径是否包含自定义的 `nextdoc4j.doc-path`。
-- 网关场景检查路由是否把文档入口和 `/v3/api-docs` 转发到正确服务。
-- 生产环境开启 `nextdoc4j.production` 后，文档入口会被隐藏。
+对于具体参数，还可显式声明 HTTP 参数名：
+
+```java title="显式命名示例"
+@RequestParam(name = "keyword") String keyword
+@PathVariable(name = "id") Long id
+```
+
+上面是两种独立的参数声明示例，分别放到对应方法签名中。`@Parameter(description = "关键词")` 用于补充文档描述，不能代替运行时的参数绑定名称。
+
+  </Accordion>
+  <Accordion id="枚举显示与传值" value="enum-values" title="枚举没有下拉或中文含义，选择值后又返回类型转换错误？">
+
+**把文档定义和后端参数转换分开检查。** 下拉候选项来自 Schema 的 `enum`，业务含义来自 `x-nextdoc4j-enum`；仅在描述中写“1 表示启用”不会生成结构化候选项。
+
+| 现象 | 检查与处理 |
+| --- | --- |
+| 没有候选项 | 查看目标字段是否输出 `enum`，确认当前服务、分组和模型分支 |
+| 有值，没有业务含义 | 检查枚举插件依赖、`nextdoc4j.plugin.enum.enabled=true`，以及枚举是否符合内置接口或自定义解析配置 |
+| JSON 中发送 `1` 后转换失败 | 检查 Jackson 的 `@JsonCreator` / `@JsonValue` 或宿主自定义映射 |
+| Query / Path / 表单发送 `1` 失败 | 检查 Spring 的 `Converter<String, 业务枚举>`，JSON 映射不会自动接管这些参数 |
+
+例如界面显示 `1 - 启用`，真实发送值应是 `1`，不是整段标签。默认按枚举常量名绑定的后端可能只接受 `ACTIVE`；文档插件不会自动改变业务绑定规则。
+
+继续阅读：[枚举插件与转换器示例](/guide/plugin/enum) · [三种枚举交互](/guide/ui/parameters-enums)。
+
+  </Accordion>
+</Accordions>
+
+## 登录与在线调试
+
+<Accordions>
+  <Accordion id="文档返回登录页" value="html-instead-of-json" title="页面能打开，但接口列表加载失败，提示 JSON 解析错误？">
+
+在 Network 中打开失败的 OpenAPI 请求，检查响应正文。**HTTP 200 不一定是 OpenAPI JSON，也可能是登录页 HTML。**
+
+| 实际响应 | 排查方向 |
+| --- | --- |
+| HTML 登录页 | 文档认证会话失效、宿主安全框架重定向，或下游文档仍受保护 |
+| JSON 认证成功消息 | 首次 Basic 请求返回认证结果，需要保存 Cookie 后再请求文档 |
+| 404 | 检查实际 OpenAPI 路径、上下文前缀、SpringDoc 开关和代理转发 |
+| 含 `openapi`、`info`、`paths` 的 JSON | 继续检查所选服务 / 分组、接口扫描范围与文档内容 |
+
+默认地址是 `/v3/api-docs`；如果配置了 `springdoc.api-docs.path`，检查自定义地址。命令行访问文档认证时，先登录保存会话 Cookie，再携带 Cookie 获取 OpenAPI。
+
+继续阅读：[文档认证与命令行示例](/guide/config/authconfiguration)。
+
+  </Accordion>
+  <Accordion id="密码与会话" value="password-and-session" title="文档密码在哪里看？为什么重启后变化，或代理后反复登录？">
+
+开启 `nextdoc4j.auth.enabled=true` 而未配置密码时，当前实例会生成随机密码，并在启动日志中提示。重启后会重新生成，多实例之间不会自动共享。
+
+需要固定密码时，通过部署环境提供：
+
+```yaml title="application.yml"
+nextdoc4j:
+  enabled: true
+  auth:
+    enabled: true
+    password: ${NEXTDOC4J_DOC_PASSWORD}
+```
+
+当前登录会话最大空闲时间为 **30 分钟**。频繁回到登录页时，检查浏览器是否携带会话 Cookie、Cookie 域名与路径、代理转发，以及多实例会话共享方式。
+
+修改密码并重启后，先访问 `/doc.html?action=logout` 退出旧会话再验证；自定义入口时替换相应路径。非空密码前后的空格参与比较，输入时需要保持一致。
+
+继续阅读：[简单认证配置](/guide/config/authconfiguration)。
+
+  </Accordion>
+  <Accordion id="调试认证失败" value="api-authentication" title="已经登录文档，在线调试为什么仍返回 401 / 403？">
+
+文档登录保护的是文档访问；业务接口仍按宿主的 Token、API Key、Session 和权限策略校验。
+
+1. 在接口详情中确认认证方案和角色 / 权限要求。
+2. 到“文档管理 → 全局认证”选择对应方案，填写并保存业务凭据。
+3. 返回调试查看“实际请求”，确认认证值出现在正确的 Header、Query 或 Cookie 中，同名公共参数、单次覆盖没有带入旧值或禁用该项。
+4. 网关中确认当前服务的凭据范围；服务 A 保存的 Token 不应被假定已自动配置给服务 B。
+
+401 通常先排查身份凭据，403 通常先排查权限；最终以宿主后端的响应约定为准。认证方案需要在 `components.securitySchemes` 中声明，并由接口或根级 `security` 引用，才能据此注入。
+
+继续阅读：[认证、权限与公共参数](/guide/ui/security-permissions) · [认证展示插件](/guide/plugin/authentication)。
+
+  </Accordion>
+  <Accordion id="跨域与网络失败" value="cors-and-network" title="cURL 能成功，浏览器却提示 CORS 或 Failed to fetch？">
+
+**先查看浏览器控制台和 Network 的实际目标。** cURL 不执行浏览器的 CORS 校验，不能据此判断浏览器跨域一定可用。
+
+| 检查位置 | 处理方向 |
+| --- | --- |
+| 请求 URL | 确认域名、端口、网关前缀及服务是否可达 |
+| HTTPS 页面请求 HTTP | 检查是否被浏览器作为混合内容阻止 |
+| OPTIONS 预检 | 确认目标服务或代理允许实际来源、方法和请求头，且没有先被认证拦截 |
+| 需要 Cookie | 打开“携带凭据”，核对目标域登录、Cookie 的 SameSite / Secure 与跨域凭据策略 |
+
+`nextdoc4j.cors=true` 可为**当前宿主**装配内置 CORS 过滤器，但不会修改其他服务或代理的配置；宿主已有对应 CORS Filter 时，也不会重复装配。需要限制来源时，应使用宿主自己的策略。
+
+继续阅读：[跨域配置](/guide/config/basicconfiguration#跨域配置) · [请求设置](/guide/ui/browse-debug#请求设置)。
+
+  </Accordion>
+  <Accordion id="请求格式与上传" value="request-format" title="发送请求返回 400 / 415，或上传文件时参数缺失？">
+
+先对照接口声明检查参数位置、Body 格式与“实际请求”。切换编辑模式不会修改后端允许的媒体类型。
+
+| 现象 | 优先检查 |
+| --- | --- |
+| 415 Unsupported Media Type | JSON、表单、XML 等模式及 Content-Type 是否符合后端 `consumes` |
+| 400 或字段校验失败 | 必填项、值类型、日期格式、枚举值，以及后端返回的校验信息 |
+| Query 值未收到 | 参数是否放在 Params，当前行是否启用 |
+| 文件加普通参数时缺值 | `file` 可能在 Body，而 `category` 等字段可能在 Query，应按契约分别填写 |
+| multipart 解析失败 | 不要手动固定 boundary，让浏览器生成 multipart Content-Type |
+| 刷新后附件消失 | 文件本体只保留在内存中，需要重新选择 |
+
+详情页中的示例是文档给出的初始值；业务唯一键、权限条件和数据是否存在，仍需要按当前环境填写。
+
+继续阅读：[在线请求调试](/guide/ui/browse-debug)。
+
+  </Accordion>
+</Accordions>
+
+## 网关与文档更新
+
+<Accordions>
+  <Accordion id="网关服务缺失" value="missing-gateway-service" title="聚合模式没有服务，或某个服务不在列表中？">
+
+按“下游 → 网关转发 → 聚合列表”的顺序检查。以下以网关对外前缀 `/user` 为例：
+
+| 顺序 | 请求 / 配置 | 预期 |
+| --- | --- | --- |
+| 1 | 直连下游 `/v3/api-docs` | 返回该服务的 OpenAPI JSON |
+| 2 | 通过网关访问 `/user/v3/api-docs` | 路由转发成功，仍返回 OpenAPI JSON |
+| 3 | 网关 `/v3/api-docs/swagger-config` | `urls` 中包含该服务的名称和文档 URL |
+| 4 | 网关 `/v3/api-docs` | 包含 `x-nextdoc4j-aggregation` 聚合标记 |
+
+确认网关使用 `nextdoc4j-gateway-spring-boot-starter`、匹配 Web 栈的 Gateway / SpringDoc UI，并设置 `nextdoc4j.enabled=true`；没有 `nextdoc4j.gateway.enabled` 这个开关。
+
+自动发现还会检查路由规则：需要 Path 谓词，`include-patterns` / `exclude-routes` 匹配的是 **routeId**；默认过滤器会排除特定的自动发现路由。WebMVC 使用纯 Java RouterFunction 等自定义路由来源时，需要核对路由定位器是否能够读取。
+
+手动配置 `gateway.services` 只添加文档条目，不会替你创建真实转发路由。
+
+继续阅读：[网关聚合插件](/guide/plugin/gateway)。
+
+  </Accordion>
+  <Accordion id="网关前缀与调试地址" value="gateway-prefix" title="网关文档能读取，但调试 404，或地址出现重复前缀？">
+
+分别核对 **OpenAPI URL、`servers`、业务 Path 和最终调试 URL**。能读取文档不代表业务转发规则一定正确。
+
+例如，下游设置 `context-path=/order`，网关 Path 为 `/orders/**` 且 `StripPrefix=1`：
+
+```text title="文档请求经过网关前后的地址"
+浏览器请求  /orders/order/v3/api-docs
+网关转发    /order/v3/api-docs
+```
+
+1. 在“实际请求”中复制最终业务 URL，检查前缀是否漏加或重复。
+2. 对照路由的 Path、StripPrefix、下游上下文和 OpenAPI `servers`，逐段确认。
+3. 使用 RewritePath、SetPath 或额外反向代理前缀时，核对实际改写结果；不能直接套用所有 StripPrefix 场景的推导。
+
+注意区分三个配置：`nextdoc4j.doc-path` 是工作台入口，`springdoc.api-docs.path` 是服务的 OpenAPI 地址，`nextdoc4j.gateway.doc-path` 是聚合使用的下游文档后缀。
+
+继续阅读：[上下文路径与前缀改写](/guide/plugin/gateway#上下文路径与前缀改写) · [调试地址核对](/guide/ui/gateway-ui#调试地址如何核对)。
+
+  </Accordion>
+  <Accordion id="下游分组缺失" value="service-groups" title="下游有多个 SpringDoc 分组，网关里为什么没有显示？">
+
+服务选择与 SpringDoc 分组是两个层次：先切换到目标服务，再查看其分组。需要读取下游的 swagger-config 时，开启：
+
+```yaml title="网关 application.yml"
+nextdoc4j:
+  enabled: true
+  gateway:
+    service-swagger-config-enabled: true
+```
+
+该项默认是 `false`。开启前，确认通过网关访问下游 `/v3/api-docs/swagger-config` 能取得分组配置，而且其中的文档 URL 可达。下游仅提供 OpenAPI、没有 swagger-config 接口时，应保持关闭。
+
+继续阅读：[多分组与 API-only 下游](/guide/plugin/gateway#多分组与-api-only-下游)。
+
+  </Accordion>
+  <Accordion id="文档更新与草稿" value="stale-documentation" title="后端已经更新，页面或调试参数为什么还是旧内容？">
+
+先确定旧的是**文档定义**还是**自己填写过的调试草稿**，避免直接清空所有站点数据。
+
+| 旧内容的位置 | 排查与处理 |
+| --- | --- |
+| `/v3/api-docs` 本身 | 检查实际部署版本、运行实例、选中分组、SpringDoc 扫描范围及后端缓存 |
+| 网关返回的文档 | 与直连下游对照，检查路由转发、服务列表刷新和响应重写缓存 |
+| 文档已更新，工作台未更新 | 使用文档刷新入口，确认当前选中的服务 / 分组；同时检查代理或浏览器缓存 |
+| 文档字段已更新，调试区仍是旧值 | 草稿可能恢复了之前的输入；使用“恢复接口示例”，或在偏好设置中按服务范围清理调试草稿 |
+
+清理调试草稿不会替代后端重新生成 OpenAPI，也不会清除全部认证凭据。网关场景中先确认清理范围是“当前服务”还是“全部服务”。
+
+继续阅读：[偏好与本地数据](/guide/ui/preferences) · [网关刷新与数据检查](/guide/plugin/gateway#服务列表刷新与数据检查)。
+
+  </Accordion>
+</Accordions>
 
 ## 继续获得帮助
 
-欢迎加入[官方讨论群](/more/join-group)，或在 [GitHub Issues](https://github.com/NextDoc4j/nextdoc4j/issues) 提交可复现的问题。
+如果还不能定位，反馈时带上以下信息，便于复现同一条访问链路：
+
+| 信息 | 建议内容 |
+| --- | --- |
+| 版本与环境 | NextDoc4j、JDK、Boot、SpringDoc、浏览器版本，MVC / WebFlux，单体 / 网关 |
+| 最小复现 | 相关依赖、配置、Controller / DTO 和稳定的复现步骤 |
+| 实际结果 | 期望行为、实际行为、请求 URL、状态码和响应类型 |
+| 定位材料 | 后端异常堆栈、浏览器控制台、脱敏后的 OpenAPI 片段；网关问题补充路由规则 |
+
+提交前删除密码、Token、Cookie 和业务敏感数据。可以先用[单体 Demo](https://single-demo.nextdoc4j.top/)或[网关 Demo](https://gateway-demo.nextdoc4j.top/)对照界面行为；演示数据与部署配置可能不同。
+
+<Cards>
+  <Card title="提交问题" href="https://github.com/NextDoc4j/nextdoc4j/issues/new?template=bug-report.yml" description="按 Bug 模板提供环境、复现步骤和定位材料。" />
+  <Card title="社区交流" href="/more/team#加入讨论群" description="添加维护者加入讨论群，交流使用经验。" />
+</Cards>

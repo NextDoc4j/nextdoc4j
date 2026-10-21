@@ -1,22 +1,31 @@
 ---
-title: 社区团队与赞助
-description: NextDoc4j 社区团队、维护者和赞助信息。
+title: 社区与支持
+description: 认识 NextDoc4j 的社区团队，添加维护者加入讨论群，也可以通过微信或支付宝支持项目。
 ---
 
-NextDoc4j 的开发由开源维护者和社区贡献者共同推动。
+import { CommunityContact, CommunitySponsorship } from '@/components/community-support';
+
+NextDoc4j 由维护者和社区贡献者共同推进。欢迎交流接入经验、分享使用反馈，也欢迎参与文档和代码贡献。
+
+## 社区团队
 
 <TeamShowcase />
 
-## 核心团队
+## 加入讨论群
 
-团队信息在构建阶段从 GitHub 和 Gitee 用户资料生成缓存，静态站点发布后不依赖运行时 API 请求。
+讨论 Spring Boot / SpringDoc 接入、网关聚合和使用体验，可以先添加维护者微信，再由维护者邀请入群。
 
-- [NextDoc4j GitHub 组织](https://github.com/NextDoc4j)
-- [NextDoc4j Gitee 组织](https://gitee.com/NextDoc4j)
-- [贡献指南](/more/contribute)
+<CommunityContact />
+
+需要定位具体问题时，建议附上版本、配置和复现步骤，便于大家一起排查。也可以在 [GitHub Discussions](https://github.com/NextDoc4j/nextdoc4j/discussions) 公开交流；可复现的缺陷和功能建议使用 [Issue 模板](https://github.com/NextDoc4j/nextdoc4j/issues/new/choose)记录，方便持续跟进。
 
 ## 赞助支持
 
-如果项目帮助解决了实际问题，欢迎通过社区渠道联系维护者了解赞助方式。
+如果 NextDoc4j 帮你节省了接入和联调时间，欢迎自愿支持项目维护。Star、反馈问题、补充文档和提交代码，同样是对项目的支持。
 
-![微信联系二维码](/images/contact/wechat-group.jpg)
+<CommunitySponsorship />
+
+<Cards>
+  <Card title="参与贡献" href="/more/contribute" description="了解文档、示例、代码与测试的协作方式。" />
+  <Card title="查找使用问题" href="/more/faq" description="按现象查找接入、调试和网关问题的排查方法。" />
+</Cards>

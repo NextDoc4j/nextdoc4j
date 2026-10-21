@@ -326,11 +326,10 @@ const quickLinkGroups = [
   {
     title: '社区支持',
     links: [
-      ['加入讨论群', '/more/join-group'],
+      ['社区与支持', '/more/team'],
       ['贡献指南', '/more/contribute'],
       ['更新日志', '/more/changelog'],
       ['常见问题 (FAQ)', '/more/faq'],
-      ['社区团队', '/more/team'],
     ],
   },
   {

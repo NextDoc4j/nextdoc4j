@@ -233,7 +233,7 @@ mvn -f nextdoc4j/pom.xml clean deploy -Prelease -s /path/to/settings.xml
 - **贡献指南**: [CONTRIBUTING.md](CONTRIBUTING.md)
 - **更新日志**: [https://nextdoc4j.top/more/changelog.html](https://nextdoc4j.top/more/changelog.html)
 - **常见问题**: [https://nextdoc4j.top/more/faq.html](https://nextdoc4j.top/more/faq.html)
-- **团队介绍**: [https://nextdoc4j.top/more/team/team.html](https://nextdoc4j.top/more/team/team.html)
+- **社区与支持**: [https://nextdoc4j.top/more/team](https://nextdoc4j.top/more/team)
 
 ## 📄 许可证
 
