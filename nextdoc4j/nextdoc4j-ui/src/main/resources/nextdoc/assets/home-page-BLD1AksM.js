@@ -1,4 +1,4 @@
-import{c as h,j as e,u as Ce,r as k,a as Me,I as we,A as n,g as re,b as Ie,d as ze,e as He,f as $e}from"./index-BTEixbyu.js";import{M as Ae}from"./markdown-content-D9RH30SI.js";import{I as Te}from"./animated-copy-button-D45PiJPu.js";import{I as Be}from"./IconKey-Ct2rUK1a.js";/**
+import{c as h,j as e,u as Ce,r as k,a as Me,I as we,A as n,g as re,b as Ie,d as ze,e as He,f as $e}from"./index-S8OpQSD2.js";import{M as Ae}from"./markdown-content-FTWf2QzD.js";import{I as Te}from"./animated-copy-button-COYeKPuh.js";import{I as Be}from"./IconKey-Bdj9iyUd.js";/**
  * @license @tabler/icons-react v3.46.0 - MIT
  *
  * This source code is licensed under the MIT license.

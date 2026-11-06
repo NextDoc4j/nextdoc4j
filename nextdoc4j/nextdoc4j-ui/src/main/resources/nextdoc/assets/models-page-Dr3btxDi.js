@@ -1,4 +1,4 @@
-import{c as M,r,j as e,v as J,w as z,p as O,C as D,F as A}from"./index-BTEixbyu.js";import{T as F,J as I,C as R}from"./code-editor-BjiTr2Bn.js";import{M as T}from"./markdown-content-D9RH30SI.js";import{b as P}from"./request-parameters-suc-O_1R.js";import{h as $,s as B,j as b}from"./json-example-model-BT8RIcwf.js";import"./animated-copy-button-D45PiJPu.js";import"./height-transition-ClQfKZxQ.js";/**
+import{c as M,r,j as e,v as J,w as z,p as O,C as D,F as A}from"./index-S8OpQSD2.js";import{T as F,J as I,C as R}from"./code-editor-CFDexUrD.js";import{M as T}from"./markdown-content-FTWf2QzD.js";import{b as P}from"./request-parameters-3A_Lajwb.js";import{h as $,s as B,j as b}from"./json-example-model-dJigEduZ.js";import"./animated-copy-button-COYeKPuh.js";import"./height-transition-CL4nJI5i.js";/**
  * @license @tabler/icons-react v3.46.0 - MIT
  *
  * This source code is licensed under the MIT license.

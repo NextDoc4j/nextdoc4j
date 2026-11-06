@@ -1,4 +1,4 @@
-import{c as Br,r as $,j as A,a8 as Qn,u as la,at as mi,I as qc,p as zc,f as jc}from"./index-BTEixbyu.js";import{I as _c}from"./animated-copy-button-D45PiJPu.js";/**
+import{c as Br,r as $,j as A,a8 as Qn,u as la,at as mi,I as qc,p as zc,f as jc}from"./index-S8OpQSD2.js";import{I as _c}from"./animated-copy-button-COYeKPuh.js";/**
  * @license @tabler/icons-react v3.46.0 - MIT
  *
  * This source code is licensed under the MIT license.
