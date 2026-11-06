@@ -23,8 +23,8 @@
     <properties>
         <!-- Demo 只用于示例与 CI，不发布到 Maven Central。 -->
         <maven.deploy.skip>true</maven.deploy.skip>
-        <revision>1.5.0</revision>
-        <nextdoc4j.version>1.5.0</nextdoc4j.version>
+        <revision>1.5.1</revision>
+        <nextdoc4j.version>1.5.1</nextdoc4j.version>
         <java.version>17</java.version>
         <maven.compiler.release>${java.version}</maven.compiler.release>
         <maven.compiler.source>${java.version}</maven.compiler.source>

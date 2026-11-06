@@ -6,7 +6,7 @@
 
     <groupId>top.nextdoc4j</groupId>
     <artifactId>nextdoc4j-root</artifactId>
-    <version>1.5.0</version>
+    <version>1.5.1</version>
     <packaging>pom</packaging>
     <name>nextdoc4j-root</name>
     <description>NextDoc4j 顶层聚合工程（仅用于开发与 CI，不发布）</description>
