@@ -1,4 +1,4 @@
 {
   "title": "配置说明",
-  "pages": ["basicconfiguration", "brandconfiguration", "authconfiguration", "markdownIntegrationConfiguration"]
+  "pages": ["basicconfiguration", "brandconfiguration", "authconfiguration", "markdownIntegrationConfiguration", "ordering"]
 }

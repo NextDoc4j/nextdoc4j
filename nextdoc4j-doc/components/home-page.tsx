@@ -212,7 +212,7 @@ export function HomePage() {
               <span>JDK <strong>17+</strong></span>
               <span>Spring Boot <strong>3.4.x / 4.x</strong></span>
               <span>OpenAPI <strong>3.1</strong></span>
-              <span>Version <strong>1.5.0</strong></span>
+              <span>Version <strong>1.5.1</strong></span>
             </div>
           </div>
 

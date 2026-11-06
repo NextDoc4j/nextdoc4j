@@ -1,0 +1,118 @@
+---
+title: 分组与接口排序
+description: 使用 x-order 调整 Controller（Tag）分组与接口在导航中的显示顺序，单体与网关模式均适用。
+---
+
+左侧导航默认按名称排序。接口较多时，可以通过 OpenAPI 扩展字段 `x-order` 指定分组和接口的显示顺序，不需要调整源码中的类或方法顺序。
+
+## 排序规则
+
+NextDoc4j 读取当前 OpenAPI 文档中的 `x-order`：
+
+| 对象 | 扩展字段位置 | 作用 |
+| --- | --- | --- |
+| Controller / Tag 分组 | 文档顶层 `tags[].x-order` | 决定左侧分组顺序 |
+| 接口 | `paths.*.*.x-order` | 决定分组内接口顺序 |
+
+排序按以下优先级执行：
+
+1. `x-order` 数值升序，值越小越靠前。
+2. 未设置或不是数字的项排在最后。
+3. `x-order` 相同时，分组按中文名称排序；接口依次按名称、路径、HTTP 方法排序。
+
+排序只影响导航展示顺序，不改变 OpenAPI `paths` 本身的顺序，也不影响接口调用。
+
+## 为 Controller 设置顺序
+
+在 Controller 上使用 `@Tag`，通过 `@Extension` 写入 `x-order`：
+
+```java title="SystemController.java"
+@Tag(
+        name = "系统管理",
+        extensions = @Extension(properties = @ExtensionProperty(name = "x-order", value = "1")))
+@RestController
+@RequestMapping("/api/system")
+public class SystemController {
+}
+```
+
+要点：
+
+- `@Extension` 不写 `name`，只写一个 `@ExtensionProperty`，Swagger 会输出标量 `"x-order": "1"`。
+- `value` 使用数字字符串，前端会转换成数字比较。
+- 同一个文档内建议使用连续、不重复的值。
+
+## 为接口设置顺序
+
+在 Controller 方法上使用 `@Operation`：
+
+```java title="SystemController.java"
+@Operation(
+        summary = "重置系统配置",
+        extensions = @Extension(properties = @ExtensionProperty(name = "x-order", value = "1")))
+@PostMapping("/config/reset")
+public R<Void> resetSystemConfig() {
+    return R.ok(null);
+}
+```
+
+没有设置 `x-order` 的接口会排在设置了 `x-order` 的接口之后，再按名称和路径排序。
+
+## 批量设置接口顺序
+
+接口较多时，可以定义一个自己的注解，再通过 SpringDoc 的 `GlobalOperationCustomizer` 统一写入 `x-order`。顺序跟着方法走，类名或方法名变化时不需要同步修改字符串映射。
+
+```java title="ApiOrder.java"
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface ApiOrder {
+    int value();
+}
+```
+
+```java title="OpenApiOrderConfiguration.java"
+@Bean
+public GlobalOperationCustomizer operationOrderCustomizer() {
+    return (operation, handlerMethod) -> {
+        ApiOrder order = handlerMethod.getMethodAnnotation(ApiOrder.class);
+        if (order != null) {
+            operation.addExtension("x-order", order.value());
+        }
+        return operation;
+    };
+}
+```
+
+使用时直接标注在接口方法上：
+
+```java title="SystemController.java"
+@ApiOrder(1)
+@Operation(summary = "重置系统配置")
+@PostMapping("/config/reset")
+public R<Void> resetSystemConfig() {
+    return R.ok(null);
+}
+```
+
+`GlobalOperationCustomizer` 同时作用于默认文档和 SpringDoc 分组文档；没有标注 `@ApiOrder` 的接口保持默认排序。
+
+## 单体与网关
+
+- **单体**：直接作用于当前应用的 OpenAPI 文档；配置多个 SpringDoc 分组时，每个分组独立排序。
+- **网关**：每个下游服务加载自己的文档后分别排序，`x-order` 需要写在各服务的 Controller 上，网关不会统一改写。
+
+## 验证
+
+1. 打开 `/v3/api-docs`，确认对应 Tag 或接口上输出了 `x-order`。
+2. 打开 `/doc.html` 并刷新，检查左侧导航顺序。
+3. 修改后未生效时，先强制刷新或清理浏览器缓存。
+
+## 常见问题
+
+| 现象 | 原因 |
+| --- | --- |
+| 分组顺序没有变化 | `@Extension` 写了 `name = "x-order"`，会输出对象而不是标量；应留空 `name`，只写属性 |
+| 接口顺序没有变化 | `x-order` 加在了 Controller 上；接口排序需要加在 `@Operation` 上 |
+| 部分接口总是排最后 | 未设置 `x-order`，或值不是数字 |
+| 多个项顺序相同 | 回退到名称、路径等默认规则，不会报错 |
+| 网关模式不生效 | 检查 `x-order` 是否写在对应下游服务的 Controller 上 |
