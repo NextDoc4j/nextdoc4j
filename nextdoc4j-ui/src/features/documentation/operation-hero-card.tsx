@@ -2,6 +2,7 @@ import {
   useEffect,
   useId,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
   type CSSProperties,
@@ -12,6 +13,7 @@ import { HeroCopyButton, type HeroCopyStatus } from '../../components/rare-ui/he
 import { HeightTransition } from '../../components/rare-ui/height-transition';
 import { resolveRequestBase } from '../../lib/http';
 import { SecurityMetadata } from '../security/security-metadata';
+import { createOperationAiContext } from './operation-ai-context';
 import { MarkdownContent } from './markdown-content';
 import type { ApiOperation, OpenApiDocument } from '../../types/openapi';
 
@@ -296,6 +298,10 @@ export function OperationHeroCard({
     .toString()
     .replace(/\/+$/, '');
   const fullUrl = `${baseUrl}/${operation.path.replace(/^\/+/, '')}`;
+  const aiContext = useMemo(
+    () => createOperationAiContext(operation, document),
+    [document, operation],
+  );
   return (
     <header
       className="legacy-operation__hero"
@@ -338,7 +344,7 @@ export function OperationHeroCard({
             className="hero-btn"
             copiedMessage="接口上下文已复制，可粘贴至 AI 助手"
             icon={<IconFileText className="icon-default" size={14} stroke={1.8} />}
-            text={`${operation.method.toUpperCase()} ${operation.path}\n接口名称：${operation.summary || ''}\n接口描述：${operation.description || ''}`}
+            text={aiContext}
             title="复制接口信息用于 AI 分析"
           >
             <span>AI 助手</span>

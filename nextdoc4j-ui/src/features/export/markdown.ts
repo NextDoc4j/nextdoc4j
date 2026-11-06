@@ -1143,7 +1143,7 @@ const findCommonResponseEnvelope = (
  * @param document Export subset used for security and schema lookup.
  * @returns Markdown section containing the complete operation contract.
  */
-const createOperationMarkdown = (operation: ApiOperation, document: OpenApiDocument) => {
+export const createOperationMarkdown = (operation: ApiOperation, document: OpenApiDocument) => {
   const schemas = document.components?.schemas ?? {};
   const responseClass = getOperationResponseClass(operation, schemas);
   const lines = [
